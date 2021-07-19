@@ -15,7 +15,6 @@ class MainWindowToolbar(QToolBar):
         super().__init__(parent)
         self.context = context
         self.setMovable(False)
-        self.setIconSize(QSize(48, 48))
 
         self._add_actions()
 

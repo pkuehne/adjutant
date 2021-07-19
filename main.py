@@ -11,7 +11,6 @@ import adjutant.resources  # pylint: disable=unused-import
 def main(argv):
     """The main"""
     QApplication.setAttribute(Qt.AA_DisableWindowContextHelpButton)
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)  # DPI support
 
     app = QApplication(argv)
     app.setStyle("Windows")
