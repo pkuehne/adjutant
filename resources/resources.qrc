@@ -1,0 +1,12 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+<file>migrations/initial.sql</file>
+<file>populate_test_data.sql</file>
+<file>icons/add_base.png</file>
+<file>icons/adjutant.png</file>
+<file>icons/filter-available.png</file>
+<file>icons/filter-applied.png</file>
+<file>icons/save_search.png</file>
+</qresource>
+</RCC>

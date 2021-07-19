@@ -1,0 +1,16 @@
+{
+    "saveAndRun": {
+        "commands": [
+            {
+                "match": "resources/.*",
+                "cmd": "source venv/bin/activate && pyrcc5 resources/resources.qrc -o adjutant/resources.py",
+                "useShortcut": false,
+                "silent": false
+            },
+        ]
+    },
+    "python.formatting.provider": "black",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": false
+}

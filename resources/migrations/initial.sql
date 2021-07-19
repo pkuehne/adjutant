@@ -1,0 +1,32 @@
+DROP TABLE IF EXISTS bases;
+CREATE TABLE IF NOT EXISTS bases ( 
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT DEFAULT "",
+    scale TEXT DEFAULT "",
+    base TEXT DEFAULT "Round",
+    width INTEGER DEFAULT 20,
+    depth INTEGER DEFAULT 0,
+    figures INTEGER DEFAULT 1
+);
+
+DROP TABLE IF EXISTS tags;
+CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    category TEXT,
+    custom BOOLEAN
+);
+
+DROP TABLE IF EXISTS bases_tags;
+CREATE TABLE IF NOT EXISTS bases_tags (
+    id INTEGER PRIMARY KEY,
+    base_id INTEGER,
+    tag_id INTEGER
+);
+
+DROP TABLE IF EXISTS searches;
+CREATE TABLE IF NOT EXISTS searches (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    encoded TEXT
+);

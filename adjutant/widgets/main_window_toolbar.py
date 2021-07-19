@@ -1,0 +1,34 @@
+""" Toolbar for the main window """
+
+
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction, QToolBar
+
+from adjutant.context.context import Context
+
+
+class MainWindowToolbar(QToolBar):
+    """Toolbar for the main window"""
+
+    def __init__(self, context: Context, parent):
+        super().__init__(parent)
+        self.context = context
+        self.setMovable(False)
+        self.setIconSize(QSize(48, 48))
+
+        self._add_actions()
+
+    def _add_actions(self):
+        """Add actions to toolbar"""
+        add_base_action = QAction(QIcon(":/icons/add_base.png"), "Add Base", self)
+        add_base_action.triggered.connect(self.context.signals.add_base)
+
+        save_search_action = QAction(
+            QIcon(":/icons/save_search.png"), "Save Search", self
+        )
+        save_search_action.triggered.connect(self.context.signals.save_search)
+
+        # Align buttons here
+        self.addAction(add_base_action)
+        self.addAction(save_search_action)
