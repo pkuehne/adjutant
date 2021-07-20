@@ -26,6 +26,7 @@ class BasesFilterModel(QSortFilterProxyModel):
         """Set the filter for a given column"""
         self.column_filters[column] = values
         self.invalidateFilter()
+        self.headerDataChanged.emit(Qt.Horizontal, column, column)
 
     def get_column_filter(self, column: int) -> List[str]:
         """Get the list of filter for the column"""
@@ -34,8 +35,7 @@ class BasesFilterModel(QSortFilterProxyModel):
     def clear_all_column_filters(self) -> None:
         """Removes any set column filters"""
         for column in range(self.columnCount()):
-            self.column_filters[column] = []
-        self.invalidateFilter()
+            self.set_column_filter(column, [])
 
     def encode_filters(self) -> str:
         """Encode the filters in a binary format"""

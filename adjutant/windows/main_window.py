@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QMainWindow
 from adjutant.context import Context
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
 from adjutant.windows.bases_screen import BasesScreen
-from adjutant.windows.base_edit_dialog import BaseEditDialog
 
 
 class MainWindow(QMainWindow):
@@ -14,7 +13,6 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        # self.setFixedSize(1920, 1080)
         self.context = Context()
         self.context.settings.set_version("0.1.0-dev")
         self.context.load_database(":memory:")

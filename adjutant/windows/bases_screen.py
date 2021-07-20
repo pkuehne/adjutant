@@ -12,8 +12,8 @@ class BasesScreen(QWidget):
     def __init__(self, context: Context, parent=None) -> None:
         super().__init__(parent=parent)
         self.context = context
-        self.bases_table = BasesTable(self.context)
         self.sidebar_view = SidebarView(self.context, self)
+        self.bases_table = BasesTable(self.context)
         self.base_detail = QWidget(self)
 
         self._setup_layout()
@@ -23,6 +23,8 @@ class BasesScreen(QWidget):
 
         central = QHBoxLayout()
         central.addWidget(self.sidebar_view)
+        central.addStretch()
         central.addWidget(self.bases_table)
         central.addWidget(self.base_detail)
+        central.setStretchFactor(self.bases_table, 1)
         self.setLayout(central)

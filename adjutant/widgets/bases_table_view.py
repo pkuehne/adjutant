@@ -61,7 +61,7 @@ class BasesTableView(QTableView):
 
         def generate_title(column: int):
             title_idx = index.siblingAtColumn(column)
-            return f"{index.model().headerData(column, Qt.Horizontal)} → {title_idx.data()}"
+            return f"{index.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)} → {title_idx.data()}"
 
         apply = QMenu(self.tr("Apply to Selection"), self)
         for column in range(1, self.model().columnCount()):

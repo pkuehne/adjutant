@@ -2,7 +2,7 @@
 
 from typing import List
 from PyQt5.QtCore import QModelIndex
-from PyQt5.QtWidgets import QSizePolicy, QTreeView
+from PyQt5.QtWidgets import QTreeView
 
 from adjutant.context import Context
 from adjutant.models.sidebar_model import SidebarModel, Section
@@ -23,13 +23,15 @@ class SidebarView(QTreeView):
         )
 
         self.setModel(self.sidebar_model)
+        self.resizeColumnToContents(0)
+        self.setFixedWidth(self.columnWidth(0) * 1.5)
         self.setHeaderHidden(True)
         self.setSelectionBehavior(self.SelectRows)
-        self.resizeColumnToContents(0)
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.selectionModel().selectionChanged.connect(
             lambda sel, _: self.item_selected(sel.indexes())
         )
+
+        # self.setFixedWidth(150)
 
     def item_selected(self, indexes: List[QModelIndex]):
         """Item selected in view"""
@@ -38,7 +40,6 @@ class SidebarView(QTreeView):
 
         index = indexes[0]
         if index.parent() == QModelIndex():
-            print(f"{index}")
             section: Section = self.sidebar_model.sections[index.row()]
             getattr(self, section.signal)(QModelIndex())
             return
