@@ -47,7 +47,6 @@ class BaseEditDialog(QDialog):
 
     def __init__(self, context: Context, index: QModelIndex, parent=None) -> None:
         super().__init__(parent=parent)
-
         self.context = context
         self.index = index
         self.add_mode = index == QModelIndex()

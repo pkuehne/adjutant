@@ -1,6 +1,5 @@
 """ Sidebar Tree View """
 
-from typing import List
 from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import QTreeView
 
@@ -27,18 +26,12 @@ class SidebarView(QTreeView):
         self.setFixedWidth(self.columnWidth(0) * 1.5)
         self.setHeaderHidden(True)
         self.setSelectionBehavior(self.SelectRows)
-        self.selectionModel().selectionChanged.connect(
-            lambda sel, _: self.item_selected(sel.indexes())
-        )
+        self.clicked.connect(self.item_selected)
 
         # self.setFixedWidth(150)
 
-    def item_selected(self, indexes: List[QModelIndex]):
+    def item_selected(self, index: QModelIndex):
         """Item selected in view"""
-        if not indexes:
-            return
-
-        index = indexes[0]
         if index.parent() == QModelIndex():
             section: Section = self.sidebar_model.sections[index.row()]
             getattr(self, section.signal)(QModelIndex())

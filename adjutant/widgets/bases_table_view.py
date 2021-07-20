@@ -114,8 +114,10 @@ class BasesTableView(QTableView):
         key = cast(QKeyEvent, event).key()
         if key in (Qt.Key_Backspace, Qt.Key_Delete):
             self.context.signals.delete_bases.emit(self.selectionModel().selectedRows())
-        if key == Qt.Key_Return:
+        elif key == Qt.Key_Return:
             indexes = self.selectionModel().selectedRows()
             if indexes:
                 self.context.signals.edit_base.emit(indexes[0])
+        else:
+            super().keyPressEvent(event)
         return True
