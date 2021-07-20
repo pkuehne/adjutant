@@ -28,7 +28,8 @@ class BasesTable(QWidget):
         self.table = BasesTableView(self.context)
         self.header = HeaderView()
         self.filter_edit = QLineEdit()
-        self.clear_button = QPushButton(self.tr("Clear All Filters"))
+        self.clear_button = QPushButton(self.tr("Clear"))
+        self.save_button = QPushButton(self.tr("Save Filters"))
         self.filter_model = BasesFilterModel()
 
         self._setup_layout()
@@ -42,6 +43,7 @@ class BasesTable(QWidget):
         filter_layout.addWidget(QLabel(self.tr("Filter: ")))
         filter_layout.addWidget(self.filter_edit)
         filter_layout.addWidget(self.clear_button)
+        filter_layout.addWidget(self.save_button)
 
         central = QVBoxLayout()
         central.addLayout(filter_layout)
@@ -65,6 +67,7 @@ class BasesTable(QWidget):
         # )
         self.filter_edit.textChanged.connect(self.filter_model.setFilterRegExp)
         self.clear_button.pressed.connect(self.clear_all_filters)
+        self.save_button.pressed.connect(self.save_search)
 
         self.context.signals.add_base.connect(self.add_base)
         self.context.signals.edit_base.connect(self.edit_base)

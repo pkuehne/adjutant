@@ -1,7 +1,6 @@
 """ Toolbar for the main window """
 
 
-from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QToolBar
 
@@ -30,4 +29,4 @@ class MainWindowToolbar(QToolBar):
 
         # Align buttons here
         self.addAction(add_base_action)
-        self.addAction(save_search_action)
+        # self.addAction(save_search_action)
