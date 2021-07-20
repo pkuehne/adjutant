@@ -34,7 +34,7 @@ class FilterPopup(QDialog):
 
     def _setup_layout(self):
         """Setup the layout"""
-        self.setFixedSize(180, 200)
+        self.setFixedSize(500, 600)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()

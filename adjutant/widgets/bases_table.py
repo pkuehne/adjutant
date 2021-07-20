@@ -121,17 +121,17 @@ class BasesTable(QWidget):
         success = self.context.models.searches_model.insertRecord(-1, record)
         self.context.models.searches_model.submitAll()
 
-    def load_search(self, name: str):
+    def load_search(self, row: int):
         """Restore a saved search"""
         self.clear_all_filters()
 
-        for row in range(self.context.models.searches_model.rowCount()):
-            record = self.context.models.searches_model.record(row)
-            if record.value("name") == name:
-                self.filter_model.decode_filters(record.value("encoded"))
-                self.filter_edit.blockSignals(True)
-                self.filter_edit.setText(self.filter_model.filterRegExp().pattern())
-                self.filter_edit.blockSignals(False)
+        if row == -1:
+            return
+        record = self.context.models.searches_model.record(row)
+        self.filter_model.decode_filters(record.value("encoded"))
+        self.filter_edit.blockSignals(True)
+        self.filter_edit.setText(self.filter_model.filterRegExp().pattern())
+        self.filter_edit.blockSignals(False)
 
     def clear_all_filters(self):
         """Clear all filters applied to the table"""

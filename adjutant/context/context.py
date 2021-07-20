@@ -101,7 +101,7 @@ class SignalContext(QObject):
     duplicate_base = pyqtSignal(QModelIndex, int)
 
     save_search = pyqtSignal()
-    load_search = pyqtSignal(QModelIndex)
+    load_search = pyqtSignal(int)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
