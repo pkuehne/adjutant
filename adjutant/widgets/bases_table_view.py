@@ -51,32 +51,42 @@ class BasesTableView(QTableView):
         )
 
         ### Make this a submenu
-        duplicate = QMenu(self.tr("Duplicate Base"), self)
+        duplicate_menu = QMenu(self.tr("Duplicate Base"), self)
         for n in range(1, 11):
-            duplicate_action = QAction(str(n) + self.tr(" times"), duplicate)
+            duplicate_action = QAction(str(n) + self.tr(" times"), duplicate_menu)
             duplicate_action.triggered.connect(
                 functools.partial(self.context.signals.duplicate_base.emit, index, n)
             )
-            duplicate.addAction(duplicate_action)
+            duplicate_menu.addAction(duplicate_action)
 
         def generate_title(column: int):
             title_idx = index.siblingAtColumn(column)
-            return f"{index.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)} → {title_idx.data()}"
+            header = index.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)
+            return f"{header} → {title_idx.data()}"
 
-        apply = QMenu(self.tr("Apply to Selection"), self)
+        apply_menu = QMenu(self.tr("Apply to Selection"), self)
         for column in range(1, self.model().columnCount()):
-            apply_action = QAction(generate_title(column), apply)
+            apply_action = QAction(generate_title(column), apply_menu)
             apply_action.triggered.connect(
                 functools.partial(self.apply_field_to_selection, row, column)
             )
-            apply.addAction(apply_action)
+            apply_menu.addAction(apply_action)
+
+        filter_menu = QMenu(self.tr("Filter to Selection"), self)
+        for column in range(1, self.model().columnCount()):
+            filter_action = QAction(generate_title(column), filter_menu)
+            filter_action.triggered.connect(
+                functools.partial(self.filter_to_selection, row, column)
+            )
+            filter_menu.addAction(filter_action)
 
         menu = QMenu(self)
         menu.addAction(edit_action)
         menu.addAction(delete_action)
-        menu.addMenu(duplicate)
+        menu.addMenu(duplicate_menu)
         menu.addSeparator()
-        menu.addMenu(apply)
+        menu.addMenu(apply_menu)
+        menu.addMenu(filter_menu)
         menu.addSeparator()
         menu.addAction(add_action)
         menu.popup(QCursor.pos())
@@ -88,6 +98,11 @@ class BasesTableView(QTableView):
 
         for index in selection:
             self.model().setData(index.siblingAtColumn(column), source.data())
+
+    def filter_to_selection(self, row: int, column: int):
+        """Filter by the selected column"""
+        source = self.model().index(row, column)
+        self.context.signals.apply_filter.emit(column, source.data())
 
     def eventFilter(
         self, source: QObject, event: QEvent

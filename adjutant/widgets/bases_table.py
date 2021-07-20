@@ -1,6 +1,6 @@
 """ Wrapper for the Bases Table """
 
-from typing import List
+from typing import Any, List
 from PyQt5.QtCore import QModelIndex, Qt
 from PyQt5.QtWidgets import (
     QHBoxLayout,
@@ -74,6 +74,7 @@ class BasesTable(QWidget):
 
         self.context.signals.save_search.connect(self.save_search)
         self.context.signals.load_search.connect(self.load_search)
+        self.context.signals.apply_filter.connect(self.apply_filter)
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
@@ -138,3 +139,16 @@ class BasesTable(QWidget):
         self.filter_edit.setText("")
         self.filter_model.clear_all_column_filters()
         self.header.update_all_filter_indicators()
+
+    def apply_filter(self, column: int, value: Any):
+        """Apply the given filter to the given column"""
+        # Get all unique items that are not the value passed in
+        items = []
+        for row in range(self.filter_model.rowCount()):
+            data = self.filter_model.index(row, column).data()
+            if data == value:
+                continue
+            items.append(data)
+        unique = list(set(items))
+
+        self.filter_model.set_column_filter(column, unique)

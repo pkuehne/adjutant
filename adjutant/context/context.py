@@ -102,6 +102,7 @@ class SignalContext(QObject):
 
     save_search = pyqtSignal()
     load_search = pyqtSignal(int)
+    apply_filter = pyqtSignal(int, object)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
