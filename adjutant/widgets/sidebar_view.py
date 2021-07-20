@@ -34,9 +34,8 @@ class SidebarView(QTreeView):
         """Item selected in view"""
         if index.parent() == QModelIndex():
             section: Section = self.sidebar_model.sections[index.row()]
-            getattr(self, section.signal)(QModelIndex())
-            return
-        section: Section = self.sidebar_model.sections[index.parent().row()]
+        else:
+            section: Section = self.sidebar_model.sections[index.parent().row()]
         getattr(self, section.signal)(index)
 
     def remove_all_filters(self, _: QModelIndex):
@@ -45,6 +44,10 @@ class SidebarView(QTreeView):
 
     def filter_by_search(self, index: QModelIndex):
         """Filters by the given search"""
-        if index == QModelIndex():
+        if index.parent() == QModelIndex():
+            if self.isExpanded(index):
+                self.collapse(index)
+            else:
+                self.expand(index)
             return
         self.context.signals.load_search.emit(index.row())
