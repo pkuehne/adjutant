@@ -13,6 +13,7 @@ class MainWindowMenuBar(QMenuBar):
         self.context = context
 
         self._setup_file_menu()
+        self._setup_add_menu()
         self._setup_help_menu()
 
     def _setup_file_menu(self):
@@ -24,6 +25,14 @@ class MainWindowMenuBar(QMenuBar):
         file_menu = self.addMenu("&File")
         file_menu.addSeparator()
         file_menu.addAction(quit_action)
+
+    def _setup_add_menu(self):
+        """Setup the add menu"""
+        bases_action = QAction("&Base", self)
+        bases_action.triggered.connect(self.context.signals.add_base.emit)
+
+        add_menu = self.addMenu("&Add")
+        add_menu.addAction(bases_action)
 
     def _setup_help_menu(self):
         """Setup the help menu"""
