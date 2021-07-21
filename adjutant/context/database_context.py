@@ -29,7 +29,7 @@ class DatabaseContext:
         """Applies any outstanding migrations to the database"""
         self.execute_sql_file(":/migrations/initial.sql")
         if settings.version_stage == "dev":
-            self.execute_sql_file(":/populate_test_data.sql")
+            return
 
     def execute_sql_command(self, command: str) -> None:
         """Execute a SQL command"""

@@ -16,7 +16,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.context = Context()
         self.context.settings.set_version("0.1.0-dev")
-        self.context.load_database(":memory:")
+        self.context.load_database("data.db")
+        # self.context.load_database(":memory:")
+        self.context.database.execute_sql_file(":/populate_test_data.sql")
+        self.context.models.refresh_models()
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)
         self.setWindowIcon(QIcon(":/icons/adjutant.png"))
