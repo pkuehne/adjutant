@@ -3,8 +3,10 @@
 from dataclasses import dataclass
 from PyQt5.QtCore import QModelIndex, QStringListModel, pyqtSignal
 from PyQt5.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDataWidgetMapper,
+    QDateEdit,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -12,6 +14,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QSpinBox,
+    QTextEdit,
     QVBoxLayout,
 )
 from adjutant.context import Context
@@ -21,13 +24,13 @@ from adjutant.context import Context
 class MappedWidgets:
     """Holds the widgets that need to be data mapped"""
 
-    id_label: QLabel
-    name_edit: QLineEdit
-    scale_edit: QLineEdit
-    base_combobox: QComboBox
-    width_edit: QSpinBox
-    depth_edit: QSpinBox
-    figures_edit: QSpinBox
+    # id_label: QLabel
+    # name_edit: QLineEdit
+    # scale_edit: QLineEdit
+    # base_combobox: QComboBox
+    # width_edit: QSpinBox
+    # depth_edit: QSpinBox
+    # figures_edit: QSpinBox
 
     def __init__(self):
         self.id_label = QLabel()
@@ -37,6 +40,17 @@ class MappedWidgets:
         self.width_edit = QSpinBox()
         self.depth_edit = QSpinBox()
         self.figures_edit = QSpinBox()
+        self.material_combobox = QComboBox()
+        self.sculptor_edit = QLineEdit()
+        self.manufacturer_edit = QLineEdit()
+        self.retailer_edit = QLineEdit()
+        self.price_edit = QLineEdit()
+        self.date_acquired = QDateEdit()
+        self.date_finished = QDateEdit()
+        self.completed = QCheckBox()
+        self.damaged = QCheckBox()
+        self.notes_edit = QTextEdit()
+        self.custom_id_edit = QLineEdit()
 
 
 class BaseEditDialog(QDialog):
@@ -57,7 +71,7 @@ class BaseEditDialog(QDialog):
 
         self.duplicate_edit = QSpinBox()
 
-        self.ok_button = QPushButton(self.tr("OK"))
+        self.ok_button = QPushButton(self.tr("OK"), self)
         self.cancel_button = QPushButton(self.tr("Cancel"))
         self.delete_button = QPushButton(self.tr("Delete"))
 
@@ -82,6 +96,18 @@ class BaseEditDialog(QDialog):
         form_layout.addRow("Width: ", self.widgets.width_edit)
         form_layout.addRow("Depth: ", self.widgets.depth_edit)
         form_layout.addRow("Figures: ", self.widgets.figures_edit)
+        form_layout.addRow("Material", self.widgets.material_combobox)
+        form_layout.addRow("Sculptor: ", self.widgets.sculptor_edit)
+        form_layout.addRow("Manufacturer: ", self.widgets.manufacturer_edit)
+        form_layout.addRow("Retailer: ", self.widgets.retailer_edit)
+        form_layout.addRow("Price: ", self.widgets.price_edit)
+        form_layout.addRow("Acquired: ", self.widgets.date_acquired)
+        form_layout.addRow("Finished: ", self.widgets.date_finished)
+        form_layout.addRow("Completed: ", self.widgets.completed)
+        form_layout.addRow("Damaged", self.widgets.damaged)
+        form_layout.addRow("Notes: ", self.widgets.notes_edit)
+        form_layout.addRow("Custom ID: ", self.widgets.custom_id_edit)
+
         if self.add_mode:
             form_layout.addRow("", QLabel(""))
             form_layout.addRow("Duplicates: ", self.duplicate_edit)
@@ -102,21 +128,45 @@ class BaseEditDialog(QDialog):
         self.widgets.base_combobox.setModel(
             QStringListModel(["Round", "Oval", "Rectangle", "Square", "Vignette"])
         )
+        self.widgets.material_combobox.setModel(
+            QStringListModel(["Plastic", "Resin", "Metal"])
+        )
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.ManualSubmit)
-        self.mapper.addMapping(self.widgets.id_label, 0, b"text")
-        self.mapper.addMapping(self.widgets.name_edit, 1)
-        self.mapper.addMapping(self.widgets.scale_edit, 2)
-        self.mapper.addMapping(self.widgets.base_combobox, 3, b"currentText")
-        self.mapper.addMapping(self.widgets.width_edit, 4)
-        self.mapper.addMapping(self.widgets.depth_edit, 5)
-        self.mapper.addMapping(self.widgets.figures_edit, 6)
+        self.mapper.addMapping(self.widgets.id_label, self.field("id"), b"text")
+        self.mapper.addMapping(self.widgets.name_edit, self.field("name"))
+        self.mapper.addMapping(self.widgets.scale_edit, self.field("scale"))
+        self.mapper.addMapping(
+            self.widgets.base_combobox, self.field("base"), b"currentText"
+        )
+        self.mapper.addMapping(self.widgets.width_edit, self.field("width"))
+        self.mapper.addMapping(self.widgets.depth_edit, self.field("depth"))
+        self.mapper.addMapping(self.widgets.figures_edit, self.field("figures"))
+        self.mapper.addMapping(self.widgets.material_combobox, self.field("material"))
+        self.mapper.addMapping(self.widgets.sculptor_edit, self.field("sculptor"))
+        self.mapper.addMapping(
+            self.widgets.manufacturer_edit, self.field("manufacturer")
+        )
+        self.mapper.addMapping(self.widgets.retailer_edit, self.field("retailer"))
+        self.mapper.addMapping(self.widgets.price_edit, self.field("price"))
+        self.mapper.addMapping(self.widgets.date_acquired, self.field("date_acquired"))
+        self.mapper.addMapping(self.widgets.date_finished, self.field("date_finished"))
+        self.mapper.addMapping(self.widgets.completed, self.field("completed"))
+        self.mapper.addMapping(self.widgets.damaged, self.field("damaged"))
+        self.mapper.addMapping(
+            self.widgets.notes_edit, self.field("notes"), b"plainText"
+        )
+        self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
 
         self.mapper.setCurrentModelIndex(self.index)
         self.ok_button.setDefault(True)
         if self.add_mode:
             self.delete_button.setDisabled(True)
+
+    def field(self, name: str) -> int:
+        """Shortcut to get the field number from the name"""
+        return self.model.fieldIndex(name)
 
     def _setup_signals(self):
         """Setup signals on widgets"""

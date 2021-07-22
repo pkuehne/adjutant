@@ -45,6 +45,7 @@ def add_base(context: Context) -> AddBaseFunc:
             record.setValue("width", item.width)
             record.setValue("depth", item.depth)
             record.setValue("figures", item.figures)
+
             assert context.models.bases_model.insertRecord(-1, record)
         assert context.models.bases_model.submitAll()
 
@@ -69,7 +70,7 @@ def context():
     """Sets up and tears down the database"""
 
     context = Context()
-    context.settings.set_version("0.0.0-test")
+    context.settings.database_version = 1
     context.load_database(":memory:")
     # context.database.execute_sql_file(":/populate_test_data.sql")
     context.models.refresh_models()

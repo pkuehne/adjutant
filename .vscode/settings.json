@@ -7,6 +7,11 @@
                 "useShortcut": false,
                 "silent": false
             },
+            {
+                "match": "resources\\.*",
+                "cmd": "venv\\Scripts\\Activate.ps1; pyrcc5 resources\\resources.qrc -o adjutant\\resources.py",
+                "silent": true
+            }
         ]
     },
     "python.formatting.provider": "black",

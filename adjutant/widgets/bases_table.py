@@ -57,6 +57,7 @@ class BasesTable(QWidget):
         self.table.setModel(self.filter_model)
         self.table.setHorizontalHeader(self.header)
         self.table.resizeColumnsToContents()
+        self.table.hideColumn(self.context.models.bases_model.fieldIndex("storage"))
 
         self.filter_model.setFilterKeyColumn(-1)  # All columns
         self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)

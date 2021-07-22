@@ -1,16 +1,16 @@
-INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1);
-INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1);
-INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1);
-INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1);
-INSERT INTO bases VALUES (null, "Retributor-Primer", "32mm", "Round", 32, 0, 1);
-INSERT INTO bases VALUES (null, "Prussian Jaeger", "28mm", "Rectangle", 40, 20, 2);
-INSERT INTO bases VALUES (null, "Prussian Jaeger", "28mm", "Rectangle", 40, 20, 2);
-INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4);
-INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4);
-INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4);
-INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4);
-INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4);
-INSERT INTO bases VALUES (null, "Prussian Command", "28mm", "Square", 40, 40, 3);
+INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1, "Plastic", "", "Games Workshop", "Element Games", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "AOS-Ret1-1", 0);
+INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1, "Plastic", "", "Games Workshop", "Element Games", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "AOS-Ret1-2", 0);
+INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1, "Plastic", "", "Games Workshop", "Element Games", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "AOS-Ret1-3", 0);
+INSERT INTO bases VALUES (null, "Retributor", "32mm", "Round", 32, 0, 1, "Plastic", "", "Games Workshop", "Element Games", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "AOS-Ret1-4", 0);
+INSERT INTO bases VALUES (null, "Retributor-Primer", "32mm", "Round", 32, 0, 1, "Plastic", "", "Games Workshop", "Element Games", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "AOS-Ret1-P", 0);
+INSERT INTO bases VALUES (null, "Prussian Jaeger", "28mm", "Rectangle", 40, 20, 2, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Jaeger", "28mm", "Rectangle", 40, 20, 2, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Infantry", "28mm", "Square", 40, 40, 4, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
+INSERT INTO bases VALUES (null, "Prussian Command", "28mm", "Square", 40, 40, 3, "Plastic", "Alan Perry", "Perry Miniatures", "Perry Miniatures", 0.0, CURRENT_DATE, CURRENT_DATE, NULL, 1, 0, "not varnished", "PRU-Sil1-1", 0);
 
 
 INSERT INTO tags VALUES (NULL, "storm sword", "weapon", 0);

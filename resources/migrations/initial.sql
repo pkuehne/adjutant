@@ -6,7 +6,20 @@ CREATE TABLE IF NOT EXISTS bases (
     base TEXT DEFAULT "Round",
     width INTEGER DEFAULT 20,
     depth INTEGER DEFAULT 0,
-    figures INTEGER DEFAULT 1
+    figures INTEGER DEFAULT 1,
+    material TEXT DEFAULT "Plastic",
+    sculptor TEXT DEFAULT "",
+    manufacturer TEXT DEFAULT "",
+    retailer TEXT DEFAULT "",
+    price FLOAT DEFAULT 0.0,
+    date_added DATE DEFAULT CURRENT_DATE,
+    date_acquired DATE DEFAULT 0,
+    date_finished DATE DEFAULT 0,
+    completed BOOLEAN DEFAULT 0,
+    damaged BOOLEAN DEFAULT 0,
+    notes TEXT DEFAULT "",
+    custom_id TEXT DEFAULT "",
+    storage INTEGER DEFAULT NULL
 );
 
 DROP TABLE IF EXISTS tags;
@@ -30,3 +43,10 @@ CREATE TABLE IF NOT EXISTS searches (
     name TEXT,
     encoded TEXT
 );
+
+DROP TABLE IF EXISTS settings;
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY,
+    version INTEGER
+);
+INSERT into settings(version) VALUES(1);

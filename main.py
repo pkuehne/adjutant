@@ -12,8 +12,8 @@ def main(argv):
     """The main"""
     QApplication.setAttribute(Qt.AA_DisableWindowContextHelpButton)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QApplication.setStyle("windows")
     app = QApplication(argv)
-    app.setStyle("Windows")
 
     window = MainWindow()
     window.setMinimumSize(app.screens()[0].size() * 0.75)
