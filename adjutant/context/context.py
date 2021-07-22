@@ -4,8 +4,8 @@ from typing import List
 
 from dataclasses import dataclass
 
-from PyQt5.QtSql import QSqlQueryModel, QSqlTableModel
-from PyQt5.QtCore import QModelIndex, QObject, Qt, pyqtSignal
+from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
+from PyQt6.QtCore import QModelIndex, QObject, Qt, pyqtSignal
 
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.database_context import DatabaseContext
@@ -23,8 +23,12 @@ def setup_header_data(model: QSqlQueryModel, roles: List[HeaderRoles]):
     """Setup header data roles"""
     col = 0
     for role in roles:
-        model.setHeaderData(col, Qt.Horizontal, role.display, Qt.DisplayRole)
-        model.setHeaderData(col, Qt.Horizontal, role.tooltip, Qt.ToolTipRole)
+        model.setHeaderData(
+            col, Qt.Orientation.Horizontal, role.display, Qt.ItemDataRole.DisplayRole
+        )
+        model.setHeaderData(
+            col, Qt.Orientation.Horizontal, role.tooltip, Qt.ItemDataRole.ToolTipRole
+        )
         col += 1
 
 
@@ -45,7 +49,7 @@ class ModelContext:
         self.base_tags_model.setTable("base_tags")
         self.searches_model = QSqlTableModel()
         self.searches_model.setTable("searches")
-        self.searches_model.setEditStrategy(QSqlTableModel.OnManualSubmit)
+        self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
         self.refresh_models()
 
@@ -54,6 +58,7 @@ class ModelContext:
         self.bases_model.select()
         self.tags_model.select()
         self.base_tags_model.select()
+        self.searches_model.select()
 
     def __setup_bases_model(self) -> QSqlTableModel:
         """Initialize and setup the bases model"""
@@ -85,7 +90,7 @@ class ModelContext:
                 # HeaderRoles("Tags", "All tags associated with this base"),
             ],
         )
-        model.setEditStrategy(model.OnManualSubmit)
+        model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         return model
 
     def __setup_tags_model(self) -> QSqlTableModel:

@@ -1,6 +1,6 @@
 """ Main screen for the Bases layout """
 
-from PyQt5.QtWidgets import QHBoxLayout, QWidget
+from PyQt6.QtWidgets import QHBoxLayout, QWidget
 from adjutant.context import Context
 from adjutant.widgets.bases_table import BasesTable
 from adjutant.widgets.sidebar_view import SidebarView

@@ -1,8 +1,8 @@
 """ Edit Window for a Base """
 
 from dataclasses import dataclass
-from PyQt5.QtCore import QModelIndex, QStringListModel, pyqtSignal
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import QModelIndex, QStringListModel, pyqtSignal
+from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDataWidgetMapper,
@@ -133,7 +133,7 @@ class BaseEditDialog(QDialog):
         )
 
         self.mapper.setModel(self.model)
-        self.mapper.setSubmitPolicy(self.mapper.ManualSubmit)
+        self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
         self.mapper.addMapping(self.widgets.id_label, self.field("id"), b"text")
         self.mapper.addMapping(self.widgets.name_edit, self.field("name"))
         self.mapper.addMapping(self.widgets.scale_edit, self.field("scale"))
@@ -211,7 +211,7 @@ class BaseEditDialog(QDialog):
         """Wraps the creation of the dialog, particularly for unit testing"""
         cls.dialog_reference = cls(context, index, parent)
         # cls.dialog_reference.summary.setFocus()
-        cls.dialog_reference.exec_()
+        cls.dialog_reference.exec()
         # result = cls.dialog_reference.result
         cls.dialog_reference = None
         # return result
@@ -220,5 +220,5 @@ class BaseEditDialog(QDialog):
     def add_base(cls, context, parent):
         """Wraps the adding of a base"""
         cls.dialog_reference = cls(context, QModelIndex(), parent)
-        cls.dialog_reference.exec_()
+        cls.dialog_reference.exec()
         cls.dialog_reference = None

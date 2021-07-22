@@ -1,7 +1,7 @@
 """ Sidebar Tree View """
 
-from PyQt5.QtCore import QModelIndex
-from PyQt5.QtWidgets import QTreeView
+from PyQt6.QtCore import QModelIndex
+from PyQt6.QtWidgets import QTreeView
 
 from adjutant.context import Context
 from adjutant.models.sidebar_model import SidebarModel, Section
@@ -25,7 +25,7 @@ class SidebarView(QTreeView):
         self.resizeColumnToContents(0)
         self.setFixedWidth(self.columnWidth(0) * 1.5)
         self.setHeaderHidden(True)
-        self.setSelectionBehavior(self.SelectRows)
+        self.setSelectionBehavior(self.SelectionBehavior.SelectRows)
         self.clicked.connect(self.item_selected)
 
         # self.setFixedWidth(150)

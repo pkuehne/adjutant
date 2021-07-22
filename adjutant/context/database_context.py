@@ -1,8 +1,8 @@
 """ Classes to manage database operations """
 
 
-from PyQt5.QtCore import QFile, QTextStream, qWarning
-from PyQt5.QtSql import QSqlDatabase, QSqlQuery
+from PyQt6.QtCore import QFile, QTextStream, qWarning
+from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.settings_context import SettingsContext
 
@@ -38,7 +38,7 @@ class DatabaseContext:
     def migrate(self, settings: SettingsContext) -> None:
         """Applies any outstanding migrations to the database"""
         if settings.database_version > self.version():
-            self.execute_sql_file(":/migrations/initial.sql")
+            self.execute_sql_file("resources/migrations/initial.sql")
 
     def execute_sql_command(self, command: str, errors: bool = True) -> QSqlQuery:
         """Execute a SQL command"""
@@ -58,7 +58,7 @@ class DatabaseContext:
         """Execute SQL statements in given file"""
         # qWarning(f"Executing {filename}")
         sql_file = QFile(filename)
-        sql_file.open(QFile.ReadOnly)
+        sql_file.open(QFile.OpenModeFlag.ReadOnly)
 
         for query in QTextStream(sql_file).readAll().split(";"):
             if not query.strip():

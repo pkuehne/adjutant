@@ -2,9 +2,9 @@
 
 import functools
 from typing import cast
-from PyQt5.QtCore import QEvent, QObject, Qt
-from PyQt5.QtGui import QContextMenuEvent, QCursor, QKeyEvent
-from PyQt5.QtWidgets import QAction, QMenu, QTableView
+from PyQt6.QtCore import QEvent, QObject, Qt
+from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor, QKeyEvent
+from PyQt6.QtWidgets import QMenu, QTableView
 
 from adjutant.context.context import Context
 
@@ -21,8 +21,8 @@ class BasesTableView(QTableView):
         """Initialize and configure widgets"""
         self.setAlternatingRowColors(True)
         self.verticalHeader().setVisible(False)
-        self.setEditTriggers(BasesTableView.NoEditTriggers)
-        self.setSelectionBehavior(BasesTableView.SelectRows)
+        self.setEditTriggers(BasesTableView.EditTrigger.NoEditTriggers)
+        self.setSelectionBehavior(BasesTableView.SelectionBehavior.SelectRows)
         self.installEventFilter(self)
 
         self.doubleClicked.connect(self.context.signals.edit_base.emit)
@@ -61,7 +61,9 @@ class BasesTableView(QTableView):
 
         def generate_title(column: int):
             title_idx = index.siblingAtColumn(column)
-            header = index.model().headerData(column, Qt.Horizontal, Qt.DisplayRole)
+            header = index.model().headerData(
+                column, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole
+            )
             return f"{header} → {title_idx.data()}"
 
         apply_menu = QMenu(self.tr("Apply to Selection"), self)
@@ -98,6 +100,7 @@ class BasesTableView(QTableView):
 
         for index in selection:
             self.model().setData(index.siblingAtColumn(column), source.data())
+        # Todo: Ensure submitAll is called
 
     def filter_to_selection(self, row: int, column: int):
         """Filter by the selected column"""
@@ -108,13 +111,13 @@ class BasesTableView(QTableView):
         self, source: QObject, event: QEvent
     ):  # pylint: disable=invalid-name
         """Capture delete/backspace key sent to table"""
-        if source != self or event.type() != QEvent.KeyPress:
+        if source != self or event.type() != QEvent.Type.KeyPress:
             return super().eventFilter(source, event)
 
         key = cast(QKeyEvent, event).key()
-        if key in (Qt.Key_Backspace, Qt.Key_Delete):
+        if key in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
             self.context.signals.delete_bases.emit(self.selectionModel().selectedRows())
-        elif key == Qt.Key_Return:
+        elif key == Qt.Key.Key_Return:
             indexes = self.selectionModel().selectedRows()
             if indexes:
                 self.context.signals.edit_base.emit(indexes[0])

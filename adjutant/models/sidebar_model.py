@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from typing import List
 
-from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt
-from PyQt5.QtSql import QSqlTableModel
+from PyQt6.QtCore import QAbstractItemModel, QModelIndex, Qt
+from PyQt6.QtSql import QSqlTableModel
 
 
 @dataclass
@@ -52,7 +52,7 @@ class SidebarModel(QAbstractItemModel):
         """Data stored at index"""
         section: Section = index.internalPointer()
         if section is None:
-            if role != Qt.DisplayRole:
+            if role != Qt.ItemDataRole.DisplayRole:
                 return None
             return self.sections[index.row()].title
 

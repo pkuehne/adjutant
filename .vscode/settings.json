@@ -1,18 +1,6 @@
 {
     "saveAndRun": {
-        "commands": [
-            {
-                "match": "resources/.*",
-                "cmd": "source venv/bin/activate && pyrcc5 resources/resources.qrc -o adjutant/resources.py",
-                "useShortcut": false,
-                "silent": false
-            },
-            {
-                "match": "resources\\.*",
-                "cmd": "venv\\Scripts\\Activate.ps1; pyrcc5 resources\\resources.qrc -o adjutant\\resources.py",
-                "silent": true
-            }
-        ]
+        "commands": []
     },
     "python.formatting.provider": "black",
     "python.linting.pylintEnabled": true,

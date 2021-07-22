@@ -1,8 +1,8 @@
 """ Wrapper for the Bases Table """
 
 from typing import Any, List
-from PyQt5.QtCore import QModelIndex, Qt
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtWidgets import (
     QHBoxLayout,
     QInputDialog,
     QLabel,
@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QVBoxLayout,
 )
-from PyQt5.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget
 
 from adjutant.context import Context
 from adjutant.models.bases_filter_model import BasesFilterModel
@@ -60,13 +60,13 @@ class BasesTable(QWidget):
         self.table.hideColumn(self.context.models.bases_model.fieldIndex("storage"))
 
         self.filter_model.setFilterKeyColumn(-1)  # All columns
-        self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.filter_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
     def _setup_signals(self):
         # self.table.selectionModel().selectionChanged.connect(
         #     lambda selected, __: print(selected)
         # )
-        self.filter_edit.textChanged.connect(self.filter_model.setFilterRegExp)
+        self.filter_edit.textChanged.connect(self.filter_model.setFilterFixedString)
         self.clear_button.pressed.connect(self.clear_all_filters)
         self.save_button.pressed.connect(self.save_search)
 
@@ -135,7 +135,7 @@ class BasesTable(QWidget):
         record = self.context.models.searches_model.record(row)
         self.filter_model.decode_filters(record.value("encoded"))
         self.filter_edit.blockSignals(True)
-        self.filter_edit.setText(self.filter_model.filterRegExp().pattern())
+        self.filter_edit.setText(self.filter_model.filterRegularExpression().pattern())
         self.filter_edit.blockSignals(False)
 
     def clear_all_filters(self):

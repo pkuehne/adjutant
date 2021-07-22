@@ -1,7 +1,7 @@
 """ The Main Window """
 
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QMainWindow
 
 from adjutant.context import Context
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         self.context.models.refresh_models()
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)
-        self.setWindowIcon(QIcon(":/icons/adjutant.png"))
+        self.setWindowIcon(QIcon("icons:adjutant.png"))
         self.bases = BasesScreen(self.context)
         self.setCentralWidget(self.bases)
 

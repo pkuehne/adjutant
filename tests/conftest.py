@@ -7,7 +7,6 @@ from dataclasses import dataclass
 import pytest
 
 from adjutant.context.context import Context
-import adjutant.resources  # pylint: disable=unused-import
 
 # pylint: disable=redefined-outer-name
 

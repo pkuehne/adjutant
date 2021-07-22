@@ -1,7 +1,7 @@
 """ Tests for the sidebar model"""
 
-from PyQt5.QtCore import QModelIndex
-from PyQt5.QtSql import QSqlTableModel
+from PyQt6.QtCore import QModelIndex
+from PyQt6.QtSql import QSqlTableModel
 from adjutant.models.sidebar_model import Section, SidebarModel
 
 

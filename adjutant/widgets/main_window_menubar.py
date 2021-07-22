@@ -1,7 +1,7 @@
 """ Menu bar for the main window"""
 
-from PyQt5.QtWidgets import QAction, QApplication, QMenuBar, QMessageBox
-
+from PyQt6.QtWidgets import QApplication, QMenuBar, QMessageBox
+from PyQt6.QtGui import QAction
 from adjutant.context import Context
 
 

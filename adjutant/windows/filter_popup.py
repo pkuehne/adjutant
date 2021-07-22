@@ -1,9 +1,9 @@
 """ Popup filter for the bases table header """
 
 from typing import cast
-from PyQt5.QtCore import QModelIndex, Qt
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from PyQt6.QtWidgets import (
     QDialog,
     QHBoxLayout,
     QListView,
@@ -19,7 +19,7 @@ class FilterPopup(QDialog):
 
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent=parent)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
 
         self.clear_button = QPushButton(self.tr("Clear Filter"))
         self.ok_button = QPushButton(self.tr("Apply"))
@@ -77,8 +77,12 @@ class FilterPopup(QDialog):
         for value in unique:
             item = QStandardItem(str(value))
             item.setCheckable(True)
-            item.setCheckState(value not in current_filters)
-            item.setData(value, Qt.UserRole + 1)
+            item.setCheckState(
+                Qt.CheckState.Unchecked
+                if value in current_filters
+                else Qt.CheckState.Checked
+            )
+            item.setData(value, Qt.ItemDataRole.UserRole + 1)
             self.list_model.appendRow(item)
 
     def update_model_check_state(self):
@@ -87,7 +91,11 @@ class FilterPopup(QDialog):
         if not indexes:
             return
         item = self.list_model.item(indexes[0].row(), indexes[0].column())
-        item.setCheckState(not item.checkState())
+        item.setCheckState(
+            Qt.CheckState.Unchecked
+            if item.checkState() == Qt.CheckState.Checked
+            else Qt.CheckState.Checked
+        )
 
     def clear_filters(self):
         """Clear all set filters"""
@@ -100,8 +108,8 @@ class FilterPopup(QDialog):
         filter_list = []
         for row in range(self.list_model.rowCount()):
             item = self.list_model.item(row, 0)
-            if not item.checkState():
-                filter_list.append(item.data(Qt.UserRole + 1))
+            if item.checkState() == Qt.CheckState.Unchecked:
+                filter_list.append(item.data(Qt.ItemDataRole.UserRole + 1))
 
         model = cast(BasesFilterModel, self.index.model())
         model.set_column_filter(self.index.column(), filter_list)

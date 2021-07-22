@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from typing import Dict, List
 import yaml
-from PyQt5.QtCore import QModelIndex, QSortFilterProxyModel, Qt
-from PyQt5.QtGui import QIcon
+from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt
+from PyQt6.QtGui import QIcon
 
 
 @dataclass
@@ -26,7 +26,7 @@ class BasesFilterModel(QSortFilterProxyModel):
         """Set the filter for a given column"""
         self.column_filters[column] = values
         self.invalidateFilter()
-        self.headerDataChanged.emit(Qt.Horizontal, column, column)
+        self.headerDataChanged.emit(Qt.Orientation.Horizontal, column, column)
 
     def get_column_filter(self, column: int) -> List[str]:
         """Get the list of filter for the column"""
@@ -40,25 +40,25 @@ class BasesFilterModel(QSortFilterProxyModel):
     def encode_filters(self) -> str:
         """Encode the filters in a binary format"""
         wrapper = {}
-        wrapper["regex"] = self.filterRegExp().pattern()
+        wrapper["regex"] = self.filterRegularExpression().pattern()
         wrapper["column_filters"] = self.column_filters
         return yaml.dump(wrapper)
 
     def decode_filters(self, encoded: str):
         """Decode the filters from binary format"""
         wrapper: dict = yaml.safe_load(encoded)
-        self.setFilterRegExp(wrapper["regex"])
+        self.setFilterFixedString(wrapper["regex"])
         self.column_filters = wrapper["column_filters"]
         self.invalidateFilter()
 
     # pylint: disable=invalid-name
     def headerData(self, section: int, orientation: Qt.Orientation, role: int):
         """Override to set filter icon"""
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             image = (
-                ":/icons/filter-available.png"
+                "icons:filter-available.png"
                 if self.column_filters.get(section, []) == []
-                else ":/icons/filter-applied.png"
+                else "icons:filter-applied.png"
             )
             return QIcon(image)
         return super().headerData(section, orientation, role=role)
