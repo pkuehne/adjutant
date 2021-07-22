@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
     QInputDialog,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
 )
@@ -75,6 +76,9 @@ class BasesTable(QWidget):
         self.context.signals.delete_base.connect(lambda base: self.delete_bases([base]))
         self.context.signals.duplicate_base.connect(self.duplicate_base)
         self.context.signals.delete_bases.connect(self.delete_bases)
+        self.context.signals.update_bases.connect(
+            self.context.models.bases_model.submitAll
+        )
 
         self.context.signals.save_search.connect(self.save_search)
         self.context.signals.load_search.connect(self.load_search)
@@ -97,6 +101,15 @@ class BasesTable(QWidget):
 
     def delete_bases(self, indexes: List[QModelIndex]):
         """Delete all currently selected rows"""
+        result = QMessageBox.warning(
+            self,
+            "Confirm deletion",
+            "Are you sure you want to delete these bases?",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if result == QMessageBox.StandardButton.Cancel:
+            return
         for index in indexes:
             index = self.convert_index(index)
             self.context.models.bases_model.removeRow(index.row())

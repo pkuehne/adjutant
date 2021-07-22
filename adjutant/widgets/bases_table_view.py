@@ -100,7 +100,7 @@ class BasesTableView(QTableView):
 
         for index in selection:
             self.model().setData(index.siblingAtColumn(column), source.data())
-        # Todo: Ensure submitAll is called
+        self.context.signals.update_bases.emit()
 
     def filter_to_selection(self, row: int, column: int):
         """Filter by the selected column"""
