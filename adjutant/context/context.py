@@ -81,7 +81,6 @@ class ModelContext:
                 HeaderRoles("Price", "How much this base cost"),
                 HeaderRoles("Added", "When this base was added to Adjutant"),
                 HeaderRoles("Acquired", "When the miniatures in this base were bought"),
-                HeaderRoles("Finished", "When the work on this base was completed"),
                 HeaderRoles("Completed", "Whether this base is ready for games"),
                 HeaderRoles("Damaged", "Is there any damage on this base?"),
                 HeaderRoles("Notes", "General notes about this base"),

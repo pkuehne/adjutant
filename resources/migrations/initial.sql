@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS bases (
     price FLOAT DEFAULT 0.0,
     date_added DATE DEFAULT CURRENT_DATE,
     date_acquired DATE DEFAULT 0,
-    date_finished DATE DEFAULT 0,
     completed BOOLEAN DEFAULT 0,
     damaged BOOLEAN DEFAULT 0,
     notes TEXT DEFAULT "",

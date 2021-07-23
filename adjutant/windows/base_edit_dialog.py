@@ -46,7 +46,6 @@ class MappedWidgets:
         self.retailer_edit = QLineEdit()
         self.price_edit = QLineEdit()
         self.date_acquired = QDateEdit()
-        self.date_finished = QDateEdit()
         self.completed = QCheckBox()
         self.damaged = QCheckBox()
         self.notes_edit = QTextEdit()
@@ -102,7 +101,6 @@ class BaseEditDialog(QDialog):
         form_layout.addRow("Retailer: ", self.widgets.retailer_edit)
         form_layout.addRow("Price: ", self.widgets.price_edit)
         form_layout.addRow("Acquired: ", self.widgets.date_acquired)
-        form_layout.addRow("Finished: ", self.widgets.date_finished)
         form_layout.addRow("Completed: ", self.widgets.completed)
         form_layout.addRow("Damaged", self.widgets.damaged)
         form_layout.addRow("Notes: ", self.widgets.notes_edit)
@@ -131,6 +129,7 @@ class BaseEditDialog(QDialog):
         self.widgets.material_combobox.setModel(
             QStringListModel(["Plastic", "Resin", "Metal"])
         )
+        self.widgets.date_acquired.setCalendarPopup(True)
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
@@ -151,7 +150,6 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(self.widgets.retailer_edit, self.field("retailer"))
         self.mapper.addMapping(self.widgets.price_edit, self.field("price"))
         self.mapper.addMapping(self.widgets.date_acquired, self.field("date_acquired"))
-        self.mapper.addMapping(self.widgets.date_finished, self.field("date_finished"))
         self.mapper.addMapping(self.widgets.completed, self.field("completed"))
         self.mapper.addMapping(self.widgets.damaged, self.field("damaged"))
         self.mapper.addMapping(
