@@ -5,6 +5,7 @@ from typing import List
 
 from PyQt6.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PyQt6.QtSql import QSqlTableModel
+from PyQt6.QtWidgets import QMenu
 
 
 @dataclass
@@ -14,6 +15,7 @@ class Section:
     title: str
     model: QSqlTableModel
     signal: str
+    context_menu: QMenu
     row: int = -1
 
 

@@ -1,7 +1,8 @@
 """ Sidebar Tree View """
 
-from PyQt6.QtCore import QModelIndex
-from PyQt6.QtWidgets import QTreeView
+from PyQt6.QtCore import QModelIndex, QPoint
+from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor
+from PyQt6.QtWidgets import QInputDialog, QMenu, QTreeView
 
 from adjutant.context import Context
 from adjutant.models.sidebar_model import SidebarModel, Section
@@ -14,10 +15,13 @@ class SidebarView(QTreeView):
         super().__init__(parent=parent)
         self.context = context
         self.sidebar_model = SidebarModel()
-        self.sidebar_model.add_section(Section("All", None, "remove_all_filters"))
+        self.sidebar_model.add_section(Section("All", None, "remove_all_filters", None))
         self.sidebar_model.add_section(
             Section(
-                "Saved Searches", self.context.models.searches_model, "filter_by_search"
+                "Saved Searches",
+                self.context.models.searches_model,
+                "filter_by_search",
+                self.searches_context_menu,
             )
         )
 
@@ -28,14 +32,17 @@ class SidebarView(QTreeView):
         self.setSelectionBehavior(self.SelectionBehavior.SelectRows)
         self.clicked.connect(self.item_selected)
 
-        # self.setFixedWidth(150)
-
-    def item_selected(self, index: QModelIndex):
-        """Item selected in view"""
+    def section_from_index(self, index: QModelIndex) -> Section:
+        """Get the section for the given index"""
         if index.parent() == QModelIndex():
             section: Section = self.sidebar_model.sections[index.row()]
         else:
             section: Section = self.sidebar_model.sections[index.parent().row()]
+        return section
+
+    def item_selected(self, index: QModelIndex):
+        """Item selected in view"""
+        section: Section = self.section_from_index(index)
         getattr(self, section.signal)(index)
 
     def remove_all_filters(self, _: QModelIndex):
@@ -51,3 +58,49 @@ class SidebarView(QTreeView):
                 self.expand(index)
             return
         self.context.signals.load_search.emit(index.row())
+
+    def contextMenuEvent(
+        self, event: QContextMenuEvent
+    ):  # pylint: disable=invalid-name
+        """When right-click context menu is requested"""
+        index = self.indexAt(QPoint(event.x(), event.y()))
+        if not index.isValid():
+            return
+
+        section: Section = self.section_from_index(index)
+        menu = section.context_menu
+        if callable(menu):
+            menu = section.context_menu(index)
+        if menu is None:
+            return
+        menu.popup(QCursor.pos())
+
+    def searches_context_menu(self, index):
+        """Create the context menu for the searches"""
+
+        if index.parent() == QModelIndex():
+            # Top level search doesn't get a context menu
+            return None
+
+        rename_action = QAction(self.tr("Rename Search"), self)
+        rename_action.triggered.connect(lambda: self.rename_search(index))
+
+        delete_action = QAction(self.tr("Delete Search"), self)
+        delete_action.triggered.connect(
+            lambda: self.context.signals.delete_search.emit(index.row())
+        )
+
+        menu = QMenu(self)
+        menu.addAction(rename_action)
+        menu.addAction(delete_action)
+        return menu
+
+    def rename_search(self, index: QModelIndex):
+        """Get new name for the search"""
+        name, success = QInputDialog.getText(
+            self, "New name", "Please enter a new name for the search"
+        )
+
+        if name == "" or not success:
+            return
+        self.context.signals.rename_search.emit(index.row(), name)

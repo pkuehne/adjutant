@@ -29,8 +29,8 @@ class BasesTable(QWidget):
         self.table = BasesTableView(self.context)
         self.header = HeaderView()
         self.filter_edit = QLineEdit()
-        self.clear_button = QPushButton(self.tr("Clear"))
-        self.save_button = QPushButton(self.tr("Save Filters"))
+        self.clear_button = QPushButton(self.tr("Clear Filters"))
+        self.save_button = QPushButton(self.tr("Save Search"))
         self.filter_model = BasesFilterModel()
 
         self._setup_layout()
@@ -82,6 +82,8 @@ class BasesTable(QWidget):
 
         self.context.signals.save_search.connect(self.save_search)
         self.context.signals.load_search.connect(self.load_search)
+        self.context.signals.delete_search.connect(self.delete_search)
+        self.context.signals.rename_search.connect(self.rename_search)
         self.context.signals.apply_filter.connect(self.apply_filter)
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
@@ -150,6 +152,29 @@ class BasesTable(QWidget):
         self.filter_edit.blockSignals(True)
         self.filter_edit.setText(self.filter_model.filterRegularExpression().pattern())
         self.filter_edit.blockSignals(False)
+
+    def delete_search(self, row: int):
+        """Delete the given search"""
+        result = QMessageBox.warning(
+            self,
+            "Confirm deletion",
+            "Are you sure you want to delete this search?",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if result == QMessageBox.StandardButton.Cancel:
+            return
+        self.context.models.searches_model.deleteRowFromTable(row)
+        self.context.models.searches_model.submitAll()
+
+    def rename_search(self, row: int, name: str):
+        """Rename the given search"""
+        # index = self.context.models.searches_model.index(row, record.)
+        model = self.context.models.searches_model
+        record = model.record(row)
+        record.setValue("name", name)
+        model.setRecord(row, record)
+        model.submitAll()
 
     def clear_all_filters(self):
         """Clear all filters applied to the table"""
