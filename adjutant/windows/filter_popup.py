@@ -1,7 +1,7 @@
 """ Popup filter for the bases table header """
 
 from typing import cast
-from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from PyQt6.QtGui import QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (
     QDialog,
@@ -14,19 +14,42 @@ from PyQt6.QtWidgets import (
 from adjutant.models.bases_filter_model import BasesFilterModel
 
 
+def from_check_state(value: Qt.CheckState) -> bool:
+    """Convert CheckState -> Boolean"""
+    return value == Qt.CheckState.Checked
+
+
+def to_check_state(value: bool) -> Qt.CheckState:
+    """Convert Boolean -> CHeckstate"""
+    if value:
+        return Qt.CheckState.Checked
+    return Qt.CheckState.Unchecked
+
+
+def invert_check_state(value: Qt.CheckState) -> Qt.CheckState:
+    """Toggles the checkstate value"""
+    if value == Qt.CheckState.Checked:
+        return Qt.CheckState.Unchecked
+    return Qt.CheckState.Checked
+
+
 class FilterPopup(QDialog):
     """Pops up when clicking on the Bases table header"""
 
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(
+        self, parent: QWidget, model: QSortFilterProxyModel, column: int
+    ) -> None:
         super().__init__(parent=parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
 
-        self.clear_button = QPushButton(self.tr("Clear Filter"))
+        self.select_all_button = QPushButton(self.tr("Select all"))
+        self.unselect_all_button = QPushButton(self.tr("Unselect all"))
         self.ok_button = QPushButton(self.tr("Apply"))
         self.cancel_button = QPushButton(self.tr("Cancel"))
         self.list_widget = QListView()
         self.list_model = QStandardItemModel()
-        self.index = QModelIndex()
+        self.model = model
+        self.column = column
 
         self._setup_layout()
         self._setup_widgets()
@@ -34,7 +57,7 @@ class FilterPopup(QDialog):
 
     def _setup_layout(self):
         """Setup the layout"""
-        self.setFixedSize(180, 200)
+        self.setFixedSize(180, 300)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -42,7 +65,8 @@ class FilterPopup(QDialog):
         button_layout.addWidget(self.ok_button)
 
         central = QVBoxLayout()
-        central.addWidget(self.clear_button)
+        central.addWidget(self.select_all_button)
+        central.addWidget(self.unselect_all_button)
         central.addWidget(self.list_widget)
         central.addLayout(button_layout)
         self.setLayout(central)
@@ -56,32 +80,27 @@ class FilterPopup(QDialog):
         self.list_widget.selectionModel().selectionChanged.connect(
             lambda __, _: self.update_model_check_state()
         )
-        self.clear_button.pressed.connect(self.clear_filters)
+        self.select_all_button.pressed.connect(self.select_all)
+        self.unselect_all_button.pressed.connect(self.unselect_all)
         self.cancel_button.pressed.connect(self.reject)
         self.ok_button.pressed.connect(self.accept)
         self.accepted.connect(self.update_filters)
 
-    def set_source_index(self, index: QModelIndex) -> None:
+    def setup_filter(self) -> None:
         """Retrieves unique items from model at that column"""
-        self.index = index
-        column = index.column()
-        filter_model = cast(BasesFilterModel, index.model())
-        current_filters = filter_model.get_column_filter(column)
+        filter_model = cast(BasesFilterModel, self.model)
+        current_filters = filter_model.get_column_filter(self.column)
         model = filter_model.sourceModel()
 
         items = []
         for row in range(model.rowCount()):
-            items.append(model.index(row, column).data())
+            items.append(model.index(row, self.column).data())
         unique = list(set(items))
 
         for value in unique:
             item = QStandardItem(str(value))
             item.setCheckable(True)
-            item.setCheckState(
-                Qt.CheckState.Unchecked
-                if value in current_filters
-                else Qt.CheckState.Checked
-            )
+            item.setCheckState(to_check_state(value not in current_filters))
             item.setData(value, Qt.ItemDataRole.UserRole + 1)
             self.list_model.appendRow(item)
 
@@ -91,25 +110,27 @@ class FilterPopup(QDialog):
         if not indexes:
             return
         item = self.list_model.item(indexes[0].row(), indexes[0].column())
-        item.setCheckState(
-            Qt.CheckState.Unchecked
-            if item.checkState() == Qt.CheckState.Checked
-            else Qt.CheckState.Checked
-        )
+        item.setCheckState(invert_check_state(item.checkState()))
 
-    def clear_filters(self):
-        """Clear all set filters"""
-        model = cast(BasesFilterModel, self.index.model())
-        model.set_column_filter(self.index.column(), [])
-        self.reject()
+    def unselect_all(self):
+        """Uncheck all items"""
+        for row in range(self.list_model.rowCount()):
+            item = self.list_model.item(row, 0)
+            item.setCheckState(Qt.CheckState.Unchecked)
+
+    def select_all(self):
+        """Uncheck all items"""
+        for row in range(self.list_model.rowCount()):
+            item = self.list_model.item(row, 0)
+            item.setCheckState(Qt.CheckState.Checked)
 
     def update_filters(self):
         """Update the filters for this column on the filter model"""
         filter_list = []
         for row in range(self.list_model.rowCount()):
             item = self.list_model.item(row, 0)
-            if item.checkState() == Qt.CheckState.Unchecked:
+            if not from_check_state(item.checkState()):
                 filter_list.append(item.data(Qt.ItemDataRole.UserRole + 1))
 
-        model = cast(BasesFilterModel, self.index.model())
-        model.set_column_filter(self.index.column(), filter_list)
+        model = cast(BasesFilterModel, self.model)
+        model.set_column_filter(self.column, filter_list)

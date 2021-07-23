@@ -19,10 +19,10 @@ class HeaderView(QHeaderView):
 
     def section_clicked(self, column: int) -> None:
         """Respond to clicks on the header"""
-        popup = FilterPopup(self)
+        popup = FilterPopup(self, self.model(), column)
         cursor = QCursor().pos()
         popup.setGeometry(cursor.x(), cursor.y(), popup.width(), popup.height())
-        popup.set_source_index(self.model().index(0, column))
+        popup.setup_filter()
         popup.exec()
         self.update_filter_indicator(column)
 
