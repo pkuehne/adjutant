@@ -4,6 +4,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow
 
 from adjutant.context import Context
+from adjutant.context.controller import Controller
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
 from adjutant.windows.bases_screen import BasesScreen
@@ -32,3 +33,5 @@ class MainWindow(QMainWindow):
         self.toolbar = MainWindowToolbar(self.context, self)
         self.addToolBar(self.toolbar)
         self.setMenuBar(MainWindowMenuBar(self.context, self))
+
+        self.controller = Controller(self, self.context)

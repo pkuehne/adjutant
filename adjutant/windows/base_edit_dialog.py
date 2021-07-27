@@ -116,6 +116,7 @@ class BaseEditDialog(QDialog):
         action_button_layout.addWidget(self.ok_button)
 
         tag_layout = QVBoxLayout()
+        tag_layout.addWidget(QLabel("Tagging"))
         tag_layout.addWidget(self.widgets.tag_edit)
         tag_layout.addWidget(self.widgets.tag_list)
         edit_widget_layout = QHBoxLayout()
