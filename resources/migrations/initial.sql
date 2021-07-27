@@ -25,8 +25,6 @@ DROP TABLE IF EXISTS tags;
 CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY,
     name TEXT,
-    category TEXT,
-    custom BOOLEAN
 );
 
 DROP TABLE IF EXISTS bases_tags;

@@ -2,9 +2,11 @@
 
 from dataclasses import dataclass
 from PyQt6.QtCore import QModelIndex, QStringListModel, pyqtSignal
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
+    QCompleter,
     QDataWidgetMapper,
     QDateEdit,
     QDialog,
@@ -12,6 +14,8 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QListWidget,
+    QListWidgetItem,
     QPushButton,
     QSpinBox,
     QTextEdit,
@@ -23,14 +27,6 @@ from adjutant.context import Context
 @dataclass
 class MappedWidgets:
     """Holds the widgets that need to be data mapped"""
-
-    # id_label: QLabel
-    # name_edit: QLineEdit
-    # scale_edit: QLineEdit
-    # base_combobox: QComboBox
-    # width_edit: QSpinBox
-    # depth_edit: QSpinBox
-    # figures_edit: QSpinBox
 
     def __init__(self):
         self.id_label = QLabel()
@@ -50,6 +46,8 @@ class MappedWidgets:
         self.damaged = QCheckBox()
         self.notes_edit = QTextEdit()
         self.custom_id_edit = QLineEdit()
+        self.tag_list = QListWidget()
+        self.tag_edit = QComboBox()
 
 
 class BaseEditDialog(QDialog):
@@ -116,13 +114,23 @@ class BaseEditDialog(QDialog):
         action_button_layout.addWidget(self.cancel_button)
         action_button_layout.addWidget(self.ok_button)
 
+        tag_layout = QVBoxLayout()
+        tag_layout.addWidget(self.widgets.tag_edit)
+        tag_layout.addWidget(self.widgets.tag_list)
+        edit_widget_layout = QHBoxLayout()
+        edit_widget_layout.addLayout(form_layout)
+        edit_widget_layout.addLayout(tag_layout)
+
         central = QVBoxLayout()
-        central.addLayout(form_layout)
+        central.addLayout(edit_widget_layout)
         central.addLayout(action_button_layout)
         self.setLayout(central)
 
     def _setup_widgets(self):
         """Sets up the widgets"""
+
+        # Edit widgets & Mapper
+
         self.widgets.base_combobox.setModel(
             QStringListModel(["Round", "Oval", "Rectangle", "Square", "Vignette"])
         )
@@ -158,9 +166,48 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
 
         self.mapper.setCurrentModelIndex(self.index)
+
+        # Tag List
+        completer = QCompleter(self.context.models.tags_model)
+        completer.setCompletionColumn(1)
+        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        completer.setCompletionMode(completer.CompletionMode.InlineCompletion)
+        self.widgets.tag_edit.setEditable(True)
+        self.widgets.tag_edit.setCompleter(completer)
+        self.widgets.tag_edit.setModel(self.context.models.tags_model)
+        self.widgets.tag_edit.setModelColumn(1)
+        self.widgets.tag_edit.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        self.widgets.tag_edit.setCurrentText("")
+        self.widgets.tag_edit.activated.connect(self.tag_selected)
+
+        self.widgets.tag_list.itemClicked.connect(self.tag_removed)
+        # Buttons
+
         self.ok_button.setDefault(True)
         if self.add_mode:
             self.delete_button.setDisabled(True)
+
+    def tag_selected(self, row: int):
+        """Add the tag to the list"""
+        self.widgets.tag_edit.setCurrentText("")
+
+        model = self.widgets.tag_edit.model()
+        tag_id = model.index(row, 0).data()
+        tag_name = model.index(row, 1).data()
+
+        items = self.widgets.tag_list.findItems(tag_name, Qt.MatchFlag.MatchExactly)
+        if items:
+            # Don't add to the list, it's already there
+            return
+
+        item = QListWidgetItem(tag_name)
+        item.setData(Qt.ItemDataRole.UserRole + 1, tag_id)
+        self.widgets.tag_list.addItem(item)
+
+    def tag_removed(self, _: QListWidgetItem):
+        """Remove tag from list"""
+        row = self.widgets.tag_list.selectedIndexes()[0].row()
+        self.widgets.tag_list.takeItem(row)
 
     def field(self, name: str) -> int:
         """Shortcut to get the field number from the name"""
@@ -180,6 +227,7 @@ class BaseEditDialog(QDialog):
 
     def submit_changes(self):
         """Submits all changes and updates the model"""
+        # Submit Bases table change
         success = self.mapper.submit()
         if not success:
             print("Mapper Error: " + self.model.lastError().text())
@@ -187,6 +235,8 @@ class BaseEditDialog(QDialog):
         if not success:
             print("Model Error: " + self.model.lastError().text())
         self.model.selectRow(self.index.row())
+
+        self.context.signals.add_tags.connect(self.index.row(), [])
 
         if self.add_mode and self.duplicate_edit.value() > 0:
             self.context.signals.duplicate_base.emit(

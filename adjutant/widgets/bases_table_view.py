@@ -50,7 +50,6 @@ class BasesTableView(QTableView):
             )
         )
 
-        ### Make this a submenu
         duplicate_menu = QMenu(self.tr("Duplicate Base"), self)
         for n in range(1, 11):
             duplicate_action = QAction(str(n) + self.tr(" times"), duplicate_menu)

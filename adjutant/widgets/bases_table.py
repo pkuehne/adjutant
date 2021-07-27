@@ -164,7 +164,7 @@ class BasesTable(QWidget):
         )
         if result == QMessageBox.StandardButton.Cancel:
             return
-        self.context.models.searches_model.deleteRowFromTable(row)
+        self.context.models.searches_model.removeRow(row)
         self.context.models.searches_model.submitAll()
 
     def rename_search(self, row: int, name: str):
