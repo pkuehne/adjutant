@@ -1,7 +1,5 @@
 """ Edit Window for a Base """
 
-from PyQt6.QtSql import QSqlQuery
-from adjutant.context.database_context import QueryBinding
 from dataclasses import dataclass
 from PyQt6.QtCore import QModelIndex, QStringListModel, pyqtSignal
 from PyQt6.QtCore import Qt
@@ -24,6 +22,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from adjutant.context import Context
+from adjutant.context.database_context import load_tags_for_base
 
 
 @dataclass
@@ -192,23 +191,11 @@ class BaseEditDialog(QDialog):
 
     def _load_tag_list(self):
         """Load the tag list with the base's tags"""
-        query = """
-            SELECT tags.id AS tag_id, tags.name AS tag_name 
-            FROM tags 
-            INNER JOIN bases_tags 
-            ON bases_tags.tag_id = tags.id 
-            WHERE bases_tags.base_id = :base_id;
-            """
-        base_id = self.index.siblingAtColumn(0).data()
-        bindings = [QueryBinding(":base_id", base_id)]
-        result: QSqlQuery = self.context.database.execute_sql_command(query, bindings)
-        if not result:
-            print("Failed to retrieve the tags from the database")
-            return
-        while result.next():
-            tag_id = result.value("tag_id")
-            tag_name = result.value("tag_name")
-            self.add_tag_to_list(tag_name, tag_id)
+        tags = load_tags_for_base(
+            self.context.database, self.index.siblingAtColumn(0).data()
+        )
+        for tag in tags:
+            self.add_tag_to_list(tag.tag_name, tag.tag_id)
 
     def add_tag_to_list(self, tag_name: str, tag_id: int):
         """Adds the given tag to the tag list"""

@@ -11,6 +11,8 @@ from adjutant.context.settings_context import SettingsContext
 
 @dataclass
 class QueryBinding:
+    """Query Binding"""
+
     placeholder: str
     value: Any
 
@@ -81,3 +83,44 @@ class DatabaseContext:
                 # Ignore empty lines
                 continue
             self.execute_sql_command(query)
+
+
+@dataclass
+class TagResult:
+    """Tag Result"""
+
+    tag_id: int
+    tag_name: str
+
+
+def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
+    """Remove all the tags for a given base"""
+    query = "DELETE from bases_tags WHERE base_id = :base_id;"
+    bindings = [QueryBinding(":base_id", base_id)]
+    result = context.execute_sql_command(query, bindings)
+    if not result:
+        print("Failed to remove old tags")
+    return
+
+
+def load_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult]:
+    """Returns all tags for a given base ID"""
+    query = """
+        SELECT tags.id AS tag_id, tags.name AS tag_name 
+        FROM tags 
+        INNER JOIN bases_tags 
+        ON bases_tags.tag_id = tags.id 
+        WHERE bases_tags.base_id = :base_id;
+        """
+    bindings = [QueryBinding(":base_id", base_id)]
+    result: QSqlQuery = context.execute_sql_command(query, bindings)
+    if not result:
+        print("Failed to retrieve the tags from the database")
+        return []
+
+    tags = []
+    while result.next():
+        tag_id = result.value("tag_id")
+        tag_name = result.value("tag_name")
+        tags.append(TagResult(tag_id, tag_name))
+    return tags

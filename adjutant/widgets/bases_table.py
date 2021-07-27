@@ -1,6 +1,5 @@
 """ Wrapper for the Bases Table """
 
-from adjutant.context.database_context import QueryBinding
 from typing import Any, List
 from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtWidgets import (
@@ -15,6 +14,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtWidgets import QWidget
 
 from adjutant.context import Context
+from adjutant.context.database_context import remove_all_tags_for_base
 from adjutant.models.bases_filter_model import BasesFilterModel
 from adjutant.windows.base_edit_dialog import BaseEditDialog
 from adjutant.widgets.bases_table_header import HeaderView
@@ -143,17 +143,13 @@ class BasesTable(QWidget):
         model.submitAll()
 
     def remove_tags(self, index: QModelIndex, tags: List[int]):
-        """Remomve tags"""
+        """Remome tags"""
 
     def set_tags(self, index: QModelIndex, tags: List[int]):
         """Remove all tags and set to parameter"""
         # Remove all tags
         base_id = index.siblingAtColumn(0).data()
-        sql = "DELETE from bases_tags WHERE base_id = :base_id;"
-        bindings = [QueryBinding(":base_id", base_id)]
-        result = self.context.database.execute_sql_command(sql, bindings)
-        if not result:
-            print("Failed to remove old tags")
+        remove_all_tags_for_base(self.context.database, base_id)
         self.context.models.base_tags_model.select()
 
         self.add_tags(index, tags)
