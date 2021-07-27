@@ -41,8 +41,11 @@ class ModelContext:
         """load the models from the database"""
         self.bases_model = self.__setup_bases_model()
         self.tags_model = self.__setup_tags_model()
+
         self.base_tags_model = QSqlTableModel()
-        self.base_tags_model.setTable("base_tags")
+        self.base_tags_model.setTable("bases_tags")
+        self.base_tags_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+
         self.searches_model = QSqlTableModel()
         self.searches_model.setTable("searches")
         self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
@@ -101,4 +104,5 @@ class ModelContext:
                 HeaderRoles("Custom", "Whether this tag was defined by you"),
             ],
         )
+        model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         return model

@@ -1,10 +1,18 @@
 """ Classes to manage database operations """
 
 
+from typing import Any, List
+from dataclasses import dataclass
 from PyQt6.QtCore import QFile, QTextStream, qWarning
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.settings_context import SettingsContext
+
+
+@dataclass
+class QueryBinding:
+    placeholder: str
+    value: Any
 
 
 class DatabaseContext:
@@ -28,7 +36,7 @@ class DatabaseContext:
 
     def version(self) -> int:
         """The version of the database"""
-        result = self.execute_sql_command("SELECT version FROM settings", False)
+        result = self.execute_sql_command("SELECT version FROM settings", errors=False)
         if result is None:
             return 0
         result.first()
@@ -40,16 +48,24 @@ class DatabaseContext:
         if settings.database_version > self.version():
             self.execute_sql_file("resources/migrations/initial.sql")
 
-    def execute_sql_command(self, command: str, errors: bool = True) -> QSqlQuery:
+    def execute_sql_command(
+        self, command: str, bindings: List[QueryBinding] = None, errors: bool = True
+    ) -> QSqlQuery:
         """Execute a SQL command"""
+        bindings = bindings if bindings else []
         query = QSqlQuery(self.database)
-        if not query.exec(command):
+        query.prepare(command)
+        for binding in bindings:
+            query.bindValue(binding.placeholder, binding.value)
+        if not query.exec():
             if errors:
                 qWarning(
                     "Failed to execute query. Error: "
                     + query.lastError().text()
                     + " Command: "
                     + command
+                    + " Bindings: "
+                    + str(bindings)
                 )
             return None
         return query

@@ -13,8 +13,9 @@ class SignalContext(QObject):
     delete_bases = pyqtSignal(list)
     duplicate_base = pyqtSignal(QModelIndex, int)
     update_bases = pyqtSignal()
-    add_tags = pyqtSignal(int, list)
-    remove_tags = pyqtSignal(int, list)
+    add_tags = pyqtSignal(QModelIndex, list)
+    remove_tags = pyqtSignal(QModelIndex, list)
+    set_tags = pyqtSignal(QModelIndex, list)
 
     save_search = pyqtSignal()
     load_search = pyqtSignal(int)

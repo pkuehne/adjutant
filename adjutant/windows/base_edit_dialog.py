@@ -1,5 +1,7 @@
 """ Edit Window for a Base """
 
+from PyQt6.QtSql import QSqlQuery
+from adjutant.context.database_context import QueryBinding
 from dataclasses import dataclass
 from PyQt6.QtCore import QModelIndex, QStringListModel, pyqtSignal
 from PyQt6.QtCore import Qt
@@ -181,11 +183,38 @@ class BaseEditDialog(QDialog):
         self.widgets.tag_edit.activated.connect(self.tag_selected)
 
         self.widgets.tag_list.itemClicked.connect(self.tag_removed)
-        # Buttons
+        self._load_tag_list()
 
+        # Buttons
         self.ok_button.setDefault(True)
         if self.add_mode:
             self.delete_button.setDisabled(True)
+
+    def _load_tag_list(self):
+        """Load the tag list with the base's tags"""
+        query = """
+            SELECT tags.id AS tag_id, tags.name AS tag_name 
+            FROM tags 
+            INNER JOIN bases_tags 
+            ON bases_tags.tag_id = tags.id 
+            WHERE bases_tags.base_id = :base_id;
+            """
+        base_id = self.index.siblingAtColumn(0).data()
+        bindings = [QueryBinding(":base_id", base_id)]
+        result: QSqlQuery = self.context.database.execute_sql_command(query, bindings)
+        if not result:
+            print("Failed to retrieve the tags from the database")
+            return
+        while result.next():
+            tag_id = result.value("tag_id")
+            tag_name = result.value("tag_name")
+            self.add_tag_to_list(tag_name, tag_id)
+
+    def add_tag_to_list(self, tag_name: str, tag_id: int):
+        """Adds the given tag to the tag list"""
+        item = QListWidgetItem(tag_name)
+        item.setData(Qt.ItemDataRole.UserRole + 1, tag_id)
+        self.widgets.tag_list.addItem(item)
 
     def tag_selected(self, row: int):
         """Add the tag to the list"""
@@ -200,9 +229,7 @@ class BaseEditDialog(QDialog):
             # Don't add to the list, it's already there
             return
 
-        item = QListWidgetItem(tag_name)
-        item.setData(Qt.ItemDataRole.UserRole + 1, tag_id)
-        self.widgets.tag_list.addItem(item)
+        self.add_tag_to_list(tag_name, tag_id)
 
     def tag_removed(self, _: QListWidgetItem):
         """Remove tag from list"""
@@ -236,7 +263,11 @@ class BaseEditDialog(QDialog):
             print("Model Error: " + self.model.lastError().text())
         self.model.selectRow(self.index.row())
 
-        self.context.signals.add_tags.connect(self.index.row(), [])
+        tags = []
+        for row in range(self.widgets.tag_list.count()):
+            item = self.widgets.tag_list.item(row)
+            tags.append(item.data(Qt.ItemDataRole.UserRole + 1))
+        self.context.signals.set_tags.emit(self.index, tags)
 
         if self.add_mode and self.duplicate_edit.value() > 0:
             self.context.signals.duplicate_base.emit(

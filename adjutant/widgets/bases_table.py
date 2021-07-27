@@ -1,5 +1,6 @@
 """ Wrapper for the Bases Table """
 
+from adjutant.context.database_context import QueryBinding
 from typing import Any, List
 from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtWidgets import (
@@ -79,6 +80,9 @@ class BasesTable(QWidget):
         self.context.signals.update_bases.connect(
             self.context.models.bases_model.submitAll
         )
+        self.context.signals.add_tags.connect(self.add_tags)
+        self.context.signals.remove_tags.connect(self.remove_tags)
+        self.context.signals.set_tags.connect(self.set_tags)
 
         self.context.signals.save_search.connect(self.save_search)
         self.context.signals.load_search.connect(self.load_search)
@@ -125,6 +129,34 @@ class BasesTable(QWidget):
             record.setNull("id")
             self.context.models.bases_model.insertRecord(-1, record)
         self.context.models.bases_model.submitAll()
+
+    def add_tags(self, index: QModelIndex, tags: List[int]):
+        """Add the tags to the given base"""
+        model = self.context.models.base_tags_model
+        for tag in tags:
+            record = model.record()
+            record.setNull("id")
+            record.setValue("base_id", index.siblingAtColumn(0).data())
+            record.setValue("tag_id", tag)
+            model.insertRecord(-1, record)
+
+        model.submitAll()
+
+    def remove_tags(self, index: QModelIndex, tags: List[int]):
+        """Remomve tags"""
+
+    def set_tags(self, index: QModelIndex, tags: List[int]):
+        """Remove all tags and set to parameter"""
+        # Remove all tags
+        base_id = index.siblingAtColumn(0).data()
+        sql = "DELETE from bases_tags WHERE base_id = :base_id;"
+        bindings = [QueryBinding(":base_id", base_id)]
+        result = self.context.database.execute_sql_command(sql, bindings)
+        if not result:
+            print("Failed to remove old tags")
+        self.context.models.base_tags_model.select()
+
+        self.add_tags(index, tags)
 
     def save_search(self):
         """Save the current search"""
