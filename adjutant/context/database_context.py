@@ -103,7 +103,7 @@ def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     return
 
 
-def load_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult]:
+def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult]:
     """Returns all tags for a given base ID"""
     query = """
         SELECT tags.id AS tag_id, tags.name AS tag_name 
@@ -124,3 +124,22 @@ def load_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult
         tag_name = result.value("tag_name")
         tags.append(TagResult(tag_id, tag_name))
     return tags
+
+
+def get_bases_for_tag(context: DatabaseContext, tag_id: int) -> List[int]:
+    """Return a list of bases that have the given tag applied"""
+    query = """
+        SELECT bases.id as base_id
+        FROM bases
+        INNER JOIN bases_tags
+        ON bases_tags.base_id = bases.id
+        WHERE bases_tags.tag_id = :tag_id;
+    """
+    bindings = [QueryBinding(":tag_id", tag_id)]
+    result: QSqlQuery = context.execute_sql_command(query, bindings)
+    if not result:
+        return
+    bases = []
+    while result.next():
+        bases.append(result.value("base_id"))
+    return bases

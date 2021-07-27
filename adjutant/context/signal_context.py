@@ -22,6 +22,7 @@ class SignalContext(QObject):
     delete_search = pyqtSignal(int)
     rename_search = pyqtSignal(int, str)
     apply_filter = pyqtSignal(int, object)
+    filter_by_id = pyqtSignal(list)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)

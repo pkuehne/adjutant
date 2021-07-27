@@ -1,5 +1,6 @@
 """ Sidebar Tree View """
 
+from adjutant.context.database_context import get_bases_for_tag
 from PyQt6.QtCore import QModelIndex, QPoint
 from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor
 from PyQt6.QtWidgets import QInputDialog, QMenu, QTreeView
@@ -23,6 +24,9 @@ class SidebarView(QTreeView):
                 "filter_by_search",
                 self.searches_context_menu,
             )
+        )
+        self.sidebar_model.add_section(
+            Section("Tags", self.context.models.tags_model, "filter_by_tag", None)
         )
 
         self.setModel(self.sidebar_model)
@@ -58,6 +62,15 @@ class SidebarView(QTreeView):
                 self.expand(index)
             return
         self.context.signals.load_search.emit(index.row())
+
+    def filter_by_tag(self, index: QModelIndex):
+        """Filter by the given tag"""
+        if index.parent() == QModelIndex():
+            # Filter by those that don't have any tags
+            return
+        tag_id = self.context.models.tags_model.index(index.row(), 0).data()
+        bases = get_bases_for_tag(self.context.database, tag_id)
+        self.context.signals.filter_by_id.emit(bases)
 
     def contextMenuEvent(
         self, event: QContextMenuEvent

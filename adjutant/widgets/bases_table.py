@@ -89,6 +89,7 @@ class BasesTable(QWidget):
         self.context.signals.delete_search.connect(self.delete_search)
         self.context.signals.rename_search.connect(self.rename_search)
         self.context.signals.apply_filter.connect(self.apply_filter)
+        self.context.signals.filter_by_id.connect(self.filter_by_id)
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
@@ -222,3 +223,13 @@ class BasesTable(QWidget):
         unique = list(set(items))
 
         self.filter_model.set_column_filter(column, unique)
+
+    def filter_by_id(self, id_list: List[int]):
+        """Filter the ID column by the supplied list"""
+        filter_list = []
+        self.filter_model.set_column_filter(0, [])
+        for row in range(self.filter_model.rowCount()):
+            data = self.filter_model.index(row, 0).data()
+            if data not in id_list:
+                filter_list.append(data)
+        self.filter_model.set_column_filter(0, filter_list)

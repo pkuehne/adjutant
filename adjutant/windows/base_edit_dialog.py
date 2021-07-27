@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from adjutant.context import Context
-from adjutant.context.database_context import load_tags_for_base
+from adjutant.context.database_context import get_tags_for_base
 
 
 @dataclass
@@ -191,7 +191,7 @@ class BaseEditDialog(QDialog):
 
     def _load_tag_list(self):
         """Load the tag list with the base's tags"""
-        tags = load_tags_for_base(
+        tags = get_tags_for_base(
             self.context.database, self.index.siblingAtColumn(0).data()
         )
         for tag in tags:
