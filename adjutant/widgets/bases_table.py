@@ -209,7 +209,6 @@ class BasesTable(QWidget):
         """Clear all filters applied to the table"""
         self.filter_edit.setText("")
         self.filter_model.clear_all_column_filters()
-        self.header.update_all_filter_indicators()
 
     def apply_filter(self, column: int, value: Any):
         """Apply the given filter to the given column"""
@@ -217,7 +216,7 @@ class BasesTable(QWidget):
         items = []
         for row in range(self.filter_model.rowCount()):
             data = self.filter_model.index(row, column).data()
-            if data == value:
+            if data != value:
                 continue
             items.append(data)
         unique = list(set(items))
@@ -226,10 +225,4 @@ class BasesTable(QWidget):
 
     def filter_by_id(self, id_list: List[int]):
         """Filter the ID column by the supplied list"""
-        filter_list = []
-        self.filter_model.set_column_filter(0, [])
-        for row in range(self.filter_model.rowCount()):
-            data = self.filter_model.index(row, 0).data()
-            if data not in id_list:
-                filter_list.append(data)
-        self.filter_model.set_column_filter(0, filter_list)
+        self.filter_model.set_column_filter(0, id_list)

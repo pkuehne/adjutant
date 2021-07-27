@@ -100,7 +100,8 @@ class FilterPopup(QDialog):
         for value in unique:
             item = QStandardItem(str(value))
             item.setCheckable(True)
-            item.setCheckState(to_check_state(value not in current_filters))
+            checked = not (current_filters is not None and value not in current_filters)
+            item.setCheckState(to_check_state(checked))
             item.setData(value, Qt.ItemDataRole.UserRole + 1)
             self.list_model.appendRow(item)
 
@@ -129,8 +130,10 @@ class FilterPopup(QDialog):
         filter_list = []
         for row in range(self.list_model.rowCount()):
             item = self.list_model.item(row, 0)
-            if not from_check_state(item.checkState()):
+            if from_check_state(item.checkState()):
                 filter_list.append(item.data(Qt.ItemDataRole.UserRole + 1))
 
+        if len(filter_list) == self.list_model.rowCount():
+            filter_list = None
         model = cast(BasesFilterModel, self.model)
         model.set_column_filter(self.column, filter_list)

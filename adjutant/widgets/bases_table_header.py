@@ -1,11 +1,9 @@
 """ Custom header view for the base table """
 
-from typing import Dict, cast
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QCursor
 from PyQt6.QtWidgets import QHeaderView, QWidget
 from adjutant.windows.filter_popup import FilterPopup
-from adjutant.models.bases_filter_model import BasesFilterModel
 
 
 class HeaderView(QHeaderView):
@@ -13,7 +11,6 @@ class HeaderView(QHeaderView):
 
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(Qt.Orientation.Horizontal, parent=parent)
-        self.filter_status: Dict[int, bool] = {}
         self.setSectionsClickable(True)
         self.sectionClicked.connect(self.section_clicked)
 
@@ -24,15 +21,3 @@ class HeaderView(QHeaderView):
         popup.setGeometry(cursor.x(), cursor.y(), popup.width(), popup.height())
         popup.setup_filter()
         popup.exec()
-        self.update_filter_indicator(column)
-
-    def update_all_filter_indicators(self) -> None:
-        """Updates the state of the column's filter indicator"""
-        for column in range(self.model().columnCount()):
-            self.update_filter_indicator(column)
-        self.repaint()
-
-    def update_filter_indicator(self, column: int) -> None:
-        """Updates the state of the column's filter indicator"""
-        filter_model = cast(BasesFilterModel, self.model())
-        self.filter_status[column] = filter_model.get_column_filter(column) != []

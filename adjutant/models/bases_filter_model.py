@@ -30,12 +30,12 @@ class BasesFilterModel(QSortFilterProxyModel):
 
     def get_column_filter(self, column: int) -> List[str]:
         """Get the list of filter for the column"""
-        return self.column_filters.get(column, [])
+        return self.column_filters.get(column, None)
 
     def clear_all_column_filters(self) -> None:
         """Removes any set column filters"""
         for column in range(self.columnCount()):
-            self.set_column_filter(column, [])
+            self.set_column_filter(column, None)
 
     def encode_filters(self) -> str:
         """Encode the filters in a binary format"""
@@ -57,7 +57,7 @@ class BasesFilterModel(QSortFilterProxyModel):
         if role == Qt.ItemDataRole.DecorationRole:
             image = (
                 "icons:filter-available.png"
-                if self.column_filters.get(section, []) == []
+                if self.column_filters.get(section, None) is None
                 else "icons:filter-applied.png"
             )
             return QIcon(image)
@@ -66,9 +66,9 @@ class BasesFilterModel(QSortFilterProxyModel):
     def filterAcceptsRow(self, source_row: int, parent: QModelIndex = None) -> bool:
         """returns True if the row should be shown"""
         for column in range(self.sourceModel().columnCount()):
-            filter_list = self.column_filters.get(column, [])
+            filter_list = self.column_filters.get(column, None)
             value = self.sourceModel().index(source_row, column).data()
-            if value in filter_list:
+            if filter_list is not None and value not in filter_list:
                 return False
 
         return super().filterAcceptsRow(source_row, parent)

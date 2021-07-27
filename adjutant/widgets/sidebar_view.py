@@ -1,11 +1,11 @@
 """ Sidebar Tree View """
 
-from adjutant.context.database_context import get_bases_for_tag
 from PyQt6.QtCore import QModelIndex, QPoint
 from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor
 from PyQt6.QtWidgets import QInputDialog, QMenu, QTreeView
 
 from adjutant.context import Context
+from adjutant.context.database_context import get_bases_for_tag
 from adjutant.models.sidebar_model import SidebarModel, Section
 
 

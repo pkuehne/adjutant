@@ -181,7 +181,7 @@ class BaseEditDialog(QDialog):
         self.widgets.tag_edit.setCurrentText("")
         self.widgets.tag_edit.activated.connect(self.tag_selected)
 
-        self.widgets.tag_list.itemClicked.connect(self.tag_removed)
+        self.widgets.tag_list.itemDoubleClicked.connect(self.tag_removed)
         self._load_tag_list()
 
         # Buttons
