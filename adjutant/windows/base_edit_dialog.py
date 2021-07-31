@@ -73,6 +73,7 @@ class CustomDelegate(QStyledItemDelegate):
             item = QListWidgetItem(tag.tag_name)
             item.setData(Qt.ItemDataRole.UserRole + 1, tag.tag_id)
             editor.addItem(item)
+        return
 
     def setModelData(
         self, editor: QWidget, model: BasesModel, index: QModelIndex
@@ -80,13 +81,13 @@ class CustomDelegate(QStyledItemDelegate):
         """Update model from editor"""
         if editor != self.widgets.tag_list:
             return super().setModelData(editor, model, index)
-        tags = []
+        tags: List[Tag] = []
         for row in range(self.widgets.tag_list.count()):
             item = self.widgets.tag_list.item(row)
-            tags.append(item.data(Qt.ItemDataRole.UserRole + 1))
+            tag_id = item.data(Qt.ItemDataRole.UserRole + 1)
+            tags.append(Tag(tag_id, ""))
         model.setData(index, tags)
-
-        return print("Update model from tag_list")
+        return
 
     # pylint: enable=invalid-name
 

@@ -98,7 +98,9 @@ class BasesTableView(QTableView):
         selection = self.selectionModel().selectedRows()
 
         for index in selection:
-            self.model().setData(index.siblingAtColumn(column), source.data())
+            self.model().setData(
+                index.siblingAtColumn(column), source.data(Qt.ItemDataRole.EditRole)
+            )
         self.context.models.bases_model.submitAll()
 
     def filter_to_selection(self, row: int, column: int):

@@ -120,16 +120,18 @@ class BasesModel(QSqlTableModel):
             )
             return False
 
-        tags: List[int] = value
+        tags: List[Tag] = value
         for tag in tags:
             sql.prepare(rel.insert_query)
             sql.bindValue(":source_id", source_id)
-            sql.bindValue(":target_id", tag)
+            sql.bindValue(":target_id", tag.tag_id)
             success = sql.exec()
             if not success:
                 print(
                     f"Failed to insert value. Query: {rel.insert_query} {source_id}, {tag}"
                 )
+                return False
+        return True
 
     def columnCount(self, _: QModelIndex = None) -> int:
         """Override for the column count"""
