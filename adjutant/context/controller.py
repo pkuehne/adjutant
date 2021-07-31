@@ -2,7 +2,7 @@
 
 from typing import List
 from PyQt6.QtCore import QModelIndex, QObject
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QInputDialog, QMessageBox
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
@@ -80,3 +80,61 @@ class Controller(QObject):
         self.models.base_tags_model.select()
 
         self.add_tags(index, tags)
+
+    def save_search(self):
+        """Save the current search"""
+        name, success = QInputDialog.getText(None, "Save Search", "Name of search")
+        if not success or not name:
+            return
+        search = self.models.bases_filter_model.encode_filters()
+        record = self.models.searches_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        record.setValue("encoded", search)
+        success = self.models.searches_model.insertRecord(-1, record)
+        self.models.searches_model.submitAll()
+
+    def load_search(self, row: int):
+        """Restore a saved search"""
+        self.models.bases_filter_model.clear_all_column_filters()
+
+        if row == -1:
+            self.models.bases_filter_model.setFilterFixedString("")
+            self.signals.search_loaded.emit()
+            return
+
+        record = self.models.searches_model.record(row)
+        self.models.bases_filter_model.decode_filters(record.value("encoded"))
+        self.signals.search_loaded.emit()
+
+    def delete_search(self, row: int):
+        """Delete the given search"""
+        result = QMessageBox.warning(
+            None,
+            "Confirm deletion",
+            "Are you sure you want to delete this search?",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if result == QMessageBox.StandardButton.Cancel:
+            return
+        self.models.searches_model.removeRow(row)
+        self.models.searches_model.submitAll()
+
+    def rename_search(self, row: int, name: str = None):
+        """Rename the given search"""
+        # index = self.models.searches_model.index(row, record.)
+        success = True
+        if name is None:
+            name, success = QInputDialog.getText(
+                None, "New name", "Please enter a new name for the search"
+            )
+
+        if name == "" or not success:
+            return
+
+        model = self.models.searches_model
+        record = model.record(row)
+        record.setValue("name", name)
+        model.setRecord(row, record)
+        model.submitAll()

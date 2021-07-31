@@ -24,7 +24,7 @@ class MainWindowToolbar(QToolBar):
         save_search_action = QAction(
             QIcon("icons:save_search.png"), "Save Search", self
         )
-        save_search_action.triggered.connect(self.context.signals.save_search)
+        save_search_action.triggered.connect(self.context.controller.save_search)
 
         # Align buttons here
         self.addAction(add_base_action)

@@ -2,7 +2,7 @@
 
 from PyQt6.QtCore import QModelIndex, QPoint
 from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor
-from PyQt6.QtWidgets import QInputDialog, QMenu, QTreeView
+from PyQt6.QtWidgets import QMenu, QTreeView
 
 from adjutant.context import Context
 from adjutant.context.database_context import get_bases_for_tag
@@ -57,13 +57,13 @@ class SidebarView(QTreeView):
 
     def remove_all_filters(self, _: QModelIndex):
         """Removes all filters"""
-        self.context.signals.load_search.emit(-1)
+        self.context.controller.load_search(-1)
 
     def filter_by_search(self, index: QModelIndex):
         """Filters by the given search"""
         if index.parent() == QModelIndex():
             return
-        self.context.signals.load_search.emit(index.row())
+        self.context.controller.load_search(index.row())
 
     def filter_by_tag(self, index: QModelIndex):
         """Filter by the given tag"""
@@ -98,24 +98,16 @@ class SidebarView(QTreeView):
             return None
 
         rename_action = QAction(self.tr("Rename Search"), self)
-        rename_action.triggered.connect(lambda: self.rename_search(index))
+        rename_action.triggered.connect(
+            lambda: self.context.controller.rename_search(index.row())
+        )
 
         delete_action = QAction(self.tr("Delete Search"), self)
         delete_action.triggered.connect(
-            lambda: self.context.signals.delete_search.emit(index.row())
+            lambda: self.context.controller.delete_search(index.row())
         )
 
         menu = QMenu(self)
         menu.addAction(rename_action)
         menu.addAction(delete_action)
         return menu
-
-    def rename_search(self, index: QModelIndex):
-        """Get new name for the search"""
-        name, success = QInputDialog.getText(
-            self, "New name", "Please enter a new name for the search"
-        )
-
-        if name == "" or not success:
-            return
-        self.context.signals.rename_search.emit(index.row(), name)

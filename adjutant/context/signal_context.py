@@ -9,13 +9,9 @@ class SignalContext(QObject):
 
     show_add_base_dialog = pyqtSignal()
     show_edit_base_dialog = pyqtSignal(QModelIndex)
-
     tags_updated = pyqtSignal(QModelIndex)
+    search_loaded = pyqtSignal()
 
-    save_search = pyqtSignal()
-    load_search = pyqtSignal(int)
-    delete_search = pyqtSignal(int)
-    rename_search = pyqtSignal(int, str)
     apply_filter = pyqtSignal(int, object)
     filter_by_id = pyqtSignal(list)
 

@@ -4,10 +4,8 @@ from typing import Any, List
 from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import (
     QHBoxLayout,
-    QInputDialog,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QVBoxLayout,
 )
@@ -66,15 +64,13 @@ class BasesTable(QWidget):
             self.context.models.bases_filter_model.setFilterFixedString
         )
         self.clear_button.pressed.connect(self.clear_all_filters)
-        self.save_button.pressed.connect(self.save_search)
+        self.save_button.pressed.connect(self.context.controller.save_search)
 
         self.context.signals.show_add_base_dialog.connect(self.show_add_base_dialog)
         self.context.signals.show_edit_base_dialog.connect(self.show_edit_base_dialog)
 
-        self.context.signals.save_search.connect(self.save_search)
-        self.context.signals.load_search.connect(self.load_search)
-        self.context.signals.delete_search.connect(self.delete_search)
-        self.context.signals.rename_search.connect(self.rename_search)
+        self.context.signals.search_loaded.connect(self.search_loaded)
+
         self.context.signals.apply_filter.connect(self.apply_filter)
         self.context.signals.filter_by_id.connect(self.filter_by_id)
 
@@ -93,57 +89,13 @@ class BasesTable(QWidget):
         index = self.convert_index(index)
         BaseEditDialog.edit_base(self.context, index, self)
 
-    def save_search(self):
-        """Save the current search"""
-        name, success = QInputDialog.getText(
-            self, self.tr("Save Search"), self.tr("Name of search")
-        )
-        if not success or not name:
-            return
-        search = self.context.models.bases_filter_model.encode_filters()
-        record = self.context.models.searches_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        record.setValue("encoded", search)
-        success = self.context.models.searches_model.insertRecord(-1, record)
-        self.context.models.searches_model.submitAll()
-
-    def load_search(self, row: int):
+    def search_loaded(self):
         """Restore a saved search"""
-        self.clear_all_filters()
-
-        if row == -1:
-            return
-        record = self.context.models.searches_model.record(row)
-        self.context.models.bases_filter_model.decode_filters(record.value("encoded"))
         self.filter_edit.blockSignals(True)
         self.filter_edit.setText(
             self.context.models.bases_filter_model.filterRegularExpression().pattern()
         )
         self.filter_edit.blockSignals(False)
-
-    def delete_search(self, row: int):
-        """Delete the given search"""
-        result = QMessageBox.warning(
-            self,
-            "Confirm deletion",
-            "Are you sure you want to delete this search?",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if result == QMessageBox.StandardButton.Cancel:
-            return
-        self.context.models.searches_model.removeRow(row)
-        self.context.models.searches_model.submitAll()
-
-    def rename_search(self, row: int, name: str):
-        """Rename the given search"""
-        # index = self.context.models.searches_model.index(row, record.)
-        model = self.context.models.searches_model
-        record = model.record(row)
-        record.setValue("name", name)
-        model.setRecord(row, record)
-        model.submitAll()
 
     def clear_all_filters(self):
         """Clear all filters applied to the table"""
