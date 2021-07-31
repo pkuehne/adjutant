@@ -95,7 +95,7 @@ class TagResult:
 
 def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     """Remove all the tags for a given base"""
-    query = "DELETE from bases_tags WHERE base_id = :base_id;"
+    query = "DELETE from bases_tags WHERE bases_id = :base_id;"
     bindings = [QueryBinding(":base_id", base_id)]
     result = context.execute_sql_command(query, bindings)
     if not result:
@@ -109,8 +109,8 @@ def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult]
         SELECT tags.id AS tag_id, tags.name AS tag_name 
         FROM tags 
         INNER JOIN bases_tags 
-        ON bases_tags.tag_id = tags.id 
-        WHERE bases_tags.base_id = :base_id;
+        ON bases_tags.tags_id = tags.id 
+        WHERE bases_tags.bases_id = :base_id;
         """
     bindings = [QueryBinding(":base_id", base_id)]
     result: QSqlQuery = context.execute_sql_command(query, bindings)
@@ -132,8 +132,8 @@ def get_bases_for_tag(context: DatabaseContext, tag_id: int) -> List[int]:
         SELECT bases.id as base_id
         FROM bases
         INNER JOIN bases_tags
-        ON bases_tags.base_id = bases.id
-        WHERE bases_tags.tag_id = :tag_id;
+        ON bases_tags.bases_id = bases.id
+        WHERE bases_tags.tags_id = :tag_id;
     """
     bindings = [QueryBinding(":tag_id", tag_id)]
     result: QSqlQuery = context.execute_sql_command(query, bindings)

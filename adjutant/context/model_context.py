@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
 from PyQt6.QtCore import Qt
 from adjutant.models.bases_filter_model import BasesFilterModel
+from adjutant.models.bases_model import BasesModel, ManyToManyRelationship
 
 
 @dataclass
@@ -70,8 +71,9 @@ class ModelContext:
 
     def __setup_bases_model(self) -> QSqlTableModel:
         """Initialize and setup the bases model"""
-        model = QSqlTableModel()
+        model = BasesModel()
         model.setTable("bases")
+        model.set_many_to_many_relationship(ManyToManyRelationship("tags", "name"))
         setup_header_data(
             model,
             [
@@ -94,7 +96,7 @@ class ModelContext:
                 HeaderRoles("Notes", "General notes about this base"),
                 HeaderRoles("Custom ID", "How you refer to this base"),
                 HeaderRoles("Storage", "Where this base is kept"),
-                # HeaderRoles("Tags", "All tags associated with this base"),
+                HeaderRoles("Tags", "All tags associated with this base"),
             ],
         )
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)

@@ -24,14 +24,14 @@ CREATE TABLE IF NOT EXISTS bases (
 DROP TABLE IF EXISTS tags;
 CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY,
-    name TEXT,
+    name TEXT
 );
 
 DROP TABLE IF EXISTS bases_tags;
 CREATE TABLE IF NOT EXISTS bases_tags (
     id INTEGER PRIMARY KEY,
-    base_id INTEGER,
-    tag_id INTEGER
+    bases_id INTEGER,
+    tags_id INTEGER
 );
 
 DROP TABLE IF EXISTS searches;

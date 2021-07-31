@@ -13,6 +13,7 @@ class HeaderView(QHeaderView):
         super().__init__(Qt.Orientation.Horizontal, parent=parent)
         self.setSectionsClickable(True)
         self.sectionClicked.connect(self.section_clicked)
+        self.setStretchLastSection(True)
 
     def section_clicked(self, column: int) -> None:
         """Respond to clicks on the header"""

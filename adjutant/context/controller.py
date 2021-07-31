@@ -62,8 +62,8 @@ class Controller(QObject):
         for tag in tags:
             record = model.record()
             record.setNull("id")
-            record.setValue("base_id", index.siblingAtColumn(0).data())
-            record.setValue("tag_id", tag)
+            record.setValue("bases_id", index.siblingAtColumn(0).data())
+            record.setValue("tags_id", tag)
             model.insertRecord(-1, record)
         model.submitAll()
         self.signals.tags_updated.emit(index)
