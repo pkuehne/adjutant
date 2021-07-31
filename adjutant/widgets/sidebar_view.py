@@ -26,7 +26,7 @@ class SidebarView(QTreeView):
             )
         )
         self.sidebar_model.add_section(
-            Section("Tags", self.context.models.tags_model, "filter_by_tag", None)
+            Section("Tags", self.context.models.tags_sort_model, "filter_by_tag", None)
         )
 
         self.setModel(self.sidebar_model)
@@ -70,7 +70,7 @@ class SidebarView(QTreeView):
         if index.parent() == QModelIndex():
             # Filter by those that don't have any tags
             return
-        tag_id = self.context.models.tags_model.index(index.row(), 0).data()
+        tag_id = self.context.models.tags_sort_model.index(index.row(), 0).data()
         bases = get_bases_for_tag(self.context.database, tag_id)
         self.context.controller.filter_by_id(bases)
 

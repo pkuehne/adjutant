@@ -4,7 +4,7 @@ from typing import List
 from dataclasses import dataclass
 
 from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from adjutant.models.bases_filter_model import BasesFilterModel
 from adjutant.models.bases_model import BasesModel, ManyToManyRelationship
 
@@ -37,6 +37,7 @@ class ModelContext:
         self.bases_model = None
         self.bases_filter_model = None
         self.tags_model = None
+        self.tags_sort_model = None
         self.base_tags_model = None
         self.searches_model = None
 
@@ -51,6 +52,12 @@ class ModelContext:
         )
 
         self.tags_model = self.__setup_tags_model()
+        self.tags_sort_model = QSortFilterProxyModel()
+        self.tags_sort_model.setSourceModel(self.tags_model)
+        self.tags_sort_model.setSortCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.tags_sort_model.sort(
+            self.tags_model.fieldIndex("name"), Qt.SortOrder.AscendingOrder
+        )
 
         self.base_tags_model = QSqlTableModel()
         self.base_tags_model.setTable("bases_tags")
