@@ -70,14 +70,6 @@ class BasesTable(QWidget):
 
         self.context.signals.show_add_base_dialog.connect(self.show_add_base_dialog)
         self.context.signals.show_edit_base_dialog.connect(self.show_edit_base_dialog)
-        self.context.signals.delete_base.connect(
-            lambda base: self.context.controller.delete_bases([base])
-        )
-        self.context.signals.duplicate_base.connect(self.duplicate_base)
-        self.context.signals.delete_bases.connect(self.context.controller.delete_bases)
-        self.context.signals.update_bases.connect(
-            self.context.models.bases_model.submitAll
-        )
 
         self.context.signals.save_search.connect(self.save_search)
         self.context.signals.load_search.connect(self.load_search)
@@ -100,31 +92,6 @@ class BasesTable(QWidget):
         """Opens the edit dialog"""
         index = self.convert_index(index)
         BaseEditDialog.edit_base(self.context, index, self)
-
-    # def delete_bases(self, indexes: List[QModelIndex]):
-    #     """Delete all currently selected rows"""
-    #     result = QMessageBox.warning(
-    #         self,
-    #         "Confirm deletion",
-    #         "Are you sure you want to delete these bases?",
-    #         QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-    #         QMessageBox.StandardButton.Cancel,
-    #     )
-    #     if result == QMessageBox.StandardButton.Cancel:
-    #         return
-    #     for index in indexes:
-    #         index = self.convert_index(index)
-    #         self.context.models.bases_model.removeRow(index.row())
-    #     self.context.models.bases_model.submitAll()
-
-    def duplicate_base(self, index: QModelIndex, num: int) -> None:
-        """Duplicate the given base num times"""
-        index = self.convert_index(index)
-        for _ in range(num):
-            record = self.context.models.bases_model.record(index.row())
-            record.setNull("id")
-            self.context.models.bases_model.insertRecord(-1, record)
-        self.context.models.bases_model.submitAll()
 
     def save_search(self):
         """Save the current search"""

@@ -45,7 +45,7 @@ class BasesTableView(QTableView):
         add_action.triggered.connect(self.context.signals.show_add_base_dialog.emit)
         delete_action = QAction(self.tr("Delete Bases"), self)
         delete_action.triggered.connect(
-            lambda: self.context.signals.delete_bases.emit(
+            lambda: self.context.controller.delete_bases(
                 self.selectionModel().selectedRows()
             )
         )
@@ -54,7 +54,7 @@ class BasesTableView(QTableView):
         for n in range(1, 11):
             duplicate_action = QAction(str(n) + self.tr(" times"), duplicate_menu)
             duplicate_action.triggered.connect(
-                functools.partial(self.context.signals.duplicate_base.emit, index, n)
+                functools.partial(self.context.controller.duplicate_base, index, n)
             )
             duplicate_menu.addAction(duplicate_action)
 
@@ -99,7 +99,7 @@ class BasesTableView(QTableView):
 
         for index in selection:
             self.model().setData(index.siblingAtColumn(column), source.data())
-        self.context.signals.update_bases.emit()
+        self.context.models.bases_model.submitAll()
 
     def filter_to_selection(self, row: int, column: int):
         """Filter by the selected column"""
@@ -115,7 +115,7 @@ class BasesTableView(QTableView):
 
         key = cast(QKeyEvent, event).key()
         if key in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
-            self.context.signals.delete_bases.emit(self.selectionModel().selectedRows())
+            self.context.controller.delete_bases(self.selectionModel().selectedRows())
         elif key == Qt.Key.Key_Return:
             indexes = self.selectionModel().selectedRows()
             if indexes:

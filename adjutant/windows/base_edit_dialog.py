@@ -1,7 +1,7 @@
 """ Edit Window for a Base """
 
 from dataclasses import dataclass
-from PyQt6.QtCore import QModelIndex, QStringListModel, pyqtSignal
+from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -55,7 +55,6 @@ class BaseEditDialog(QDialog):
     """Dialog to show edit fields for a base"""
 
     dialog_reference = None
-    duplicate_base = pyqtSignal(QModelIndex, int)
 
     def __init__(self, context: Context, index: QModelIndex, parent=None) -> None:
         super().__init__(parent=parent)
@@ -258,13 +257,13 @@ class BaseEditDialog(QDialog):
         self.context.controller.set_tags(self.index, tags)
 
         if self.add_mode and self.duplicate_edit.value() > 0:
-            self.context.signals.duplicate_base.emit(
+            self.context.controller.duplicate_base(
                 self.index, self.duplicate_edit.value()
             )
 
     def delete_button_pressed(self):
         """Delete the current index"""
-        self.context.signals.delete_bases.emit([self.index])
+        self.context.controller.delete_bases([self.index])
         self.reject()
 
     def base_combobox_changed(self, text: str):

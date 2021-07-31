@@ -10,10 +10,6 @@ class SignalContext(QObject):
     show_add_base_dialog = pyqtSignal()
     show_edit_base_dialog = pyqtSignal(QModelIndex)
 
-    delete_base = pyqtSignal(QModelIndex)
-    delete_bases = pyqtSignal(list)
-    duplicate_base = pyqtSignal(QModelIndex, int)
-    update_bases = pyqtSignal()
     tags_updated = pyqtSignal(QModelIndex)
 
     save_search = pyqtSignal()
