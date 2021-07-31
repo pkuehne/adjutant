@@ -255,7 +255,7 @@ class BaseEditDialog(QDialog):
         for row in range(self.widgets.tag_list.count()):
             item = self.widgets.tag_list.item(row)
             tags.append(item.data(Qt.ItemDataRole.UserRole + 1))
-        self.context.signals.set_tags.emit(self.index, tags)
+        self.context.controller.set_tags(self.index, tags)
 
         if self.add_mode and self.duplicate_edit.value() > 0:
             self.context.signals.duplicate_base.emit(

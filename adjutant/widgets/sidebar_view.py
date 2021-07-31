@@ -52,7 +52,6 @@ class SidebarView(QTreeView):
                 self.collapse(index)
             else:
                 self.expand(index)
-            return
 
         getattr(self, section.signal)(index)
 
@@ -62,6 +61,8 @@ class SidebarView(QTreeView):
 
     def filter_by_search(self, index: QModelIndex):
         """Filters by the given search"""
+        if index.parent() == QModelIndex():
+            return
         self.context.signals.load_search.emit(index.row())
 
     def filter_by_tag(self, index: QModelIndex):

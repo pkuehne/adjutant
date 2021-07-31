@@ -19,7 +19,7 @@ class MainWindowToolbar(QToolBar):
     def _add_actions(self):
         """Add actions to toolbar"""
         add_base_action = QAction(QIcon("icons:add_base.png"), "Add Base", self)
-        add_base_action.triggered.connect(self.context.signals.add_base)
+        add_base_action.triggered.connect(self.context.signals.show_add_base_dialog)
 
         save_search_action = QAction(
             QIcon("icons:save_search.png"), "Save Search", self

@@ -1,6 +1,7 @@
 """ Data context """
 
 
+from adjutant.context.controller import Controller
 from adjutant.context.model_context import ModelContext
 from adjutant.context.signal_context import SignalContext
 from adjutant.context.settings_context import SettingsContext
@@ -15,6 +16,9 @@ class Context:
         self.signals = SignalContext()
         self.database = DatabaseContext()
         self.models = ModelContext()
+        self.controller = Controller(
+            self.models, self.database, self.signals, self.settings
+        )
 
     def load_database(self, filename: str) -> None:
         """Load a database file"""

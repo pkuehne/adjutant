@@ -29,7 +29,7 @@ class MainWindowMenuBar(QMenuBar):
     def _setup_add_menu(self):
         """Setup the add menu"""
         bases_action = QAction("&Base", self)
-        bases_action.triggered.connect(self.context.signals.add_base.emit)
+        bases_action.triggered.connect(self.context.signals.show_add_base_dialog.emit)
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)

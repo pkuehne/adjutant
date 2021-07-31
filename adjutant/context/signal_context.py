@@ -7,15 +7,14 @@ from PyQt6.QtCore import QModelIndex, QObject, pyqtSignal
 class SignalContext(QObject):
     """Collects all pan-application signals"""
 
-    edit_base = pyqtSignal(QModelIndex)
-    add_base = pyqtSignal()
+    show_add_base_dialog = pyqtSignal()
+    show_edit_base_dialog = pyqtSignal(QModelIndex)
+
     delete_base = pyqtSignal(QModelIndex)
     delete_bases = pyqtSignal(list)
     duplicate_base = pyqtSignal(QModelIndex, int)
     update_bases = pyqtSignal()
-    add_tags = pyqtSignal(QModelIndex, list)
-    remove_tags = pyqtSignal(QModelIndex, list)
-    set_tags = pyqtSignal(QModelIndex, list)
+    tags_updated = pyqtSignal(QModelIndex)
 
     save_search = pyqtSignal()
     load_search = pyqtSignal(int)

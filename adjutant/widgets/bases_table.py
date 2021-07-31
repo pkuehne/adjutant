@@ -1,7 +1,7 @@
 """ Wrapper for the Bases Table """
 
 from typing import Any, List
-from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QInputDialog,
@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtWidgets import QWidget
 
 from adjutant.context import Context
-from adjutant.models.bases_filter_model import BasesFilterModel
+
 from adjutant.windows.base_edit_dialog import BaseEditDialog
 from adjutant.widgets.bases_table_header import HeaderView
 from adjutant.widgets.bases_table_view import BasesTableView
@@ -31,7 +31,6 @@ class BasesTable(QWidget):
         self.filter_edit = QLineEdit()
         self.clear_button = QPushButton(self.tr("Clear Filters"))
         self.save_button = QPushButton(self.tr("Save Search"))
-        self.filter_model = BasesFilterModel()
 
         self._setup_layout()
         self._setup_widgets()
@@ -54,28 +53,28 @@ class BasesTable(QWidget):
 
     def _setup_widgets(self):
         """Initialize and configure widgets"""
-        self.filter_model.setSourceModel(self.context.models.bases_model)
-        self.table.setModel(self.filter_model)
+        self.table.setModel(self.context.models.bases_filter_model)
         self.table.setHorizontalHeader(self.header)
         self.table.resizeColumnsToContents()
         self.table.hideColumn(self.context.models.bases_model.fieldIndex("storage"))
-
-        self.filter_model.setFilterKeyColumn(-1)  # All columns
-        self.filter_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
     def _setup_signals(self):
         # self.table.selectionModel().selectionChanged.connect(
         #     lambda selected, __: print(selected)
         # )
-        self.filter_edit.textChanged.connect(self.filter_model.setFilterFixedString)
+        self.filter_edit.textChanged.connect(
+            self.context.models.bases_filter_model.setFilterFixedString
+        )
         self.clear_button.pressed.connect(self.clear_all_filters)
         self.save_button.pressed.connect(self.save_search)
 
-        self.context.signals.add_base.connect(self.add_base)
-        self.context.signals.edit_base.connect(self.edit_base)
-        self.context.signals.delete_base.connect(lambda base: self.delete_bases([base]))
+        self.context.signals.show_add_base_dialog.connect(self.show_add_base_dialog)
+        self.context.signals.show_edit_base_dialog.connect(self.show_edit_base_dialog)
+        self.context.signals.delete_base.connect(
+            lambda base: self.context.controller.delete_bases([base])
+        )
         self.context.signals.duplicate_base.connect(self.duplicate_base)
-        self.context.signals.delete_bases.connect(self.delete_bases)
+        self.context.signals.delete_bases.connect(self.context.controller.delete_bases)
         self.context.signals.update_bases.connect(
             self.context.models.bases_model.submitAll
         )
@@ -89,34 +88,34 @@ class BasesTable(QWidget):
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
-        if index.model() == self.filter_model:
-            index = self.filter_model.mapToSource(index)
+        if index.model() == self.context.models.bases_filter_model:
+            index = self.context.models.bases_filter_model.mapToSource(index)
         return index
 
-    def edit_base(self, index: QModelIndex) -> None:
+    def show_add_base_dialog(self) -> None:
+        """Add a base"""
+        BaseEditDialog.add_base(self.context, self)
+
+    def show_edit_base_dialog(self, index: QModelIndex) -> None:
         """Opens the edit dialog"""
         index = self.convert_index(index)
         BaseEditDialog.edit_base(self.context, index, self)
 
-    def add_base(self) -> None:
-        """Add a base"""
-        BaseEditDialog.add_base(self.context, self)
-
-    def delete_bases(self, indexes: List[QModelIndex]):
-        """Delete all currently selected rows"""
-        result = QMessageBox.warning(
-            self,
-            "Confirm deletion",
-            "Are you sure you want to delete these bases?",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if result == QMessageBox.StandardButton.Cancel:
-            return
-        for index in indexes:
-            index = self.convert_index(index)
-            self.context.models.bases_model.removeRow(index.row())
-        self.context.models.bases_model.submitAll()
+    # def delete_bases(self, indexes: List[QModelIndex]):
+    #     """Delete all currently selected rows"""
+    #     result = QMessageBox.warning(
+    #         self,
+    #         "Confirm deletion",
+    #         "Are you sure you want to delete these bases?",
+    #         QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+    #         QMessageBox.StandardButton.Cancel,
+    #     )
+    #     if result == QMessageBox.StandardButton.Cancel:
+    #         return
+    #     for index in indexes:
+    #         index = self.convert_index(index)
+    #         self.context.models.bases_model.removeRow(index.row())
+    #     self.context.models.bases_model.submitAll()
 
     def duplicate_base(self, index: QModelIndex, num: int) -> None:
         """Duplicate the given base num times"""
@@ -134,7 +133,7 @@ class BasesTable(QWidget):
         )
         if not success or not name:
             return
-        search = self.filter_model.encode_filters()
+        search = self.context.models.bases_filter_model.encode_filters()
         record = self.context.models.searches_model.record()
         record.setNull("id")
         record.setValue("name", name)
@@ -149,9 +148,11 @@ class BasesTable(QWidget):
         if row == -1:
             return
         record = self.context.models.searches_model.record(row)
-        self.filter_model.decode_filters(record.value("encoded"))
+        self.context.models.bases_filter_model.decode_filters(record.value("encoded"))
         self.filter_edit.blockSignals(True)
-        self.filter_edit.setText(self.filter_model.filterRegularExpression().pattern())
+        self.filter_edit.setText(
+            self.context.models.bases_filter_model.filterRegularExpression().pattern()
+        )
         self.filter_edit.blockSignals(False)
 
     def delete_search(self, row: int):
@@ -180,21 +181,21 @@ class BasesTable(QWidget):
     def clear_all_filters(self):
         """Clear all filters applied to the table"""
         self.filter_edit.setText("")
-        self.filter_model.clear_all_column_filters()
+        self.context.models.bases_filter_model.clear_all_column_filters()
 
     def apply_filter(self, column: int, value: Any):
         """Apply the given filter to the given column"""
         # Get all unique items that are not the value passed in
         items = []
-        for row in range(self.filter_model.rowCount()):
-            data = self.filter_model.index(row, column).data()
+        for row in range(self.context.models.bases_filter_model.rowCount()):
+            data = self.context.models.bases_filter_model.index(row, column).data()
             if data != value:
                 continue
             items.append(data)
         unique = list(set(items))
 
-        self.filter_model.set_column_filter(column, unique)
+        self.context.models.bases_filter_model.set_column_filter(column, unique)
 
     def filter_by_id(self, id_list: List[int]):
         """Filter the ID column by the supplied list"""
-        self.filter_model.set_column_filter(0, id_list)
+        self.context.models.bases_filter_model.set_column_filter(0, id_list)

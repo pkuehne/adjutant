@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
 from PyQt6.QtCore import Qt
+from adjutant.models.bases_filter_model import BasesFilterModel
 
 
 @dataclass
@@ -33,6 +34,7 @@ class ModelContext:
 
     def __init__(self):
         self.bases_model = None
+        self.bases_filter_model = None
         self.tags_model = None
         self.base_tags_model = None
         self.searches_model = None
@@ -40,6 +42,13 @@ class ModelContext:
     def load(self):
         """load the models from the database"""
         self.bases_model = self.__setup_bases_model()
+        self.bases_filter_model = BasesFilterModel()
+        self.bases_filter_model.setSourceModel(self.bases_model)
+        self.bases_filter_model.setFilterKeyColumn(-1)  # All columns
+        self.bases_filter_model.setFilterCaseSensitivity(
+            Qt.CaseSensitivity.CaseInsensitive
+        )
+
         self.tags_model = self.__setup_tags_model()
 
         self.base_tags_model = QSqlTableModel()

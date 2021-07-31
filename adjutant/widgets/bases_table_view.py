@@ -25,7 +25,7 @@ class BasesTableView(QTableView):
         self.setSelectionBehavior(BasesTableView.SelectionBehavior.SelectRows)
         self.installEventFilter(self)
 
-        self.doubleClicked.connect(self.context.signals.edit_base.emit)
+        self.doubleClicked.connect(self.context.signals.show_edit_base_dialog.emit)
 
     def contextMenuEvent(
         self, event: QContextMenuEvent
@@ -39,10 +39,10 @@ class BasesTableView(QTableView):
 
         edit_action = QAction(self.tr("Edit Base"), self)
         edit_action.triggered.connect(
-            lambda: self.context.signals.edit_base.emit(index)
+            lambda: self.context.signals.show_edit_base_dialog.emit(index)
         )
         add_action = QAction(self.tr("Add Base"), self)
-        add_action.triggered.connect(self.context.signals.add_base.emit)
+        add_action.triggered.connect(self.context.signals.show_add_base_dialog.emit)
         delete_action = QAction(self.tr("Delete Bases"), self)
         delete_action.triggered.connect(
             lambda: self.context.signals.delete_bases.emit(
@@ -119,7 +119,7 @@ class BasesTableView(QTableView):
         elif key == Qt.Key.Key_Return:
             indexes = self.selectionModel().selectedRows()
             if indexes:
-                self.context.signals.edit_base.emit(indexes[0])
+                self.context.signals.show_edit_base_dialog.emit(indexes[0])
         else:
             super().keyPressEvent(event)
         return True
