@@ -5,6 +5,7 @@ from typing import Dict, List
 import yaml
 from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt
 from PyQt6.QtGui import QIcon
+from adjutant.models.bases_model import Tag
 
 
 @dataclass
@@ -67,8 +68,23 @@ class BasesFilterModel(QSortFilterProxyModel):
         """returns True if the row should be shown"""
         for column in range(self.sourceModel().columnCount()):
             filter_list = self.column_filters.get(column, None)
-            value = self.sourceModel().index(source_row, column).data()
-            if filter_list is not None and value not in filter_list:
-                return False
+            value = (
+                self.sourceModel()
+                .index(source_row, column)
+                .data(Qt.ItemDataRole.EditRole)
+            )
+            if isinstance(value, list):
+                if filter_list is not None:
+                    filter_set = set(filter_list)
+                    value: List[Tag] = value
+                    value_set = {tag.tag_id for tag in value}
+                    if not filter_list and value_set:
+                        # No filters, but tags
+                        return False
+                    if not filter_set.issubset(value_set):
+                        return False
+            else:
+                if filter_list is not None and value not in filter_list:
+                    return False
 
         return super().filterAcceptsRow(source_row, parent)

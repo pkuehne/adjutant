@@ -1,6 +1,7 @@
 """ Popup filter for the bases table header """
 
-from typing import cast
+from dataclasses import dataclass
+from typing import Any, List, cast
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from PyQt6.QtGui import QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (
@@ -11,7 +12,16 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from adjutant.models.bases_model import Tag
 from adjutant.models.bases_filter_model import BasesFilterModel
+
+
+@dataclass(eq=True, frozen=True)
+class FilterValue:
+    """Filter text and data value"""
+
+    text: str
+    value: Any
 
 
 def from_check_state(value: Qt.CheckState) -> bool:
@@ -92,17 +102,25 @@ class FilterPopup(QDialog):
         current_filters = filter_model.get_column_filter(self.column)
         model = filter_model.sourceModel()
 
-        items = []
+        items: List[FilterValue] = []
         for row in range(model.rowCount()):
-            items.append(model.index(row, self.column).data())
+            value = model.index(row, self.column).data(Qt.ItemDataRole.EditRole)
+            if isinstance(value, list):
+                value: List[Tag] = value
+                for tag in value:
+                    items.append(FilterValue(tag.tag_name, tag.tag_id))
+            else:
+                items.append(FilterValue(str(value), value))
         unique = list(set(items))
 
-        for value in unique:
-            item = QStandardItem(str(value))
+        for filter_ in unique:
+            item = QStandardItem(filter_.text)
             item.setCheckable(True)
-            checked = not (current_filters is not None and value not in current_filters)
+            checked = not (
+                current_filters is not None and filter_.value not in current_filters
+            )
             item.setCheckState(to_check_state(checked))
-            item.setData(value, Qt.ItemDataRole.UserRole + 1)
+            item.setData(filter_.value, Qt.ItemDataRole.UserRole + 1)
             self.list_model.appendRow(item)
 
     def update_model_check_state(self):

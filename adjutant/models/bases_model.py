@@ -17,7 +17,7 @@ class ManyToManyRelationship:
     insert_query: str = None
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Tag:
     """Tag"""
 
