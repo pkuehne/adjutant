@@ -104,7 +104,7 @@ class BasesTableView(QTableView):
     def filter_to_selection(self, row: int, column: int):
         """Filter by the selected column"""
         source = self.model().index(row, column)
-        self.context.signals.apply_filter.emit(column, source.data())
+        self.context.controller.apply_filter(column, source.data())
 
     def eventFilter(
         self, source: QObject, event: QEvent

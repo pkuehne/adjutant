@@ -138,3 +138,20 @@ class Controller(QObject):
         record.setValue("name", name)
         model.setRecord(row, record)
         model.submitAll()
+
+    def apply_filter(self, column: int, value):
+        """Apply the given filter to the given column"""
+        # Get all unique items that are not the value passed in
+        items = []
+        for row in range(self.models.bases_filter_model.rowCount()):
+            data = self.models.bases_filter_model.index(row, column).data()
+            if data != value:
+                continue
+            items.append(data)
+        unique = list(set(items))
+
+        self.models.bases_filter_model.set_column_filter(column, unique)
+
+    def filter_by_id(self, id_list: List[int]):
+        """Filter the ID column by the supplied list"""
+        self.models.bases_filter_model.set_column_filter(0, id_list)

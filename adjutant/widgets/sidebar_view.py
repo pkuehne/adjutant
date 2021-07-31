@@ -72,7 +72,7 @@ class SidebarView(QTreeView):
             return
         tag_id = self.context.models.tags_model.index(index.row(), 0).data()
         bases = get_bases_for_tag(self.context.database, tag_id)
-        self.context.signals.filter_by_id.emit(bases)
+        self.context.controller.filter_by_id(bases)
 
     def contextMenuEvent(
         self, event: QContextMenuEvent

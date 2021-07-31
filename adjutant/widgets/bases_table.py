@@ -1,6 +1,5 @@
 """ Wrapper for the Bases Table """
 
-from typing import Any, List
 from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -68,11 +67,7 @@ class BasesTable(QWidget):
 
         self.context.signals.show_add_base_dialog.connect(self.show_add_base_dialog)
         self.context.signals.show_edit_base_dialog.connect(self.show_edit_base_dialog)
-
         self.context.signals.search_loaded.connect(self.search_loaded)
-
-        self.context.signals.apply_filter.connect(self.apply_filter)
-        self.context.signals.filter_by_id.connect(self.filter_by_id)
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
@@ -101,20 +96,3 @@ class BasesTable(QWidget):
         """Clear all filters applied to the table"""
         self.filter_edit.setText("")
         self.context.models.bases_filter_model.clear_all_column_filters()
-
-    def apply_filter(self, column: int, value: Any):
-        """Apply the given filter to the given column"""
-        # Get all unique items that are not the value passed in
-        items = []
-        for row in range(self.context.models.bases_filter_model.rowCount()):
-            data = self.context.models.bases_filter_model.index(row, column).data()
-            if data != value:
-                continue
-            items.append(data)
-        unique = list(set(items))
-
-        self.context.models.bases_filter_model.set_column_filter(column, unique)
-
-    def filter_by_id(self, id_list: List[int]):
-        """Filter the ID column by the supplied list"""
-        self.context.models.bases_filter_model.set_column_filter(0, id_list)
