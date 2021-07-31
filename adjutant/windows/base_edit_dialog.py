@@ -1,6 +1,7 @@
 """ Edit Window for a Base """
 
 from dataclasses import dataclass
+from typing import List
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -18,11 +19,13 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QPushButton,
     QSpinBox,
+    QStyledItemDelegate,
     QTextEdit,
     QVBoxLayout,
+    QWidget,
 )
 from adjutant.context import Context
-from adjutant.context.database_context import get_tags_for_base
+from adjutant.models.bases_model import BasesModel, Tag
 
 
 @dataclass
@@ -49,6 +52,43 @@ class MappedWidgets:
         self.custom_id_edit = QLineEdit()
         self.tag_list = QListWidget()
         self.tag_edit = QComboBox()
+
+
+class CustomDelegate(QStyledItemDelegate):
+    """Custom delegate to marshal some odd widgets"""
+
+    def __init__(self, parent, context: Context, widgets: MappedWidgets) -> None:
+        super().__init__(parent=parent)
+        self.context = context
+        self.widgets = widgets
+
+    # pylint: disable=invalid-name
+    def setEditorData(self, editor: QWidget, index: QModelIndex) -> None:
+        """Update editor from model"""
+        if editor != self.widgets.tag_list:
+            return super().setEditorData(editor, index)
+        tags: List[Tag] = index.data(Qt.ItemDataRole.EditRole)
+        editor: QListWidget = editor
+        for tag in tags:
+            item = QListWidgetItem(tag.tag_name)
+            item.setData(Qt.ItemDataRole.UserRole + 1, tag.tag_id)
+            editor.addItem(item)
+
+    def setModelData(
+        self, editor: QWidget, model: BasesModel, index: QModelIndex
+    ) -> None:
+        """Update model from editor"""
+        if editor != self.widgets.tag_list:
+            return super().setModelData(editor, model, index)
+        tags = []
+        for row in range(self.widgets.tag_list.count()):
+            item = self.widgets.tag_list.item(row)
+            tags.append(item.data(Qt.ItemDataRole.UserRole + 1))
+        model.setData(index, tags)
+
+        return print("Update model from tag_list")
+
+    # pylint: enable=invalid-name
 
 
 class BaseEditDialog(QDialog):
@@ -142,6 +182,7 @@ class BaseEditDialog(QDialog):
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
+        self.mapper.setItemDelegate(CustomDelegate(self, self.context, self.widgets))
         self.mapper.addMapping(self.widgets.id_label, self.field("id"), b"text")
         self.mapper.addMapping(self.widgets.name_edit, self.field("name"))
         self.mapper.addMapping(self.widgets.scale_edit, self.field("scale"))
@@ -165,6 +206,9 @@ class BaseEditDialog(QDialog):
             self.widgets.notes_edit, self.field("notes"), b"plainText"
         )
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
+        self.mapper.addMapping(
+            self.widgets.tag_list, self.context.models.bases_model.columnCount() - 1
+        )
 
         self.mapper.setCurrentModelIndex(self.index)
 
@@ -182,26 +226,11 @@ class BaseEditDialog(QDialog):
         self.widgets.tag_edit.activated.connect(self.tag_selected)
 
         self.widgets.tag_list.itemDoubleClicked.connect(self.tag_removed)
-        self._load_tag_list()
 
         # Buttons
         self.ok_button.setDefault(True)
         if self.add_mode:
             self.delete_button.setDisabled(True)
-
-    def _load_tag_list(self):
-        """Load the tag list with the base's tags"""
-        tags = get_tags_for_base(
-            self.context.database, self.index.siblingAtColumn(0).data()
-        )
-        for tag in tags:
-            self.add_tag_to_list(tag.tag_name, tag.tag_id)
-
-    def add_tag_to_list(self, tag_name: str, tag_id: int):
-        """Adds the given tag to the tag list"""
-        item = QListWidgetItem(tag_name)
-        item.setData(Qt.ItemDataRole.UserRole + 1, tag_id)
-        self.widgets.tag_list.addItem(item)
 
     def tag_selected(self, row: int):
         """Add the tag to the list"""
@@ -216,7 +245,9 @@ class BaseEditDialog(QDialog):
             # Don't add to the list, it's already there
             return
 
-        self.add_tag_to_list(tag_name, tag_id)
+        item = QListWidgetItem(tag_name)
+        item.setData(Qt.ItemDataRole.UserRole + 1, tag_id)
+        self.widgets.tag_list.addItem(item)
 
     def tag_removed(self, _: QListWidgetItem):
         """Remove tag from list"""
@@ -249,12 +280,6 @@ class BaseEditDialog(QDialog):
         if not success:
             print("Model Error: " + self.model.lastError().text())
         self.model.selectRow(self.index.row())
-
-        tags = []
-        for row in range(self.widgets.tag_list.count()):
-            item = self.widgets.tag_list.item(row)
-            tags.append(item.data(Qt.ItemDataRole.UserRole + 1))
-        self.context.controller.set_tags(self.index, tags)
 
         if self.add_mode and self.duplicate_edit.value() > 0:
             self.context.controller.duplicate_base(
