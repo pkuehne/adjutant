@@ -22,7 +22,7 @@ def test_id_filtering(context: Context, add_empty_bases: AddEmptyBasesFunc):
     assert filter_model.rowCount() != context.models.bases_model.rowCount()
     for row in range(filter_model.rowCount()):
         print(filter_model.index(row, 0).data())
-        assert filter_model.index(row, 0).data() not in filter_list
+        assert filter_model.index(row, 0).data() in filter_list
 
 
 def test_setting_getting_filters():
@@ -55,7 +55,7 @@ def test_filters_are_applied(context: Context, add_base: AddBaseFunc):
     assert filter_model.rowCount() > 0
     assert filter_model.rowCount() != context.models.bases_model.rowCount()
     for row in range(filter_model.rowCount()):
-        assert filter_model.index(row, 1).data() not in filter_list
+        assert filter_model.index(row, 1).data() in filter_list
 
 
 def test_multiple_filters_are_applied(context: Context, add_base: AddBaseFunc):
@@ -64,7 +64,7 @@ def test_multiple_filters_are_applied(context: Context, add_base: AddBaseFunc):
     filter_model = BasesFilterModel()
     filter_model.setSourceModel(context.models.bases_model)
     filter_list_name = ["foo"]
-    filter_list_scale = ["32mm"]
+    filter_list_scale = ["28mm"]
     add_base(
         [
             BasesRecord(name="foo", scale="28mm"),
@@ -81,5 +81,5 @@ def test_multiple_filters_are_applied(context: Context, add_base: AddBaseFunc):
     assert filter_model.rowCount() > 0
     assert filter_model.rowCount() != context.models.bases_model.rowCount()
     for row in range(filter_model.rowCount()):
-        assert filter_model.index(row, 1).data() not in filter_list_name
-        assert filter_model.index(row, 2).data() not in filter_list_scale
+        assert filter_model.index(row, 1).data() in filter_list_name
+        assert filter_model.index(row, 2).data() in filter_list_scale

@@ -103,6 +103,8 @@ class BasesModel(QSqlTableModel):
         self, index: QModelIndex, value, role: int = Qt.ItemDataRole.EditRole
     ) -> bool:
         """Update the data in the model"""
+        if index.column() == 0:  # Ensure that id is always null
+            return super().setData(index, None, role=role)
         if index.column() < super().columnCount():
             return super().setData(index, value, role=role)
         if role != Qt.ItemDataRole.EditRole:
