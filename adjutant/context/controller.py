@@ -47,14 +47,14 @@ class Controller(QObject):
             self.models.bases_model.removeRow(index.row())
         self.models.bases_model.submitAll()
 
-    def duplicate_base(self, index: QModelIndex, num: int) -> None:
+    def duplicate_base(self, index: QModelIndex, num: int) -> bool:
         """Duplicate the given base num times"""
         index = self.convert_index(index)
         for _ in range(num):
             record = self.models.bases_model.record(index.row())
             record.setNull("id")
             self.models.bases_model.insertRecord(-1, record)
-        self.models.bases_model.submitAll()
+        return self.models.bases_model.submitAll()
 
     def add_tags(self, index: QModelIndex, tags: List[int]):
         """Add the tags to the given base"""

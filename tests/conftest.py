@@ -36,10 +36,8 @@ def add_base(context: Context) -> AddBaseFunc:
             record = context.models.bases_model.record()
             if item.base_id is None:
                 record.setNull("id")
-                print("Set to Null")
             else:
                 record.setValue("id", item.base_id)
-                print(f"Set to {item.base_id}")
             record.setValue("name", item.name)
             record.setValue("scale", item.scale)
             record.setValue("base", item.base)

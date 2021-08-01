@@ -73,7 +73,7 @@ class CustomDelegate(QStyledItemDelegate):
             item = QListWidgetItem(tag.tag_name)
             item.setData(Qt.ItemDataRole.UserRole + 1, tag.tag_id)
             editor.addItem(item)
-        return
+        return None
 
     def setModelData(
         self, editor: QWidget, model: BasesModel, index: QModelIndex
@@ -87,7 +87,7 @@ class CustomDelegate(QStyledItemDelegate):
             tag_id = item.data(Qt.ItemDataRole.UserRole + 1)
             tags.append(Tag(tag_id, ""))
         model.setData(index, tags)
-        return
+        return None
 
     # pylint: enable=invalid-name
 
