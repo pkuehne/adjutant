@@ -1,12 +1,16 @@
 """ Context for the controller """
 
 from typing import List
-from PyQt6.QtCore import QModelIndex, QObject
+from PyQt6.QtCore import QModelIndex, QObject, Qt
 from PyQt6.QtWidgets import QInputDialog, QMessageBox
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
-from adjutant.context.database_context import DatabaseContext, remove_all_tags_for_base
+from adjutant.context.database_context import (
+    DatabaseContext,
+    TagResult,
+    remove_all_tags_for_base,
+)
 
 
 class Controller(QObject):
@@ -54,7 +58,10 @@ class Controller(QObject):
             record = self.models.bases_model.record(index.row())
             record.setNull("id")
             self.models.bases_model.insertRecord(-1, record)
-        return self.models.bases_model.submitAll()
+        success = self.models.bases_model.submitAll()
+        if not success:
+            return False
+        return self.duplicate_tags(index, num)
 
     def add_tags(self, index: QModelIndex, tags: List[int]):
         """Add the tags to the given base"""
@@ -80,6 +87,19 @@ class Controller(QObject):
         self.models.base_tags_model.select()
 
         self.add_tags(index, tags)
+
+    def duplicate_tags(self, index: QModelIndex, num: int) -> bool:
+        """Updates the same tags on the last 'num' rows same as index"""
+        tag_column = self.models.bases_model.columnCount() - 1
+        tags: List[TagResult] = index.siblingAtColumn(tag_column).data(
+            Qt.ItemDataRole.EditRole
+        )
+
+        num_rows = self.models.bases_model.rowCount()
+        for step in range(num):
+            idx = self.models.bases_model.index(num_rows - 1 - step, tag_column)
+            self.models.bases_model.setData(idx, tags)
+        return self.models.bases_model.submitAll()
 
     def save_search(self):
         """Save the current search"""
