@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -18,6 +19,7 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QPushButton,
+    QSizePolicy,
     QSpinBox,
     QStyledItemDelegate,
     QTextEdit,
@@ -52,6 +54,7 @@ class MappedWidgets:
         self.custom_id_edit = QLineEdit()
         self.tag_list = QListWidget()
         self.tag_edit = QComboBox()
+        self.add_tag_button = QPushButton()
 
 
 class CustomDelegate(QStyledItemDelegate):
@@ -155,9 +158,13 @@ class BaseEditDialog(QDialog):
         action_button_layout.addWidget(self.cancel_button)
         action_button_layout.addWidget(self.ok_button)
 
+        tag_source_layout = QHBoxLayout()
+        tag_source_layout.addWidget(self.widgets.tag_edit)
+        tag_source_layout.addWidget(self.widgets.add_tag_button)
+
         tag_layout = QVBoxLayout()
         tag_layout.addWidget(QLabel("Tagging"))
-        tag_layout.addWidget(self.widgets.tag_edit)
+        tag_layout.addLayout(tag_source_layout)
         tag_layout.addWidget(self.widgets.tag_list)
         edit_widget_layout = QHBoxLayout()
         edit_widget_layout.addLayout(form_layout)
@@ -228,6 +235,12 @@ class BaseEditDialog(QDialog):
 
         self.widgets.tag_list.itemDoubleClicked.connect(self.tag_removed)
 
+        self.widgets.add_tag_button.setToolTip(self.tr("Add a new tag"))
+        self.widgets.add_tag_button.setIcon(QIcon("icons:add.png"))
+        self.widgets.tag_edit.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+
         # Buttons
         self.ok_button.setDefault(True)
         if self.add_mode:
@@ -270,6 +283,11 @@ class BaseEditDialog(QDialog):
             self.base_combobox_changed
         )
         self.base_combobox_changed(self.widgets.base_combobox.currentText())
+        self.widgets.add_tag_button.pressed.connect(
+            lambda: self.context.controller.create_tag(
+                self.widgets.tag_edit.currentText()
+            )
+        )
 
     def submit_changes(self):
         """Submits all changes and updates the model"""

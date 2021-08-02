@@ -50,6 +50,7 @@ class ManageTagsDialog(QDialog):
         self.tag_list.setModel(self.context.models.tags_sort_model)
         self.tag_list.setModelColumn(self.context.models.tags_model.fieldIndex("name"))
         self.tag_list.setSelectionMode(self.tag_list.SelectionMode.SingleSelection)
+        self.tag_list.setEditTriggers(self.tag_list.EditTrigger.NoEditTriggers)
 
     def _setup_signals(self):
         """Setup the signals"""

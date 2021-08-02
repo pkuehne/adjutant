@@ -66,10 +66,10 @@ class Controller(QObject):
             return False
         return self.duplicate_tags(index, num)
 
-    def create_tag(self):
+    def create_tag(self, default=""):
         """Create a new tag"""
         name, success = QInputDialog.getText(
-            None, "New tag", "Please enter a name for the tag"
+            None, "New tag", "Please enter a name for the tag", text=default
         )
 
         if name == "" or not success:
@@ -84,14 +84,16 @@ class Controller(QObject):
     def rename_tag(self, index: QModelIndex):
         """Rename the given tag"""
         index = self.convert_index(index)
+        index = index.siblingAtColumn(1)
+        previous = index.data()
         name, success = QInputDialog.getText(
-            None, "New tag", "Please enter a name for the tag"
+            None, "New tag", f"Rename tag '{previous}' to:", text=previous
         )
 
         if name == "" or not success:
             return
 
-        self.models.tags_model.setData(index.siblingAtColumn(1), name)
+        self.models.tags_model.setData(index, name)
         self.models.tags_model.submitAll()
 
     def delete_tag(self, index: QModelIndex):
