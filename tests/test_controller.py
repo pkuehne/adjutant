@@ -1,8 +1,8 @@
 """ Tests for the Controller class"""
 
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QInputDialog, QMessageBox
 
-from tests.conftest import AddBaseFunc, AddEmptyBasesFunc, BasesRecord
+from tests.conftest import AddBaseFunc, AddEmptyBasesFunc, AddTagFunc, BasesRecord
 from adjutant.context.context import Context
 
 
@@ -36,6 +36,34 @@ def test_convert_index_bases_model(
     # Then
     assert index.model() == retval.model()
     assert retval.model() == context.models.bases_model
+
+
+def test_convert_index_tags_model(context: Context, add_tag: AddTagFunc):
+    """If a filter_model index is passed, the base model index should be returned"""
+    # Given
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 0)
+
+    # When
+    retval = context.controller.convert_index(index)
+
+    # Then
+    assert index.model() == retval.model()
+    assert retval.model() == context.models.tags_model
+
+
+def test_convert_index_tags_sort_model(context: Context, add_tag: AddTagFunc):
+    """If a filter_model index is passed, the base model index should be returned"""
+    # Given
+    add_tag("Foo")
+    index = context.models.tags_sort_model.index(0, 0)
+
+    # When
+    retval = context.controller.convert_index(index)
+
+    # Then
+    assert index.model() != retval.model()
+    assert retval.model() == context.models.tags_model
 
 
 def test_delete_confirmation_required(
@@ -143,3 +171,135 @@ def test_duplicate_bases_zero_does_nothing(context: Context, add_base: AddBaseFu
     # Then
     assert success
     assert model.rowCount() == 1
+
+
+def test_duplicate_bases_returns_false_when_submit_all_fails(
+    context: Context, add_base: AddBaseFunc, monkeypatch
+):
+    """When duplicating a submit failure returns False"""
+    # Given
+    model = context.models.bases_model
+    add_base([BasesRecord(None, name="Foo Name", figures=5)])
+    index = model.index(0, 0)
+    monkeypatch.setattr(model, "submitAll", lambda: False)
+
+    # When
+    success = context.controller.duplicate_base(index, 2)
+
+    # Then
+    assert success is False
+
+
+def test_create_tag_requires_name(context: Context, monkeypatch):
+    """When creating a tag, a name is required"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args: ("", True))
+
+    # When
+    context.controller.create_tag()
+
+    # Then
+    assert context.models.tags_model.rowCount() == 0
+
+
+def test_create_tag_requires_input(context: Context, monkeypatch):
+    """When creating a tag, user can't click cancel button"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args: ("Foo", False))
+
+    # When
+    context.controller.create_tag()
+
+    # Then
+    assert context.models.tags_model.rowCount() == 0
+
+
+def test_create_tag(context: Context, monkeypatch):
+    """When creating a tag, a name is required"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args: ("Foo", True))
+
+    # When
+    context.controller.create_tag()
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert context.models.tags_model.index(0, 1).data() == "Foo"
+    assert context.models.tags_model.isDirty() is False
+
+
+def test_rename_tag_requires_name(context: Context, add_tag: AddTagFunc, monkeypatch):
+    """When creating a tag, a name is required"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args: ("", True))
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_tag(index)
+
+    # Then
+    assert index.data() == "Foo"
+
+
+def test_rename_tag_requires_input(context: Context, add_tag: AddTagFunc, monkeypatch):
+    """When renaming a tag, the user can't click cancel"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args: ("Foo", False))
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_tag(index)
+
+    # Then
+    assert index.data() == "Foo"
+
+
+def test_rename_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
+    """When renaming a tag, the name value should change"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args: ("Bar", True))
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_tag(index)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert index.data() == "Bar"
+    assert context.models.tags_model.isDirty() is False
+
+
+def test_delete_tag_requires_confirmation(
+    context: Context, add_tag: AddTagFunc, monkeypatch
+):
+    """Delete requires confirmation"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Cancel
+    )
+
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.delete_tag(index)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert index.isValid()
+
+
+def test_delete_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
+    """Delete tag does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.delete_tag(index)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 0
+    assert context.models.tags_model.isDirty() is False
+    assert index.isValid()

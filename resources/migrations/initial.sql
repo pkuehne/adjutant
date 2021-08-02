@@ -31,7 +31,10 @@ DROP TABLE IF EXISTS bases_tags;
 CREATE TABLE IF NOT EXISTS bases_tags (
     id INTEGER PRIMARY KEY,
     bases_id INTEGER,
-    tags_id INTEGER
+    tags_id INTEGER,
+
+    CONSTRAINT fk_bases_id FOREIGN KEY(bases_id) REFERENCES bases(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tags_id FOREIGN KEY(tags_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS searches;

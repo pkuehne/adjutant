@@ -2,7 +2,9 @@
 
 from PyQt6.QtWidgets import QApplication, QMenuBar, QMessageBox
 from PyQt6.QtGui import QAction
+
 from adjutant.context import Context
+from adjutant.windows.manage_tags_dialog import ManageTagsDialog
 
 
 class MainWindowMenuBar(QMenuBar):
@@ -14,6 +16,7 @@ class MainWindowMenuBar(QMenuBar):
 
         self._setup_file_menu()
         self._setup_add_menu()
+        self._setup_manage_menu()
         self._setup_help_menu()
 
     def _setup_file_menu(self):
@@ -33,6 +36,16 @@ class MainWindowMenuBar(QMenuBar):
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)
+
+    def _setup_manage_menu(self):
+        """Setup the Manage menu"""
+        tags_action = QAction("Manage &Tags", self)
+        tags_action.triggered.connect(
+            lambda: ManageTagsDialog.show(self.parent(), self.context)
+        )
+
+        manage_menu = self.addMenu("&Manage")
+        manage_menu.addAction(tags_action)
 
     def _setup_help_menu(self):
         """Setup the help menu"""

@@ -65,6 +65,22 @@ def add_empty_bases(add_base: AddBaseFunc) -> AddEmptyBasesFunc:
     return add_empty_bases_func
 
 
+AddTagFunc = Callable[[str], None]
+
+
+@pytest.fixture
+def add_tag(context: Context) -> AddTagFunc:
+    def add_tag_func(name: str):
+        record = context.models.tags_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert context.models.tags_model.insertRecord(-1, record)
+        context.models.tags_model.submitAll()
+        assert context.models.tags_model.lastError().text() == ""
+
+    return add_tag_func
+
+
 @pytest.fixture
 def context():
     """Sets up and tears down the database"""

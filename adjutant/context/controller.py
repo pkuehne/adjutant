@@ -33,6 +33,8 @@ class Controller(QObject):
         """Converts index reference to bases_table index"""
         if index.model() == self.models.bases_filter_model:
             index = self.models.bases_filter_model.mapToSource(index)
+        if index.model() == self.models.tags_sort_model:
+            index = self.models.tags_sort_model.mapToSource(index)
         return index
 
     def delete_bases(self, indexes: List[QModelIndex]):
@@ -62,6 +64,50 @@ class Controller(QObject):
         if not success:
             return False
         return self.duplicate_tags(index, num)
+
+    def create_tag(self):
+        """Create a new tag"""
+        name, success = QInputDialog.getText(
+            None, "New tag", "Please enter a name for the tag"
+        )
+
+        if name == "" or not success:
+            return
+
+        record = self.models.tags_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        self.models.tags_model.insertRecord(-1, record)
+        self.models.tags_model.submitAll()
+
+    def rename_tag(self, index: QModelIndex):
+        """Rename the given tag"""
+        index = self.convert_index(index)
+        name, success = QInputDialog.getText(
+            None, "New tag", "Please enter a name for the tag"
+        )
+
+        if name == "" or not success:
+            return
+
+        self.models.tags_model.setData(index.siblingAtColumn(1), name)
+        self.models.tags_model.submitAll()
+
+    def delete_tag(self, index: QModelIndex):
+        """Delete the given tag"""
+        index = self.convert_index(index)
+
+        result = QMessageBox.warning(
+            None,
+            "Confirm deletion",
+            "Are you sure you want to delete this tag?",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if result == QMessageBox.StandardButton.Cancel:
+            return
+        self.models.tags_model.removeRow(index.row())
+        self.models.tags_model.submitAll()
 
     def add_tags(self, index: QModelIndex, tags: List[int]):
         """Add the tags to the given base"""
