@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 import yaml
-from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt
+from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt, pyqtSignal
 from PyQt6.QtGui import QIcon
 from adjutant.models.bases_model import Tag
 
@@ -19,6 +19,8 @@ class FilterWrapper:
 class BasesFilterModel(QSortFilterProxyModel):
     """Provides filtering for the Bases Model"""
 
+    filter_changed = pyqtSignal()
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.column_filters: Dict[int, List[str]] = {}
@@ -28,6 +30,7 @@ class BasesFilterModel(QSortFilterProxyModel):
         self.column_filters[column] = values
         self.invalidateFilter()
         self.headerDataChanged.emit(Qt.Orientation.Horizontal, column, column)
+        self.filter_changed.emit()
 
     def get_column_filter(self, column: int) -> List[str]:
         """Get the list of filter for the column"""
@@ -37,6 +40,11 @@ class BasesFilterModel(QSortFilterProxyModel):
         """Removes any set column filters"""
         for column in range(self.columnCount()):
             self.set_column_filter(column, None)
+
+    def setFilterFixedString(self, pattern: str) -> None:
+        """Filter the model by the given string"""
+        super().setFilterFixedString(pattern)
+        self.filter_changed.emit()
 
     def encode_filters(self) -> str:
         """Encode the filters in a binary format"""

@@ -1,5 +1,6 @@
 """ The Main Window """
 
+from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow
 
@@ -32,3 +33,4 @@ class MainWindow(QMainWindow):
         self.toolbar = MainWindowToolbar(self.context, self)
         self.addToolBar(self.toolbar)
         self.setMenuBar(MainWindowMenuBar(self.context, self))
+        self.setStatusBar(MainWindowStatusBar(self, self.context))
