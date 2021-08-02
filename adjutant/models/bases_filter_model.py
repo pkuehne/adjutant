@@ -1,7 +1,7 @@
 """ The overlying filter model for use with the Bases table """
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Any, Dict, List
 import yaml
 from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt
 from PyQt6.QtGui import QIcon
@@ -23,7 +23,7 @@ class BasesFilterModel(QSortFilterProxyModel):
         super().__init__(parent=parent)
         self.column_filters: Dict[int, List[str]] = {}
 
-    def set_column_filter(self, column: int, values: List[str]) -> None:
+    def set_column_filter(self, column: int, values: List[Any]) -> None:
         """Set the filter for a given column"""
         self.column_filters[column] = values
         self.invalidateFilter()
@@ -78,7 +78,7 @@ class BasesFilterModel(QSortFilterProxyModel):
                     filter_set = set(filter_list)
                     value: List[Tag] = value
                     value_set = {tag.tag_id for tag in value}
-                    if not filter_list and value_set:
+                    if not filter_set and value_set:
                         # No filters, but tags
                         return False
                     if not filter_set.issubset(value_set):

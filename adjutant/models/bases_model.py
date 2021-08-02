@@ -138,3 +138,7 @@ class BasesModel(QSqlTableModel):
     def columnCount(self, _: QModelIndex = None) -> int:
         """Override for the column count"""
         return super().columnCount() + len(self.m2m_relationships)
+
+    def column_id_tags(self):
+        """Returns the column id for the tags column"""
+        return self.columnCount() - 1

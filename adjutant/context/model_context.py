@@ -76,7 +76,7 @@ class ModelContext:
         self.base_tags_model.select()
         self.searches_model.select()
 
-    def __setup_bases_model(self) -> QSqlTableModel:
+    def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""
         model = BasesModel()
         model.setTable("bases")

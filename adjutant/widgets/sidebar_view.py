@@ -5,7 +5,6 @@ from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor
 from PyQt6.QtWidgets import QMenu, QTreeView
 
 from adjutant.context import Context
-from adjutant.context.database_context import get_bases_for_tag
 from adjutant.models.sidebar_model import SidebarModel, Section
 
 
@@ -70,9 +69,11 @@ class SidebarView(QTreeView):
         if index.parent() == QModelIndex():
             # Filter by those that don't have any tags
             return
+
         tag_id = self.context.models.tags_sort_model.index(index.row(), 0).data()
-        bases = get_bases_for_tag(self.context.database, tag_id)
-        self.context.controller.filter_by_id(bases)
+        self.context.models.bases_filter_model.set_column_filter(
+            self.context.models.bases_model.column_id_tags(), [tag_id]
+        )
 
     def contextMenuEvent(
         self, event: QContextMenuEvent
