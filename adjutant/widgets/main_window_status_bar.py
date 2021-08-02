@@ -23,7 +23,6 @@ class MainWindowStatusBar(QStatusBar):
 
     def update_row_count(self):
         """Set the row count on the widget"""
-        print("Updating")
         self.row_count.setText(
-            f"Rows: {self.context.models.bases_filter_model.rowCount()}"
+            self.tr("Rows: ") + f"{self.context.models.bases_filter_model.rowCount()}"
         )

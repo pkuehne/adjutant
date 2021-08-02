@@ -41,11 +41,6 @@ class BasesFilterModel(QSortFilterProxyModel):
         for column in range(self.columnCount()):
             self.set_column_filter(column, None)
 
-    def setFilterFixedString(self, pattern: str) -> None:
-        """Filter the model by the given string"""
-        super().setFilterFixedString(pattern)
-        self.filter_changed.emit()
-
     def encode_filters(self) -> str:
         """Encode the filters in a binary format"""
         wrapper = {}
@@ -71,6 +66,11 @@ class BasesFilterModel(QSortFilterProxyModel):
             )
             return QIcon(image)
         return super().headerData(section, orientation, role=role)
+
+    def setFilterFixedString(self, pattern: str) -> None:
+        """Filter the model by the given string"""
+        super().setFilterFixedString(pattern)
+        self.filter_changed.emit()
 
     def filterAcceptsRow(self, source_row: int, parent: QModelIndex = None) -> bool:
         """returns True if the row should be shown"""
