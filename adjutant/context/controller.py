@@ -9,6 +9,7 @@ from adjutant.context.model_context import ModelContext
 from adjutant.context.database_context import (
     DatabaseContext,
     TagResult,
+    get_tag_count,
     remove_all_tags_for_base,
 )
 
@@ -96,11 +97,13 @@ class Controller(QObject):
     def delete_tag(self, index: QModelIndex):
         """Delete the given tag"""
         index = self.convert_index(index)
+        count = get_tag_count(self.database, index.siblingAtColumn(0).data())
+        usage = f" It will be removed from {count} bases." if count else ""
 
         result = QMessageBox.warning(
             None,
             "Confirm deletion",
-            "Are you sure you want to delete this tag?",
+            "Are you sure you want to delete this tag?" + usage,
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Cancel,
         )

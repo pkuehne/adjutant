@@ -143,3 +143,18 @@ def get_bases_for_tag(context: DatabaseContext, tag_id: int) -> List[int]:
     while result.next():
         bases.append(result.value("base_id"))
     return bases
+
+
+def get_tag_count(context: DatabaseContext, tag_id: int) -> int:
+    """Returns a count of how many times the given tag is used"""
+    query = """
+        SELECT count(*) cnt
+        FROM bases_tags
+        WHERE tags_id = :tag_id;
+    """
+    bindings = [QueryBinding(":tag_id", tag_id)]
+    result: QSqlQuery = context.execute_sql_command(query, bindings)
+    if not result:
+        return 0
+    result.next()
+    return result.value("cnt")

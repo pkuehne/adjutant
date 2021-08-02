@@ -70,6 +70,8 @@ AddTagFunc = Callable[[str], None]
 
 @pytest.fixture
 def add_tag(context: Context) -> AddTagFunc:
+    """Fixture to add a record to the tags table"""
+
     def add_tag_func(name: str):
         record = context.models.tags_model.record()
         record.setNull("id")
@@ -79,6 +81,25 @@ def add_tag(context: Context) -> AddTagFunc:
         assert context.models.tags_model.lastError().text() == ""
 
     return add_tag_func
+
+
+AddTagUseFunc = Callable[[int, int], None]
+
+
+@pytest.fixture
+def add_tag_use(context: Context) -> AddTagUseFunc:
+    """Fixture to add a record to the base_tags table"""
+
+    def add_tag_use_func(base: int, tag: int) -> None:
+        record = context.models.base_tags_model.record()
+        record.setNull("id")
+        record.setValue("bases_id", base)
+        record.setValue("tags_id", tag)
+        assert context.models.base_tags_model.insertRecord(-1, record)
+        context.models.base_tags_model.submitAll()
+        assert context.models.base_tags_model.lastError().text() == ""
+
+    return add_tag_use_func
 
 
 @pytest.fixture
