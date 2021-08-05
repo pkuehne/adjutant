@@ -10,7 +10,6 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QCompleter,
     QDataWidgetMapper,
-    QDateEdit,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -28,6 +27,7 @@ from PyQt6.QtWidgets import (
 )
 from adjutant.context import Context
 from adjutant.models.bases_model import BasesModel, Tag
+from adjutant.widgets.nullable_date import NullableDate
 
 
 @dataclass
@@ -47,7 +47,7 @@ class MappedWidgets:
         self.manufacturer_edit = QLineEdit()
         self.retailer_edit = QLineEdit()
         self.price_edit = QLineEdit()
-        self.date_acquired = QDateEdit()
+        self.date_acquired = NullableDate()
         self.completed = QCheckBox()
         self.damaged = QCheckBox()
         self.notes_edit = QTextEdit()
@@ -68,6 +68,10 @@ class CustomDelegate(QStyledItemDelegate):
     # pylint: disable=invalid-name
     def setEditorData(self, editor: QWidget, index: QModelIndex) -> None:
         """Update editor from model"""
+        # print(f"Setting editor: {index.column()} -> {editor}")
+        if editor == self.widgets.date_acquired:
+            editor.date = index.data()
+            return
         if editor != self.widgets.tag_list:
             return super().setEditorData(editor, index)
         tags: List[Tag] = index.data(Qt.ItemDataRole.EditRole)
@@ -82,6 +86,9 @@ class CustomDelegate(QStyledItemDelegate):
         self, editor: QWidget, model: BasesModel, index: QModelIndex
     ) -> None:
         """Update model from editor"""
+        if editor == self.widgets.date_acquired:
+            model.setData(index, editor.date)
+            return
         if editor != self.widgets.tag_list:
             return super().setModelData(editor, model, index)
         tags: List[Tag] = []
@@ -186,7 +193,7 @@ class BaseEditDialog(QDialog):
         self.widgets.material_combobox.setModel(
             QStringListModel(["Plastic", "Resin", "Metal"])
         )
-        self.widgets.date_acquired.setCalendarPopup(True)
+        # self.widgets.date_acquired.dateedit.setCalendarPopup(True)
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
@@ -215,7 +222,7 @@ class BaseEditDialog(QDialog):
         )
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
         self.mapper.addMapping(
-            self.widgets.tag_list, self.context.models.bases_model.columnCount() - 1
+            self.widgets.tag_list, self.context.models.bases_model.column_id_tags()
         )
 
         self.mapper.setCurrentModelIndex(self.index)

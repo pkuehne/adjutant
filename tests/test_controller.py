@@ -458,3 +458,15 @@ def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch)
     assert context.models.searches_model.rowCount() == 0
     assert context.models.searches_model.isDirty() is False
     assert index.isValid()
+
+
+def test_apply_filter_sets_filter_model(context: Context):
+    """When a filter is applied, it sets the corresponding column filter in the model"""
+    # Given
+    filter_value = [1, 2, 3, 4, 5]
+
+    # When
+    context.controller.apply_filter(0, filter_value)
+
+    # Then
+    assert context.models.bases_filter_model.get_column_filter(0) == filter_value

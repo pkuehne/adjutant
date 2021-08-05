@@ -211,7 +211,3 @@ class Controller(QObject):
         """Apply the given filter to the given column"""
         # Get all unique items that are not the value passed in
         self.models.bases_filter_model.set_column_filter(column, value)
-
-    def filter_by_id(self, id_list: List[int]):
-        """Filter the ID column by the supplied list"""
-        self.models.bases_filter_model.set_column_filter(0, id_list)
