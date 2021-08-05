@@ -5,6 +5,7 @@ from PyQt6.QtGui import QAction
 
 from adjutant.context import Context
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
+from adjutant.windows.manage_searches_dialog import ManageSearchesDialog
 
 
 class MainWindowMenuBar(QMenuBar):
@@ -43,9 +44,14 @@ class MainWindowMenuBar(QMenuBar):
         tags_action.triggered.connect(
             lambda: ManageTagsDialog.show(self.parent(), self.context)
         )
+        searches_action = QAction("Manage &Searches", self)
+        searches_action.triggered.connect(
+            lambda: ManageSearchesDialog.show(self.parent(), self.context)
+        )
 
         manage_menu = self.addMenu("&Manage")
         manage_menu.addAction(tags_action)
+        manage_menu.addAction(searches_action)
 
     def _setup_help_menu(self):
         """Setup the help menu"""

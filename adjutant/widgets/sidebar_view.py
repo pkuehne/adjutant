@@ -98,14 +98,16 @@ class SidebarView(QTreeView):
             # Top level search doesn't get a context menu
             return None
 
+        search_index = self.context.models.searches_model.index(index.row(), 0)
+
         rename_action = QAction(self.tr("Rename Search"), self)
         rename_action.triggered.connect(
-            lambda: self.context.controller.rename_search(index.row())
+            lambda: self.context.controller.rename_search(search_index)
         )
 
         delete_action = QAction(self.tr("Delete Search"), self)
         delete_action.triggered.connect(
-            lambda: self.context.controller.delete_search(index.row())
+            lambda: self.context.controller.delete_search(search_index)
         )
 
         menu = QMenu(self)

@@ -102,6 +102,24 @@ def add_tag_use(context: Context) -> AddTagUseFunc:
     return add_tag_use_func
 
 
+AddSearchFunc = Callable[[str], None]
+
+
+@pytest.fixture
+def add_search(context: Context) -> AddSearchFunc:
+    """Fixture to add a record to the searches table"""
+
+    def add_search_func(name: str) -> None:
+        record = context.models.searches_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert context.models.searches_model.insertRecord(-1, record)
+        context.models.searches_model.submitAll()
+        assert context.models.searches_model.lastError().text() == ""
+
+    return add_search_func
+
+
 @pytest.fixture
 def context():
     """Sets up and tears down the database"""

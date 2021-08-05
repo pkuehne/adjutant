@@ -178,7 +178,7 @@ class Controller(QObject):
         self.models.bases_filter_model.decode_filters(record.value("encoded"))
         self.signals.search_loaded.emit()
 
-    def delete_search(self, row: int):
+    def delete_search(self, index: QModelIndex):
         """Delete the given search"""
         result = QMessageBox.warning(
             None,
@@ -189,39 +189,28 @@ class Controller(QObject):
         )
         if result == QMessageBox.StandardButton.Cancel:
             return
-        self.models.searches_model.removeRow(row)
+        self.models.searches_model.removeRow(index.row())
         self.models.searches_model.submitAll()
 
-    def rename_search(self, row: int, name: str = None):
+    def rename_search(self, index: QModelIndex):
         """Rename the given search"""
         # index = self.models.searches_model.index(row, record.)
-        success = True
-        if name is None:
-            name, success = QInputDialog.getText(
-                None, "New name", "Please enter a new name for the search"
-            )
+        index = index.siblingAtColumn(1)
+        previous = index.data()
+        name, success = QInputDialog.getText(
+            None, "New name", "Please enter a new name for the search", text=previous
+        )
 
         if name == "" or not success:
             return
 
-        model = self.models.searches_model
-        record = model.record(row)
-        record.setValue("name", name)
-        model.setRecord(row, record)
-        model.submitAll()
+        self.models.searches_model.setData(index, name)
+        self.models.searches_model.submitAll()
 
     def apply_filter(self, column: int, value):
         """Apply the given filter to the given column"""
         # Get all unique items that are not the value passed in
-        items = []
-        for row in range(self.models.bases_filter_model.rowCount()):
-            data = self.models.bases_filter_model.index(row, column).data()
-            if data != value:
-                continue
-            items.append(data)
-        unique = list(set(items))
-
-        self.models.bases_filter_model.set_column_filter(column, unique)
+        self.models.bases_filter_model.set_column_filter(column, value)
 
     def filter_by_id(self, id_list: List[int]):
         """Filter the ID column by the supplied list"""
