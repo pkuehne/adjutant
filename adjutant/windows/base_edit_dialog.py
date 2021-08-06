@@ -68,10 +68,6 @@ class CustomDelegate(QStyledItemDelegate):
     # pylint: disable=invalid-name
     def setEditorData(self, editor: QWidget, index: QModelIndex) -> None:
         """Update editor from model"""
-        # print(f"Setting editor: {index.column()} -> {editor}")
-        if editor == self.widgets.date_acquired:
-            editor.date = index.data()
-            return
         if editor != self.widgets.tag_list:
             return super().setEditorData(editor, index)
         tags: List[Tag] = index.data(Qt.ItemDataRole.EditRole)
@@ -86,9 +82,6 @@ class CustomDelegate(QStyledItemDelegate):
         self, editor: QWidget, model: BasesModel, index: QModelIndex
     ) -> None:
         """Update model from editor"""
-        if editor == self.widgets.date_acquired:
-            model.setData(index, editor.date)
-            return
         if editor != self.widgets.tag_list:
             return super().setModelData(editor, model, index)
         tags: List[Tag] = []

@@ -14,6 +14,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from PyQt6.QtCore import pyqtProperty
+
 
 def _value_from_str(value: str) -> datetime:
     if value == "":
@@ -56,11 +58,12 @@ class NullableDate(QWidget):
         """Setup signals"""
         self.checkbox.toggled.connect(self.dateedit.setVisible)
 
-    @property
+    # @property
+    @pyqtProperty(str, user=True)
     def date(self) -> date:
         """Retrieve the given date"""
         if self.checkbox.isChecked():
-            return self.dateedit.date()
+            return self.dateedit.date().toString("yyyy-MM-dd")
         return None
 
     @date.setter

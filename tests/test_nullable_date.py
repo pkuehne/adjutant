@@ -37,11 +37,11 @@ def test_date_returns_none_unchecked(qtbot):
 def test_date_returns_date_checked(qtbot):
     """When the checkbox is checked, the date should be returned by date()"""
     # Given
-    current_date = datetime.now()
+    current_date = "2020-02-03"
     widget = NullableDate()
     qtbot.addWidget(widget)
     widget.checkbox.setChecked(True)
-    widget.dateedit.setDate(current_date)
+    widget.dateedit.setDate(datetime.fromisoformat(current_date))
 
     # When
     value = widget.date
