@@ -1,13 +1,14 @@
 """ The Main Window """
 
-from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget
 
 from adjutant.context import Context
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
+from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
 from adjutant.windows.bases_screen import BasesScreen
+from adjutant.windows.storage_screen import StorageScreen
 
 
 class MainWindow(QMainWindow):
@@ -27,8 +28,17 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)
         self.setWindowIcon(QIcon("icons:adjutant.png"))
+
         self.bases = BasesScreen(self.context)
-        self.setCentralWidget(self.bases)
+        self.storage = StorageScreen(self.context)
+
+        self.tabbar = QTabWidget(self)
+        self.tabbar.addTab(self.bases, "Bases")
+        self.tabbar.addTab(QWidget(), "Units")
+        self.tabbar.addTab(QWidget(), "Forces")
+        self.tabbar.addTab(self.storage, "Storage")
+
+        self.setCentralWidget(self.tabbar)
 
         self.toolbar = MainWindowToolbar(self.context, self)
         self.addToolBar(self.toolbar)

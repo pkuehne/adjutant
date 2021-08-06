@@ -34,9 +34,12 @@ class MainWindowMenuBar(QMenuBar):
         """Setup the add menu"""
         bases_action = QAction("&Base", self)
         bases_action.triggered.connect(self.context.signals.show_add_base_dialog.emit)
+        tags_action = QAction("&Tag", self)
+        tags_action.triggered.connect(lambda _: self.context.controller.create_tag())
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)
+        add_menu.addAction(tags_action)
 
     def _setup_manage_menu(self):
         """Setup the Manage menu"""

@@ -40,6 +40,7 @@ class ModelContext:
         self.tags_sort_model = None
         self.base_tags_model = None
         self.searches_model = None
+        self.storage_model = None
 
     def load(self):
         """load the models from the database"""
@@ -67,6 +68,8 @@ class ModelContext:
         self.searches_model.setTable("searches")
         self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
+        self.storage_model = self._setup_storage_model()
+
         self.refresh_models()
 
     def refresh_models(self) -> None:
@@ -75,6 +78,7 @@ class ModelContext:
         self.tags_model.select()
         self.base_tags_model.select()
         self.searches_model.select()
+        self.storage_model.select()
 
     def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""
@@ -118,9 +122,27 @@ class ModelContext:
             [
                 HeaderRoles("ID", "Internal ID of the tag"),
                 HeaderRoles("Name", "The name of the tag"),
-                HeaderRoles("Category", "Which category the tag belongs to"),
-                HeaderRoles("Custom", "Whether this tag was defined by you"),
             ],
         )
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
+        return model
+
+    def _setup_storage_model(self) -> QSqlTableModel:
+        """Setup the storage model"""
+        model = QSqlTableModel()
+        model.setTable("storage")
+        model.setEditStrategy(model.EditStrategy.OnManualSubmit)
+        setup_header_data(
+            model,
+            [
+                HeaderRoles("ID", "Internal ID of the storage container"),
+                HeaderRoles("Name", "The name of the container"),
+                HeaderRoles("Location", "Where the container is located"),
+                HeaderRoles("Height", "How tall your mini can be at most"),
+                HeaderRoles(
+                    "Magnetized", "Whether this container will take magnetized minis"
+                ),
+                HeaderRoles("Full", "Whether there's space in this box or not"),
+            ],
+        )
         return model

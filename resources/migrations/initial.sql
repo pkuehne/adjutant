@@ -44,6 +44,16 @@ CREATE TABLE IF NOT EXISTS searches (
     encoded TEXT
 );
 
+DROP TABLE IF EXISTS storage;
+CREATE TABLE IF NOT EXISTS storage (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    location TEXT,
+    height INTEGER,
+    magnetized BOOLEAN,
+    full BOOLEAN
+);
+
 DROP TABLE IF EXISTS settings;
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY,
