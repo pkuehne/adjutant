@@ -12,22 +12,6 @@ from tests.conftest import (
 from adjutant.context.context import Context
 
 
-def test_convert_index_filter_model(
-    context: Context, add_empty_bases: AddEmptyBasesFunc
-):
-    """If a filter_model index is passed, the base model index should be returned"""
-    # Given
-    add_empty_bases(5)
-    index = context.models.bases_filter_model.index(0, 0)
-
-    # When
-    retval = context.controller.convert_index(index)
-
-    # Then
-    assert index.model() != retval.model()
-    assert retval.model() == context.models.bases_model
-
-
 def test_convert_index_bases_model(
     context: Context, add_empty_bases: AddEmptyBasesFunc
 ):
@@ -523,15 +507,3 @@ def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch)
     assert context.models.searches_model.rowCount() == 0
     assert context.models.searches_model.isDirty() is False
     assert index.isValid()
-
-
-def test_apply_filter_sets_filter_model(context: Context):
-    """When a filter is applied, it sets the corresponding column filter in the model"""
-    # Given
-    filter_value = [1, 2, 3, 4, 5]
-
-    # When
-    context.controller.apply_filter(0, filter_value)
-
-    # Then
-    assert context.models.bases_filter_model.get_column_filter(0) == filter_value

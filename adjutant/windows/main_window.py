@@ -44,3 +44,8 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
         self.setMenuBar(MainWindowMenuBar(self.context, self))
         self.setStatusBar(MainWindowStatusBar(self, self.context))
+
+        self.bases.row_count_changed.connect(self.statusBar().update_row_count)
+        self.statusBar().update_row_count(
+            self.bases.bases_table.table.filter_model.rowCount()
+        )

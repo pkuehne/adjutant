@@ -32,8 +32,6 @@ class Controller(QObject):
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
-        if index.model() == self.models.bases_filter_model:
-            index = self.models.bases_filter_model.mapToSource(index)
         if index.model() == self.models.tags_sort_model:
             index = self.models.tags_sort_model.mapToSource(index)
         return index
@@ -162,32 +160,6 @@ class Controller(QObject):
             self.models.bases_model.setData(idx, tags)
         return self.models.bases_model.submitAll()
 
-    def save_search(self):
-        """Save the current search"""
-        name, success = QInputDialog.getText(None, "Save Search", "Name of search")
-        if not success or not name:
-            return
-        search = self.models.bases_filter_model.encode_filters()
-        record = self.models.searches_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        record.setValue("encoded", search)
-        success = self.models.searches_model.insertRecord(-1, record)
-        self.models.searches_model.submitAll()
-
-    def load_search(self, row: int):
-        """Restore a saved search"""
-        self.models.bases_filter_model.clear_all_column_filters()
-
-        if row == -1:
-            self.models.bases_filter_model.setFilterFixedString("")
-            self.signals.search_loaded.emit()
-            return
-
-        record = self.models.searches_model.record(row)
-        self.models.bases_filter_model.decode_filters(record.value("encoded"))
-        self.signals.search_loaded.emit()
-
     def delete_search(self, index: QModelIndex):
         """Delete the given search"""
         result = QMessageBox.warning(
@@ -216,8 +188,3 @@ class Controller(QObject):
 
         self.models.searches_model.setData(index, name)
         self.models.searches_model.submitAll()
-
-    def apply_filter(self, column: int, value):
-        """Apply the given filter to the given column"""
-        # Get all unique items that are not the value passed in
-        self.models.bases_filter_model.set_column_filter(column, value)

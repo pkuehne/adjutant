@@ -16,7 +16,7 @@ class FilterWrapper:
     column_filters: Dict[int, List[str]]
 
 
-class BasesFilterModel(QSortFilterProxyModel):
+class SortFilterModel(QSortFilterProxyModel):
     """Provides filtering for the Bases Model"""
 
     filter_changed = pyqtSignal()

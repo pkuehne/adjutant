@@ -1,7 +1,7 @@
 """ Popup filter for the bases table header """
 
 from dataclasses import dataclass
-from typing import Any, List, cast
+from typing import Any, List
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from PyQt6.QtGui import QCursor, QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (
@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from adjutant.models.bases_model import Tag
-from adjutant.models.bases_filter_model import BasesFilterModel
+from adjutant.models.sort_filter_model import SortFilterModel
 
 
 @dataclass(eq=True, frozen=True)
@@ -46,9 +46,7 @@ def invert_check_state(value: Qt.CheckState) -> Qt.CheckState:
 class FilterPopup(QDialog):
     """Pops up when clicking on the Bases table header"""
 
-    def __init__(
-        self, parent: QWidget, model: QSortFilterProxyModel, column: int
-    ) -> None:
+    def __init__(self, parent: QWidget, model: SortFilterModel, column: int) -> None:
         super().__init__(parent=parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
 
@@ -98,9 +96,8 @@ class FilterPopup(QDialog):
 
     def setup_filter(self) -> None:
         """Retrieves unique items from model at that column"""
-        filter_model = cast(BasesFilterModel, self.model)
-        current_filters = filter_model.get_column_filter(self.column)
-        model = filter_model.sourceModel()
+        current_filters = self.model.get_column_filter(self.column)
+        model = self.model.sourceModel()
 
         items: List[FilterValue] = []
         for row in range(model.rowCount()):
@@ -153,8 +150,7 @@ class FilterPopup(QDialog):
 
         if len(filter_list) == self.list_model.rowCount():
             filter_list = None
-        model = cast(BasesFilterModel, self.model)
-        model.set_column_filter(self.column, filter_list)
+        self.model.set_column_filter(self.column, filter_list)
 
     @classmethod
     def show(cls, parent: QWidget, model: QSortFilterProxyModel, column: int):

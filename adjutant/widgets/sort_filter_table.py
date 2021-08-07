@@ -13,7 +13,7 @@ from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
 from PyQt6.QtWidgets import QTableView
 
 from adjutant.widgets.sort_filter_header import SortFilterHeader
-from adjutant.models.bases_filter_model import BasesFilterModel
+from adjutant.models.sort_filter_model import SortFilterModel
 
 
 class SortFilterTable(QTableView):
@@ -26,7 +26,7 @@ class SortFilterTable(QTableView):
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self._setup_widget()
-        self.filter_model = BasesFilterModel()
+        self.filter_model = SortFilterModel()
 
     def _setup_widget(self):
         """Initialize and configure widgets"""
@@ -37,7 +37,9 @@ class SortFilterTable(QTableView):
         self.installEventFilter(self)
         self.setHorizontalHeader(SortFilterHeader(self))
 
-        self.doubleClicked.connect(self.item_edited.emit)
+        self.doubleClicked.connect(
+            lambda: self.item_edited.emit(self.selected_indexes()[0])
+        )
 
     def _map_index(self, index: QModelIndex):
         """Maps a filter model index to source"""
@@ -55,6 +57,9 @@ class SortFilterTable(QTableView):
     def setModel(self, model: QAbstractItemModel) -> None:
         """Set the source model for the table"""
         self.filter_model.setSourceModel(model)
+        self.filter_model.setFilterKeyColumn(-1)  # All columns
+        self.filter_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+
         return super().setModel(self.filter_model)
 
     def contextMenuEvent(self, event: QContextMenuEvent):

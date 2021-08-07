@@ -1,6 +1,6 @@
 """ Sidebar Tree View """
 
-from PyQt6.QtCore import QModelIndex, QPoint
+from PyQt6.QtCore import QModelIndex, QPoint, pyqtSignal
 from PyQt6.QtGui import QAction, QContextMenuEvent, QCursor
 from PyQt6.QtWidgets import QMenu, QTreeView
 
@@ -10,6 +10,8 @@ from adjutant.models.sidebar_model import SidebarModel, Section
 
 class SidebarView(QTreeView):
     """Sidebar tree"""
+
+    apply_filter = pyqtSignal(int, list)
 
     def __init__(self, context: Context, parent=None) -> None:
         super().__init__(parent=parent)
@@ -56,13 +58,13 @@ class SidebarView(QTreeView):
 
     def remove_all_filters(self, _: QModelIndex):
         """Removes all filters"""
-        self.context.controller.load_search(-1)
+        self.context.signals.load_search.emit(-1)
 
     def filter_by_search(self, index: QModelIndex):
         """Filters by the given search"""
         if index.parent() == QModelIndex():
             return
-        self.context.controller.load_search(index.row())
+        self.context.signals.load_search.emit(index.row())
 
     def filter_by_tag(self, index: QModelIndex):
         """Filter by the given tag"""
@@ -71,7 +73,7 @@ class SidebarView(QTreeView):
             return
 
         tag_id = self.context.models.tags_sort_model.index(index.row(), 0).data()
-        self.context.models.bases_filter_model.set_column_filter(
+        self.apply_filter.emit(
             self.context.models.bases_model.column_id_tags(), [tag_id]
         )
 

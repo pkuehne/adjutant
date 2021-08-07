@@ -16,13 +16,6 @@ class MainWindowStatusBar(QStatusBar):
 
         self.addPermanentWidget(self.row_count)
 
-        self.context.models.bases_filter_model.filter_changed.connect(
-            self.update_row_count
-        )
-        self.update_row_count()
-
-    def update_row_count(self):
+    def update_row_count(self, count: int):
         """Set the row count on the widget"""
-        self.row_count.setText(
-            self.tr("Rows: ") + f"{self.context.models.bases_filter_model.rowCount()}"
-        )
+        self.row_count.setText(self.tr("Rows: ") + f"{count}")
