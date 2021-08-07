@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, List, cast
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
-from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from PyQt6.QtGui import QCursor, QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -155,3 +155,18 @@ class FilterPopup(QDialog):
             filter_list = None
         model = cast(BasesFilterModel, self.model)
         model.set_column_filter(self.column, filter_list)
+
+    @classmethod
+    def show(cls, parent: QWidget, model: QSortFilterProxyModel, column: int):
+        """Show the dialog"""
+        cls.dialog_reference = cls(parent, model, column)
+        cursor = QCursor().pos()
+        cls.dialog_reference.setGeometry(
+            cursor.x(),
+            cursor.y(),
+            cls.dialog_reference.width(),
+            cls.dialog_reference.height(),
+        )
+        cls.dialog_reference.setup_filter()
+        cls.dialog_reference.exec()
+        cls.dialog_reference = None
