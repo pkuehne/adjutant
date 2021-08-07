@@ -12,22 +12,6 @@ from tests.conftest import (
 from adjutant.context.context import Context
 
 
-def test_convert_index_bases_model(
-    context: Context, add_empty_bases: AddEmptyBasesFunc
-):
-    """If a filter_model index is passed, the base model index should be returned"""
-    # Given
-    add_empty_bases(5)
-    index = context.models.bases_model.index(0, 0)
-
-    # When
-    retval = context.controller.convert_index(index)
-
-    # Then
-    assert index.model() == retval.model()
-    assert retval.model() == context.models.bases_model
-
-
 def test_convert_index_tags_model(context: Context, add_tag: AddTagFunc):
     """If a filter_model index is passed, the base model index should be returned"""
     # Given
@@ -68,8 +52,12 @@ def test_delete_confirmation_required(
     add_empty_bases(num_rows)
 
     # When
-    context.controller.delete_bases(
-        [context.models.bases_model.index(0, 0), context.models.bases_model.index(1, 0)]
+    context.controller.delete_records(
+        context.models.bases_model,
+        [
+            context.models.bases_model.index(0, 0),
+            context.models.bases_model.index(1, 0),
+        ],
     )
 
     # Then
@@ -92,7 +80,7 @@ def test_delete_removes_selected_indexes(
     id2 = index2.data()
 
     # When
-    context.controller.delete_bases([index1, index2])
+    context.controller.delete_records(context.models.bases_model, [index1, index2])
 
     # Then
     assert context.models.bases_model.rowCount() == num_rows - 2
@@ -113,7 +101,7 @@ def test_delete_does_nothing_for_no_indexes(
     add_empty_bases(num_rows)
 
     # When
-    context.controller.delete_bases([])
+    context.controller.delete_records(context.models.bases_model, [])
 
     # Then
     assert context.models.bases_model.rowCount() == num_rows
@@ -507,3 +495,8 @@ def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch)
     assert context.models.searches_model.rowCount() == 0
     assert context.models.searches_model.isDirty() is False
     assert index.isValid()
+
+
+##############################
+# Storage
+##############################

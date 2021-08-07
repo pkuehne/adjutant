@@ -60,7 +60,8 @@ class SortFilterTable(QTableView):
         self.filter_model.setFilterKeyColumn(-1)  # All columns
         self.filter_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
-        return super().setModel(self.filter_model)
+        super().setModel(self.filter_model)
+        self.resizeColumnsToContents()
 
     def contextMenuEvent(self, event: QContextMenuEvent):
         """When right-click context menu is requested"""

@@ -33,13 +33,16 @@ class MainWindowMenuBar(QMenuBar):
     def _setup_add_menu(self):
         """Setup the add menu"""
         bases_action = QAction("&Base", self)
-        bases_action.triggered.connect(self.context.signals.show_add_base_dialog.emit)
+        bases_action.triggered.connect(self.context.signals.show_add_base_dialog)
         tags_action = QAction("&Tag", self)
         tags_action.triggered.connect(lambda _: self.context.controller.create_tag())
+        storage_action = QAction("&Storage", self)
+        storage_action.triggered.connect(self.context.signals.show_add_storage_dialog)
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)
         add_menu.addAction(tags_action)
+        add_menu.addAction(storage_action)
 
     def _setup_manage_menu(self):
         """Setup the Manage menu"""

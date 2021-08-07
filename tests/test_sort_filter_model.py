@@ -83,3 +83,33 @@ def test_multiple_filters_are_applied(context: Context, add_base: AddBaseFunc):
     for row in range(filter_model.rowCount()):
         assert filter_model.index(row, 1).data() in filter_list_name
         assert filter_model.index(row, 2).data() in filter_list_scale
+
+
+def test_setting_fixed_string_emit_signal(qtbot):
+    """When a fixed string is set, a signal is emitted"""
+    # Given
+    filter_model = SortFilterModel()
+
+    # When
+    with qtbot.waitSignal(filter_model.filter_changed, timeout=10):
+        filter_model.setFilterFixedString("Foo")
+
+    # Then
+
+
+def test_clear_filters_does_that(context: Context):
+    """When the celar filters function is called, all filters are removed"""
+    # Given
+
+    filter_model = SortFilterModel()
+    filter_model.setSourceModel(context.models.bases_model)
+    filter_model.column_filters[0] = [0, 1, 2, 3, 4]
+    filter_model.column_filters[3] = ["foo"]
+    filter_model.column_filters[5] = ["a", "b"]
+
+    # When
+    filter_model.clear_all_column_filters()
+
+    # Then
+    for col in range(context.models.bases_model.rowCount()):
+        assert filter_model.column_filters[col] is None

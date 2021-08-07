@@ -47,12 +47,12 @@ CREATE TABLE IF NOT EXISTS searches (
 DROP TABLE IF EXISTS storage;
 CREATE TABLE IF NOT EXISTS storage (
     id INTEGER PRIMARY KEY,
-    name TEXT,
-    location TEXT,
-    height INTEGER,
-    magnetized BOOLEAN,
-    full BOOLEAN,
-    notes TEXT
+    name TEXT DEFAULT "",
+    location TEXT DEFAULT "",
+    height INTEGER DEFAULT 0,
+    magnetized BOOLEAN DEFAULT 0,
+    full BOOLEAN DEFAULT 0,
+    notes TEXT DEFAULT ""
 );
 
 DROP TABLE IF EXISTS settings;

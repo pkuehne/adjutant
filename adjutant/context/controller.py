@@ -3,6 +3,7 @@
 from typing import List
 from PyQt6.QtCore import QModelIndex, QObject, Qt
 from PyQt6.QtWidgets import QInputDialog, QMessageBox
+from PyQt6.QtSql import QSqlTableModel
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
@@ -36,21 +37,26 @@ class Controller(QObject):
             index = self.models.tags_sort_model.mapToSource(index)
         return index
 
-    def delete_bases(self, indexes: List[QModelIndex]):
-        """Delete all currently selected rows"""
+    def delete_records(
+        self, model: QSqlTableModel, indexes: List[QModelIndex], desc="records"
+    ):
+        """Removes records from the model with confirmation"""
         result = QMessageBox.warning(
             None,
             "Confirm deletion",
-            "Are you sure you want to delete these bases?",
+            f"Are you sure you want to delete {len(indexes)} {desc}?",
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Cancel,
         )
         if result == QMessageBox.StandardButton.Cancel:
             return
         for index in indexes:
-            index = self.convert_index(index)
-            self.models.bases_model.removeRow(index.row())
-        self.models.bases_model.submitAll()
+            model.removeRow(index.row())
+        model.submitAll()
+
+    def delete_bases(self, indexes: List[QModelIndex]):
+        """Delete all currently selected rows"""
+        self.delete_records(self.models.bases_model, indexes, "bases")
 
     def duplicate_base(self, index: QModelIndex, num: int) -> bool:
         """Duplicate the given base num times"""
@@ -188,3 +194,10 @@ class Controller(QObject):
 
         self.models.searches_model.setData(index, name)
         self.models.searches_model.submitAll()
+
+    def edit_storage(self, index: QModelIndex):
+        """Edit a storage location"""
+
+    def delete_storages(self, indexes: List[QModelIndex]):
+        """Delete all passed-in storages"""
+        self.delete_records(self.models.storage_model, indexes, "storage locations")

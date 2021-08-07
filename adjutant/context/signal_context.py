@@ -14,5 +14,8 @@ class SignalContext(QObject):
     load_search = pyqtSignal(int)
     save_search = pyqtSignal()
 
+    show_add_storage_dialog = pyqtSignal()
+    show_edit_storage_dialog = pyqtSignal(QModelIndex)
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
