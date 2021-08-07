@@ -6,8 +6,8 @@ from PyQt6.QtWidgets import QHeaderView, QWidget
 from adjutant.windows.filter_popup import FilterPopup
 
 
-class HeaderView(QHeaderView):
-    """Headerview with filter indicator"""
+class SortFilterHeader(QHeaderView):
+    """Handles the filter popup menu"""
 
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(Qt.Orientation.Horizontal, parent=parent)

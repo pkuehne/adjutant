@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import QWidget
 from adjutant.context import Context
 
 from adjutant.windows.base_edit_dialog import BaseEditDialog
-from adjutant.widgets.bases_table_header import HeaderView
+from adjutant.widgets.sort_filter_header import SortFilterHeader
 from adjutant.widgets.bases_table_view import BasesTableView
 
 
@@ -24,7 +24,7 @@ class BasesTable(QWidget):
         super().__init__()
         self.context = context
         self.table = BasesTableView(self.context)
-        self.header = HeaderView()
+        self.header = SortFilterHeader()
         self.filter_edit = QLineEdit()
         self.clear_button = QPushButton(self.tr("Clear Filters"))
         self.save_button = QPushButton(self.tr("Save Search"))

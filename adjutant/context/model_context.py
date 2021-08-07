@@ -143,6 +143,7 @@ class ModelContext:
                     "Magnetized", "Whether this container will take magnetized minis"
                 ),
                 HeaderRoles("Full", "Whether there's space in this box or not"),
+                HeaderRoles("Notes", "Notes about this storage location"),
             ],
         )
         return model

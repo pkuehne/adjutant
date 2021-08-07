@@ -73,6 +73,6 @@ INSERT INTO tags VALUES (NULL, "pet");
 INSERT INTO tags VALUES (NULL, "dramatic");
 INSERT INTO tags VALUES (NULL, "injured");
 
-INSERT INTO storage VALUES (NULL, "Cardboard box", "1st shelf", 10, 0, 0);
-INSERT INTO storage VALUES (NULL, "Warhammer", "Top shelf", 25, 1, 1);
-INSERT INTO storage VALUES (NULL, "Ancients", "Top shelf", 15, 1, 0);
+INSERT INTO storage VALUES (NULL, "Cardboard box", "1st shelf", 10, 0, 0, "Slightly damp");
+INSERT INTO storage VALUES (NULL, "Warhammer", "Top shelf", 25, 1, 1, "Can fit one more 32mm base");
+INSERT INTO storage VALUES (NULL, "Ancients", "Top shelf", 15, 1, 0, "");

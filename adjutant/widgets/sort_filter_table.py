@@ -12,6 +12,7 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
 from PyQt6.QtWidgets import QTableView
 
+from adjutant.widgets.sort_filter_header import SortFilterHeader
 from adjutant.models.bases_filter_model import BasesFilterModel
 
 
@@ -34,6 +35,7 @@ class SortFilterTable(QTableView):
         self.setEditTriggers(self.EditTrigger.NoEditTriggers)
         self.setSelectionBehavior(self.SelectionBehavior.SelectRows)
         self.installEventFilter(self)
+        self.setHorizontalHeader(SortFilterHeader(self))
 
         self.doubleClicked.connect(self.item_edited.emit)
 

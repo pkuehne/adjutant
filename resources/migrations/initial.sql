@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS storage (
     location TEXT,
     height INTEGER,
     magnetized BOOLEAN,
-    full BOOLEAN
+    full BOOLEAN,
+    notes TEXT
 );
 
 DROP TABLE IF EXISTS settings;
