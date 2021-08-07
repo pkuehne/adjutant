@@ -96,12 +96,7 @@ class BasesTableView(QTableView):
         """Apply the field at index(row, column) to all selected indexes"""
         source = self.model().index(row, column)
         selection = self.selectionModel().selectedRows()
-
-        for index in selection:
-            self.model().setData(
-                index.siblingAtColumn(column), source.data(Qt.ItemDataRole.EditRole)
-            )
-        self.context.models.bases_model.submitAll()
+        self.context.controller.apply_field_to_bases(source, selection)
 
     def filter_to_selection(self, row: int, column: int):
         """Filter by the selected column"""

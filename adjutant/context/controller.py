@@ -114,6 +114,16 @@ class Controller(QObject):
         self.models.tags_model.removeRow(index.row())
         self.models.tags_model.submitAll()
 
+    def apply_field_to_bases(self, source: QModelIndex, destination: List[QModelIndex]):
+        """Apply the data from the source index to the same field in the destination list"""
+        for index in destination:
+            index = self.convert_index(index)
+            self.models.bases_model.setData(
+                index.siblingAtColumn(source.column()),
+                source.data(Qt.ItemDataRole.EditRole),
+            )
+        self.models.bases_model.submitAll()
+
     def add_tags(self, index: QModelIndex, tags: List[int]):
         """Add the tags to the given base"""
         model = self.models.base_tags_model

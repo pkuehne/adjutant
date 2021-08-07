@@ -162,6 +162,7 @@ def test_duplicate_bases_does_that(context: Context, add_base: AddBaseFunc):
         model.index(2, figures_field).data()
         == index.siblingAtColumn(figures_field).data()
     )
+    assert model.isDirty() is False
 
 
 def test_duplicate_bases_zero_does_nothing(context: Context, add_base: AddBaseFunc):
@@ -194,6 +195,71 @@ def test_duplicate_bases_returns_false_when_submit_all_fails(
 
     # Then
     assert success is False
+
+
+def test_apply_field_updates_bases(context: Context, add_base: AddBaseFunc):
+    """Test that the field's value overwrites the selected indices"""
+    # Given
+    add_base(
+        [
+            BasesRecord(name="Foo", figures=1),
+            BasesRecord(name="Bar", figures=3),
+            BasesRecord(name="Baz", figures=3),
+        ]
+    )
+    name_field = context.models.bases_model.fieldIndex("name")
+    figures_field = context.models.bases_model.fieldIndex("figures")
+    source = context.models.bases_model.index(0, name_field)
+    destinations = [
+        context.models.bases_model.index(1, figures_field),
+        context.models.bases_model.index(1, figures_field),
+    ]
+
+    # When
+    context.controller.apply_field_to_bases(source, destinations)
+
+    # Then
+    assert context.models.bases_model.isDirty() is False
+    assert destinations[0].siblingAtColumn(name_field).data() == source.data()
+    assert destinations[1].siblingAtColumn(name_field).data() == source.data()
+    assert destinations[0].siblingAtColumn(
+        figures_field
+    ).data() != source.siblingAtColumn(figures_field)
+
+
+def test_apply_field_wont_update_id(context: Context, add_base: AddBaseFunc):
+    """Test that the field's value overwrites the selected indices"""
+    # Given
+    add_base(
+        [
+            BasesRecord(name="Foo", figures=1),
+            BasesRecord(name="Bar", figures=3),
+            BasesRecord(name="Baz", figures=3),
+        ]
+    )
+    id_field = 0
+    source = context.models.bases_model.index(0, id_field)
+    destinations = [
+        context.models.bases_model.index(1, id_field),
+        context.models.bases_model.index(1, id_field),
+    ]
+
+    # When
+    context.controller.apply_field_to_bases(source, destinations)
+
+    # Then
+    assert context.models.bases_model.isDirty() is False
+    assert destinations[0].siblingAtColumn(id_field).data() != source.siblingAtColumn(
+        id_field
+    )
+    assert destinations[1].siblingAtColumn(id_field).data() != source.siblingAtColumn(
+        id_field
+    )
+
+
+######################
+# Tags
+######################
 
 
 def test_create_tag_requires_name(context: Context, monkeypatch):
@@ -349,10 +415,9 @@ def test_delete_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
     assert index.isValid()
 
 
-######################################
-###############
-#
-#####################################
+######################
+# Searches
+######################
 
 
 def test_rename_search_requires_name(
