@@ -1,6 +1,7 @@
 """ Tag List Widget """
 
 from typing import List
+import operator
 from PyQt6.QtWidgets import QListWidget, QListWidgetItem
 from PyQt6.QtCore import Qt, pyqtProperty
 from adjutant.models.bases_model import Tag
@@ -20,8 +21,9 @@ class TagListWidget(QListWidget):
         for row in range(self.count()):
             item = self.item(row)
             tag_id = item.data(Qt.ItemDataRole.UserRole + 1)
-            tags.append(Tag(tag_id, ""))
-        return tags
+            tag_name = item.data(Qt.ItemDataRole.DisplayRole)
+            tags.append(Tag(tag_id, tag_name))
+        return sorted(tags, key=operator.attrgetter("tag_name"))
 
     @tag_list.setter
     def tag_list(self, tags: List[Tag]):
