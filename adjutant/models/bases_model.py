@@ -32,6 +32,7 @@ class BasesModel(QSqlRelationalTableModel):
         super().__init__(parent=parent)
         self.m2m_relationships: List[ManyToManyRelationship] = []
         self.relational_fields = {}
+        self.boolean_fields = []
 
     def set_many_to_many_relationship(self, rel: ManyToManyRelationship):
         """Adds a new many-to-many relationship"""
@@ -66,6 +67,11 @@ class BasesModel(QSqlRelationalTableModel):
     def data(self, idx: QModelIndex, role: int):
         """Return many-to-many relationships as well"""
         if idx.column() < super().columnCount():
+            if (
+                idx.column() in self.boolean_fields
+                and role == Qt.ItemDataRole.DisplayRole
+            ):
+                return "Yes" if super().data(idx, role=role) == 1 else "No"
             return super().data(idx, role=role)
 
         if role not in [

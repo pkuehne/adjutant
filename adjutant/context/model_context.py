@@ -103,6 +103,8 @@ class ModelContext:
             ],
         )
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
+        model.boolean_fields.append(model.fieldIndex("completed"))
+        model.boolean_fields.append(model.fieldIndex("damaged"))
         model.relational_fields["storage_id"] = model.fieldIndex("storage_id")
         model.setRelation(
             model.fieldIndex("storage_id"), QSqlRelation("storage", "id", "name")
