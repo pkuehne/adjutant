@@ -1,7 +1,6 @@
 """ Edit Window for a Base """
 
 from dataclasses import dataclass
-from typing import List
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -16,18 +15,16 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QListWidget,
     QListWidgetItem,
     QPushButton,
     QSizePolicy,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
-    QWidget,
 )
 from adjutant.context import Context
-from adjutant.models.bases_model import BasesModel, Tag
 from adjutant.widgets.nullable_date import NullableDate
+from adjutant.widgets.tag_list_widget import TagListWidget
 
 
 @dataclass
@@ -52,48 +49,10 @@ class MappedWidgets:
         self.damaged = QCheckBox()
         self.notes_edit = QTextEdit()
         self.custom_id_edit = QLineEdit()
-        self.tag_list = QListWidget()
+        self.tag_list = TagListWidget()
         self.tag_edit = QComboBox()
         self.add_tag_button = QPushButton()
         self.storage_combobox = QComboBox()
-
-
-class CustomDelegate(QSqlRelationalDelegate):
-    """Custom delegate to marshal some odd widgets"""
-
-    def __init__(self, parent, context: Context, widgets: MappedWidgets) -> None:
-        super().__init__(parent=parent)
-        self.context = context
-        self.widgets = widgets
-
-    # pylint: disable=invalid-name
-    def setEditorData(self, editor: QWidget, index: QModelIndex) -> None:
-        """Update editor from model"""
-        if editor != self.widgets.tag_list:
-            return super().setEditorData(editor, index)
-        tags: List[Tag] = index.data(Qt.ItemDataRole.EditRole)
-        editor: QListWidget = editor
-        for tag in tags:
-            item = QListWidgetItem(tag.tag_name)
-            item.setData(Qt.ItemDataRole.UserRole + 1, tag.tag_id)
-            editor.addItem(item)
-        return None
-
-    def setModelData(
-        self, editor: QWidget, model: BasesModel, index: QModelIndex
-    ) -> None:
-        """Update model from editor"""
-        if editor != self.widgets.tag_list:
-            return super().setModelData(editor, model, index)
-        tags: List[Tag] = []
-        for row in range(self.widgets.tag_list.count()):
-            item = self.widgets.tag_list.item(row)
-            tag_id = item.data(Qt.ItemDataRole.UserRole + 1)
-            tags.append(Tag(tag_id, ""))
-        model.setData(index, tags)
-        return None
-
-    # pylint: enable=invalid-name
 
 
 class BaseEditDialog(QDialog):
@@ -196,7 +155,7 @@ class BaseEditDialog(QDialog):
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
-        self.mapper.setItemDelegate(CustomDelegate(self, self.context, self.widgets))
+        self.mapper.setItemDelegate(QSqlRelationalDelegate())
         self.mapper.addMapping(self.widgets.id_label, self.field("id"), b"text")
         self.mapper.addMapping(self.widgets.name_edit, self.field("name"))
         self.mapper.addMapping(self.widgets.scale_edit, self.field("scale"))
@@ -224,7 +183,9 @@ class BaseEditDialog(QDialog):
         )
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
         self.mapper.addMapping(
-            self.widgets.tag_list, self.context.models.bases_model.column_id_tags()
+            self.widgets.tag_list,
+            self.context.models.bases_model.column_id_tags(),
+            b"tag_list",
         )
 
         self.mapper.setCurrentModelIndex(self.index)
