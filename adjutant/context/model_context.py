@@ -3,7 +3,7 @@
 from typing import List
 from dataclasses import dataclass
 
-from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
+from PyQt6.QtSql import QSqlQueryModel, QSqlRelation, QSqlTableModel
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from adjutant.models.bases_model import BasesModel, ManyToManyRelationship
 
@@ -103,6 +103,11 @@ class ModelContext:
             ],
         )
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
+        model.relational_fields["storage_id"] = model.fieldIndex("storage_id")
+        model.setRelation(
+            model.fieldIndex("storage_id"), QSqlRelation("storage", "id", "name")
+        )
+        model.setJoinMode(model.JoinMode.LeftJoin)
         return model
 
     def __setup_tags_model(self) -> QSqlTableModel:

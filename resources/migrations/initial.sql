@@ -18,7 +18,9 @@ CREATE TABLE IF NOT EXISTS bases (
     damaged BOOLEAN DEFAULT 0,
     notes TEXT DEFAULT "",
     custom_id TEXT DEFAULT "",
-    storage INTEGER DEFAULT NULL
+    storage_id INTEGER DEFAULT 0,
+
+    CONSTRAINT fk_storage_id FOREIGN KEY(storage_id) REFERENCES storage(id)
 );
 
 DROP TABLE IF EXISTS tags;
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS storage (
     full BOOLEAN DEFAULT 0,
     notes TEXT DEFAULT ""
 );
+INSERT INTO storage(id, name) VALUES (0, "<None>");
 
 DROP TABLE IF EXISTS settings;
 CREATE TABLE IF NOT EXISTS settings (

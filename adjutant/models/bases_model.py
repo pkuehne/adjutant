@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import List
 from PyQt6.QtCore import QModelIndex, Qt
-from PyQt6.QtSql import QSqlQuery, QSqlTableModel
+from PyQt6.QtSql import QSqlQuery, QSqlRelationalTableModel
 
 
 @dataclass
@@ -25,12 +25,13 @@ class Tag:
     tag_name: str
 
 
-class BasesModel(QSqlTableModel):
+class BasesModel(QSqlRelationalTableModel):
     """Subclass QSqlTableModel"""
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.m2m_relationships: List[ManyToManyRelationship] = []
+        self.relational_fields = {}
 
     def set_many_to_many_relationship(self, rel: ManyToManyRelationship):
         """Adds a new many-to-many relationship"""

@@ -5,6 +5,7 @@ from typing import List
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
+from PyQt6.QtSql import QSqlRelationalDelegate
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -20,7 +21,6 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSpinBox,
-    QStyledItemDelegate,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -55,9 +55,10 @@ class MappedWidgets:
         self.tag_list = QListWidget()
         self.tag_edit = QComboBox()
         self.add_tag_button = QPushButton()
+        self.storage_combobox = QComboBox()
 
 
-class CustomDelegate(QStyledItemDelegate):
+class CustomDelegate(QSqlRelationalDelegate):
     """Custom delegate to marshal some odd widgets"""
 
     def __init__(self, parent, context: Context, widgets: MappedWidgets) -> None:
@@ -145,6 +146,7 @@ class BaseEditDialog(QDialog):
         form_layout.addRow("Acquired: ", self.widgets.date_acquired)
         form_layout.addRow("Completed: ", self.widgets.completed)
         form_layout.addRow("Damaged", self.widgets.damaged)
+        form_layout.addRow("Storage", self.widgets.storage_combobox)
         form_layout.addRow("Notes: ", self.widgets.notes_edit)
         form_layout.addRow("Custom ID: ", self.widgets.custom_id_edit)
 
@@ -186,7 +188,11 @@ class BaseEditDialog(QDialog):
         self.widgets.material_combobox.setModel(
             QStringListModel(["Plastic", "Resin", "Metal"])
         )
-        # self.widgets.date_acquired.dateedit.setCalendarPopup(True)
+        storage_model = self.model.relationModel(
+            self.model.relational_fields["storage_id"]
+        )
+        self.widgets.storage_combobox.setModel(storage_model)
+        self.widgets.storage_combobox.setModelColumn(1)
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
@@ -210,6 +216,9 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(self.widgets.date_acquired, self.field("date_acquired"))
         self.mapper.addMapping(self.widgets.completed, self.field("completed"))
         self.mapper.addMapping(self.widgets.damaged, self.field("damaged"))
+        self.mapper.addMapping(
+            self.widgets.storage_combobox, self.model.relational_fields["storage_id"]
+        )
         self.mapper.addMapping(
             self.widgets.notes_edit, self.field("notes"), b"plainText"
         )

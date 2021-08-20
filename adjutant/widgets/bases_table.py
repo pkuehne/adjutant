@@ -53,7 +53,6 @@ class BasesTable(QWidget):
     def _setup_widgets(self):
         """Initialize and configure widgets"""
         self.table.setModel(self.context.models.bases_model)
-        self.table.hideColumn(self.context.models.bases_model.fieldIndex("storage"))
 
     def _setup_signals(self):
         self.filter_edit.textChanged.connect(
@@ -63,6 +62,7 @@ class BasesTable(QWidget):
         self.save_button.pressed.connect(self.save_search)
 
         self.table.item_edited.connect(self.context.signals.show_edit_base_dialog)
+        self.table.item_deleted.connect(self.context.controller.delete_bases)
         self.table.context_menu_launched.connect(self.context_menu)
 
         self.context.signals.show_add_base_dialog.connect(
