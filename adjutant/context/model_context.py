@@ -39,6 +39,7 @@ class ModelContext:
         self.base_tags_model = None
         self.searches_model = None
         self.storage_model = None
+        self.statuses_model = None
 
     def load(self):
         """load the models from the database"""
@@ -61,6 +62,8 @@ class ModelContext:
         self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
         self.storage_model = self._setup_storage_model()
+
+        self.statuses_model = self._setup_statuses_model()
 
         self.refresh_models()
 
@@ -99,6 +102,7 @@ class ModelContext:
                 HeaderRoles("Notes", "General notes about this base"),
                 HeaderRoles("Custom ID", "How you refer to this base"),
                 HeaderRoles("Storage", "Where this base is kept"),
+                HeaderRoles("Status", "What status this base is in"),
                 HeaderRoles("Tags", "All tags associated with this base"),
             ],
         )
@@ -106,8 +110,12 @@ class ModelContext:
         model.boolean_fields.append(model.fieldIndex("completed"))
         model.boolean_fields.append(model.fieldIndex("damaged"))
         model.relational_fields["storage_id"] = model.fieldIndex("storage_id")
+        model.relational_fields["status_id"] = model.fieldIndex("status_id")
         model.setRelation(
             model.fieldIndex("storage_id"), QSqlRelation("storage", "id", "name")
+        )
+        model.setRelation(
+            model.fieldIndex("status_id"), QSqlRelation("statuses", "id", "name")
         )
         model.setJoinMode(model.JoinMode.LeftJoin)
         return model
@@ -145,4 +153,12 @@ class ModelContext:
                 HeaderRoles("Notes", "Notes about this storage location"),
             ],
         )
+        return model
+
+    def _setup_statuses_model(self) -> QSqlTableModel:
+        """Setup the statuses model"""
+        model = QSqlTableModel()
+        model.setTable("statuses")
+        model.setEditStrategy(model.EditStrategy.OnManualSubmit)
+        setup_header_data(model, [HeaderRoles("Name", "What this status represents")])
         return model

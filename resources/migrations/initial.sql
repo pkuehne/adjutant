@@ -19,8 +19,10 @@ CREATE TABLE IF NOT EXISTS bases (
     notes TEXT DEFAULT "",
     custom_id TEXT DEFAULT "",
     storage_id INTEGER DEFAULT 0,
+    status_id INTEGER DEFAULT 0,
 
-    CONSTRAINT fk_storage_id FOREIGN KEY(storage_id) REFERENCES storage(id)
+    CONSTRAINT fk_storage_id FOREIGN KEY(storage_id) REFERENCES storage(id),
+    CONSTRAINT fk_status_id FOREIGN KEY(status_id) REFERENCES statuses(id)
 );
 
 DROP TABLE IF EXISTS tags;
@@ -57,6 +59,13 @@ CREATE TABLE IF NOT EXISTS storage (
     notes TEXT DEFAULT ""
 );
 INSERT INTO storage(id, name) VALUES (0, "<None>");
+
+DROP TABLE IF EXISTS statuses;
+CREATE TABLE IF NOT EXISTS statuses (
+    id INTEGER PRIMARY KEY,
+    name TEXT DEFAULT ""
+);
+INSERT INTO statuses(id, name) VALUES (0, "<None>");
 
 DROP TABLE IF EXISTS settings;
 CREATE TABLE IF NOT EXISTS settings (

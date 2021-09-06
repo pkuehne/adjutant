@@ -13,7 +13,7 @@ class ManageSearchesDialog(QDialog):
     def __init__(self, parent, context: Context) -> None:
         super().__init__(parent=parent)
         self.context = context
-        self.setWindowTitle("Manage tags")
+        self.setWindowTitle("Manage searches")
 
         self.searches_list = QListView()
         self.rename_button = QPushButton(self.tr("Rename search"))

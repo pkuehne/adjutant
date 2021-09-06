@@ -53,6 +53,7 @@ class MappedWidgets:
         self.tag_edit = QComboBox()
         self.add_tag_button = QPushButton()
         self.storage_combobox = QComboBox()
+        self.status_combobox = QComboBox()
 
 
 class BaseEditDialog(QDialog):
@@ -104,6 +105,7 @@ class BaseEditDialog(QDialog):
         form_layout.addRow("Price: ", self.widgets.price_edit)
         form_layout.addRow("Acquired: ", self.widgets.date_acquired)
         form_layout.addRow("Completed: ", self.widgets.completed)
+        form_layout.addRow("Status", self.widgets.status_combobox)
         form_layout.addRow("Damaged", self.widgets.damaged)
         form_layout.addRow("Storage", self.widgets.storage_combobox)
         form_layout.addRow("Notes: ", self.widgets.notes_edit)
@@ -152,6 +154,11 @@ class BaseEditDialog(QDialog):
         )
         self.widgets.storage_combobox.setModel(storage_model)
         self.widgets.storage_combobox.setModelColumn(1)
+        status_model = self.model.relationModel(
+            self.model.relational_fields["status_id"]
+        )
+        self.widgets.status_combobox.setModel(status_model)
+        self.widgets.status_combobox.setModelColumn(1)
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
@@ -182,6 +189,9 @@ class BaseEditDialog(QDialog):
             self.widgets.notes_edit, self.field("notes"), b"plainText"
         )
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
+        self.mapper.addMapping(
+            self.widgets.status_combobox, self.model.relational_fields["status_id"]
+        )
         self.mapper.addMapping(
             self.widgets.tag_list,
             self.context.models.bases_model.column_id_tags(),
