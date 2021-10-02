@@ -96,6 +96,16 @@ def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     return
 
 
+def add_tag_to_base(context: DatabaseContext, base_id: int, tag_id: int):
+    """ "Add a tag usage for a given tag/base combination"""
+    query = "INSERT INTO bases_tags VALUES(NULL, :base_id, :tag_id)"
+    bindings = [QueryBinding(":base_id", base_id), QueryBinding(":tag_id", tag_id)]
+    result = context.execute_sql_command(query, bindings)
+    if not result:
+        print("Failed to associate tag to base")
+    return
+
+
 def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[Tag]:
     """Returns all tags for a given base ID"""
     query = """

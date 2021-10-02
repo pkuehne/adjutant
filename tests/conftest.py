@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import pytest
 
 from adjutant.context.context import Context
+from adjutant.models.relational_model import RelationalModel
 
 # pylint: disable=redefined-outer-name
 
@@ -131,3 +132,13 @@ def context():
     context.models.refresh_models()
 
     return context
+
+
+@pytest.fixture
+def relational_model(context: Context):
+    """fixture to create a RelationalModel"""
+    rmod = RelationalModel()
+    rmod.setTable("bases")
+    rmod.setEditStrategy(rmod.EditStrategy.OnManualSubmit)
+    context.models.bases_model = rmod
+    return rmod

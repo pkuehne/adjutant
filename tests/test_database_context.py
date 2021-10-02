@@ -1,8 +1,14 @@
 """ Tests for the database context"""
 
-from tests.conftest import AddBaseFunc, AddTagFunc, AddTagUseFunc, BasesRecord
+from tests.conftest import (
+    AddBaseFunc,
+    AddEmptyBasesFunc,
+    AddTagFunc,
+    AddTagUseFunc,
+    BasesRecord,
+)
 from adjutant.context import Context
-from adjutant.context.database_context import get_tag_count
+from adjutant.context.database_context import add_tag_to_base, get_tag_count
 
 
 def test_tag_count_is_zero_no_usage(context: Context, add_tag: AddTagFunc):
@@ -50,3 +56,45 @@ def test_tag_count_when_used(
 
     # Then
     assert count == 1
+
+
+def test_add_tag_to_base(
+    context: Context,
+    add_tag: AddTagFunc,
+    add_empty_bases: AddEmptyBasesFunc,
+):
+    """add_tag_to_base adds entry to the bases_tags table"""
+    # Given
+    add_empty_bases(1)
+    base_id = context.models.bases_model.index(0, 0).data()
+    add_tag("Foo")
+    tag_id = context.models.tags_model.index(0, 0).data()
+
+    # When
+    add_tag_to_base(context.database, base_id, tag_id)
+
+    # Then
+    context.models.base_tags_model.select()
+    assert context.models.base_tags_model.rowCount() == 1
+
+
+def test_add_tag_to_base_invalid_id(
+    context: Context,
+    add_tag: AddTagFunc,
+    add_empty_bases: AddEmptyBasesFunc,
+    monkeypatch,
+):
+    """add_tag_to_base adds entry to the bases_tags table"""
+    # Given
+    add_empty_bases(1)
+    base_id = context.models.bases_model.index(0, 0).data()
+    add_tag("Foo")
+    tag_id = context.models.tags_model.index(0, 0).data()
+    monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
+
+    # When
+    add_tag_to_base(context.database, base_id, tag_id)
+
+    # Then
+    context.models.base_tags_model.select()
+    assert context.models.base_tags_model.rowCount() == 0
