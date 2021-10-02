@@ -9,10 +9,10 @@ from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
 from adjutant.context.database_context import (
     DatabaseContext,
-    TagResult,
     get_tag_count,
     remove_all_tags_for_base,
 )
+from adjutant.context.dataclasses import Tag
 
 
 class Controller(QObject):
@@ -156,7 +156,7 @@ class Controller(QObject):
     def duplicate_tags(self, index: QModelIndex, num: int) -> bool:
         """Updates the same tags on the last 'num' rows same as index"""
         tag_column = self.models.bases_model.columnCount() - 1
-        tags: List[TagResult] = index.siblingAtColumn(tag_column).data(
+        tags: List[Tag] = index.siblingAtColumn(tag_column).data(
             Qt.ItemDataRole.EditRole
         )
 

@@ -7,6 +7,7 @@ from PyQt6.QtCore import QFile, QTextStream, qWarning
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.settings_context import SettingsContext
+from adjutant.context.dataclasses import Tag
 
 
 @dataclass
@@ -85,14 +86,6 @@ class DatabaseContext:
             self.execute_sql_command(query)
 
 
-@dataclass
-class TagResult:
-    """Tag Result"""
-
-    tag_id: int
-    tag_name: str
-
-
 def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     """Remove all the tags for a given base"""
     query = "DELETE from bases_tags WHERE bases_id = :base_id;"
@@ -103,7 +96,7 @@ def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     return
 
 
-def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult]:
+def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[Tag]:
     """Returns all tags for a given base ID"""
     query = """
         SELECT tags.id AS tag_id, tags.name AS tag_name 
@@ -122,7 +115,7 @@ def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[TagResult]
     while result.next():
         tag_id = result.value("tag_id")
         tag_name = result.value("tag_name")
-        tags.append(TagResult(tag_id, tag_name))
+        tags.append(Tag(tag_id, tag_name))
     return tags
 
 

@@ -1,28 +1,9 @@
 """ Bases Model"""
 
-from dataclasses import dataclass
 from typing import List
 from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtSql import QSqlQuery, QSqlRelationalTableModel
-
-
-@dataclass
-class ManyToManyRelationship:
-    """Defines a many-to-many relationship"""
-
-    target_table: str
-    target_field: int
-    select_query: str = None
-    delete_query: str = None
-    insert_query: str = None
-
-
-@dataclass(eq=True, frozen=True)
-class Tag:
-    """Tag"""
-
-    tag_id: int
-    tag_name: str
+from adjutant.context.dataclasses import ManyToManyRelationship, Tag
 
 
 class BasesModel(QSqlRelationalTableModel):

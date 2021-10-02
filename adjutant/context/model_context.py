@@ -5,7 +5,8 @@ from dataclasses import dataclass
 
 from PyQt6.QtSql import QSqlQueryModel, QSqlRelation, QSqlTableModel
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
-from adjutant.models.bases_model import BasesModel, ManyToManyRelationship
+from adjutant.models.bases_model import BasesModel
+from adjutant.context.dataclasses import ManyToManyRelationship
 
 
 @dataclass
