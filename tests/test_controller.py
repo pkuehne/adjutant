@@ -1,11 +1,13 @@
 """ Tests for the Controller class"""
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QInputDialog, QMessageBox
 
 from tests.conftest import (
     AddBaseFunc,
     AddEmptyBasesFunc,
     AddSearchFunc,
+    AddStatusFunc,
     AddTagFunc,
     BasesRecord,
 )
@@ -38,6 +40,11 @@ def test_convert_index_tags_sort_model(context: Context, add_tag: AddTagFunc):
     # Then
     assert index.model() != retval.model()
     assert retval.model() == context.models.tags_model
+
+
+###################################
+# delete_records
+###################################
 
 
 def test_delete_confirmation_required(
@@ -105,6 +112,139 @@ def test_delete_does_nothing_for_no_indexes(
 
     # Then
     assert context.models.bases_model.rowCount() == num_rows
+
+
+###################################
+# create_record
+###################################
+
+
+def test_create_record_requires_name(context: Context, monkeypatch):
+    """When creating a record, a name is required"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("", True))
+
+    # When
+    context.controller.create_record(context.models.tags_model)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 0
+
+
+def test_create_record_requires_input(context: Context, monkeypatch):
+    """When creating a record, user can't click cancel button"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", False))
+
+    # When
+    context.controller.create_record(context.models.tags_model)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 0
+
+
+def test_create_record(context: Context, monkeypatch):
+    """When creating a record, a name is required"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", True))
+
+    # When
+    context.controller.create_record(context.models.tags_model)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert context.models.tags_model.index(0, 1).data() == "Foo"
+    assert context.models.tags_model.isDirty() is False
+
+
+def test_create_record_uses_passed_default(context: Context, monkeypatch):
+    """When creating a tag, a name is required"""
+    monkeypatch.setattr(
+        QInputDialog,
+        "getText",
+        lambda *args, **kwargs: (kwargs["text"], kwargs["text"] == "Foobar"),
+    )
+
+    # When
+    context.controller.create_record(context.models.tags_model, default="Foobar")
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert context.models.tags_model.index(0, 1).data() == "Foobar"
+    assert context.models.tags_model.isDirty() is False
+
+
+###################################
+# rename_record
+###################################
+
+
+def test_rename_record_requires_name(
+    context: Context, add_tag: AddTagFunc, monkeypatch
+):
+    """When renaming a record, a non-empty string must be used"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("", True))
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_record(context.models.tags_model, index)
+
+    # Then
+    assert index.data() == "Foo"
+
+
+def test_rename_record_requires_input(
+    context: Context, add_tag: AddTagFunc, monkeypatch
+):
+    """When renaming a record, the user can't click cancel"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", False))
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_record(context.models.tags_model, index)
+
+    # Then
+    assert index.data() == "Foo"
+
+
+def test_rename_record(context: Context, add_tag: AddTagFunc, monkeypatch):
+    """When renaming a record, the name value should change"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_record(context.models.tags_model, index)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert index.data() == "Bar"
+    assert context.models.tags_model.isDirty() is False
+
+
+def test_rename_record_uses_passed_default(
+    context: Context, add_tag: AddTagFunc, monkeypatch
+):
+    """When renaming a record, a default name can be set"""
+    monkeypatch.setattr(
+        QInputDialog,
+        "getText",
+        lambda *args, **kwargs: ("Foobar", kwargs["text"] == "Foo"),
+    )
+    add_tag("Foo")
+    index = context.models.tags_model.index(0, 1)
+
+    # When
+    context.controller.rename_record(context.models.tags_model, index)
+
+    # Then
+    assert context.models.tags_model.rowCount() == 1
+    assert context.models.tags_model.index(0, 1).data() == "Foobar"
+    assert context.models.tags_model.isDirty() is False
+
+
+###################################
+# Bases
+###################################
 
 
 def test_duplicate_bases_does_that(context: Context, add_base: AddBaseFunc):
@@ -232,30 +372,6 @@ def test_apply_field_wont_update_id(context: Context, add_base: AddBaseFunc):
 ######################
 # Tags
 ######################
-
-
-def test_create_tag_requires_name(context: Context, monkeypatch):
-    """When creating a tag, a name is required"""
-    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("", True))
-
-    # When
-    context.controller.create_tag()
-
-    # Then
-    assert context.models.tags_model.rowCount() == 0
-
-
-def test_create_tag_requires_input(context: Context, monkeypatch):
-    """When creating a tag, user can't click cancel button"""
-    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", False))
-
-    # When
-    context.controller.create_tag()
-
-    # Then
-    assert context.models.tags_model.rowCount() == 0
-
-
 def test_create_tag(context: Context, monkeypatch):
     """When creating a tag, a name is required"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", True))
@@ -267,49 +383,6 @@ def test_create_tag(context: Context, monkeypatch):
     assert context.models.tags_model.rowCount() == 1
     assert context.models.tags_model.index(0, 1).data() == "Foo"
     assert context.models.tags_model.isDirty() is False
-
-
-def test_create_tag_uses_passed_default(context: Context, monkeypatch):
-    """When creating a tag, a name is required"""
-    monkeypatch.setattr(
-        QInputDialog,
-        "getText",
-        lambda *args, **kwargs: (kwargs["text"], kwargs["text"] == "Foobar"),
-    )
-
-    # When
-    context.controller.create_tag(default="Foobar")
-
-    # Then
-    assert context.models.tags_model.rowCount() == 1
-    assert context.models.tags_model.index(0, 1).data() == "Foobar"
-    assert context.models.tags_model.isDirty() is False
-
-
-def test_rename_tag_requires_name(context: Context, add_tag: AddTagFunc, monkeypatch):
-    """When creating a tag, a default name can be set"""
-    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("", True))
-    add_tag("Foo")
-    index = context.models.tags_model.index(0, 1)
-
-    # When
-    context.controller.rename_tag(index)
-
-    # Then
-    assert index.data() == "Foo"
-
-
-def test_rename_tag_requires_input(context: Context, add_tag: AddTagFunc, monkeypatch):
-    """When renaming a tag, the user can't click cancel"""
-    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", False))
-    add_tag("Foo")
-    index = context.models.tags_model.index(0, 1)
-
-    # When
-    context.controller.rename_tag(index)
-
-    # Then
-    assert index.data() == "Foo"
 
 
 def test_rename_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
@@ -325,47 +398,6 @@ def test_rename_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
     assert context.models.tags_model.rowCount() == 1
     assert index.data() == "Bar"
     assert context.models.tags_model.isDirty() is False
-
-
-def test_rename_tag_uses_passed_default(
-    context: Context, add_tag: AddTagFunc, monkeypatch
-):
-    """When renaming a tag, a default name can be set"""
-    monkeypatch.setattr(
-        QInputDialog,
-        "getText",
-        lambda *args, **kwargs: ("Foobar", kwargs["text"] == "Foo"),
-    )
-    add_tag("Foo")
-    index = context.models.tags_model.index(0, 1)
-
-    # When
-    context.controller.rename_tag(index)
-
-    # Then
-    assert context.models.tags_model.rowCount() == 1
-    assert context.models.tags_model.index(0, 1).data() == "Foobar"
-    assert context.models.tags_model.isDirty() is False
-
-
-def test_delete_tag_requires_confirmation(
-    context: Context, add_tag: AddTagFunc, monkeypatch
-):
-    """Delete requires confirmation"""
-    # Given
-    monkeypatch.setattr(
-        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Cancel
-    )
-
-    add_tag("Foo")
-    index = context.models.tags_model.index(0, 1)
-
-    # When
-    context.controller.delete_tag(index)
-
-    # Then
-    assert context.models.tags_model.rowCount() == 1
-    assert index.isValid()
 
 
 def test_delete_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
@@ -392,36 +424,6 @@ def test_delete_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
 ######################
 
 
-def test_rename_search_requires_name(
-    context: Context, add_search: AddSearchFunc, monkeypatch
-):
-    """When creating a search, a default name can be set"""
-    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("", True))
-    add_search("Foo")
-    index = context.models.searches_model.index(0, 1)
-
-    # When
-    context.controller.rename_search(index)
-
-    # Then
-    assert index.data() == "Foo"
-
-
-def test_rename_search_requires_input(
-    context: Context, add_search: AddSearchFunc, monkeypatch
-):
-    """When renaming a search, the user can't click cancel"""
-    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", False))
-    add_search("Foo")
-    index = context.models.searches_model.index(0, 1)
-
-    # When
-    context.controller.rename_search(index)
-
-    # Then
-    assert index.data() == "Foo"
-
-
 def test_rename_search(context: Context, add_search: AddSearchFunc, monkeypatch):
     """When renaming a search, the name value should change"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
@@ -435,47 +437,6 @@ def test_rename_search(context: Context, add_search: AddSearchFunc, monkeypatch)
     assert context.models.searches_model.rowCount() == 1
     assert index.data() == "Bar"
     assert context.models.searches_model.isDirty() is False
-
-
-def test_rename_search_uses_passed_default(
-    context: Context, add_search: AddSearchFunc, monkeypatch
-):
-    """When renaming a search, a default name can be set"""
-    monkeypatch.setattr(
-        QInputDialog,
-        "getText",
-        lambda *args, **kwargs: ("Foobar", kwargs["text"] == "Foo"),
-    )
-    add_search("Foo")
-    index = context.models.searches_model.index(0, 1)
-
-    # When
-    context.controller.rename_search(index)
-
-    # Then
-    assert context.models.searches_model.rowCount() == 1
-    assert context.models.searches_model.index(0, 1).data() == "Foobar"
-    assert context.models.searches_model.isDirty() is False
-
-
-def test_delete_search_requires_confirmation(
-    context: Context, add_search: AddSearchFunc, monkeypatch
-):
-    """Delete requires confirmation"""
-    # Given
-    monkeypatch.setattr(
-        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Cancel
-    )
-
-    add_search("Foo")
-    index = context.models.searches_model.index(0, 1)
-
-    # When
-    context.controller.delete_search(index)
-
-    # Then
-    assert context.models.searches_model.rowCount() == 1
-    assert index.isValid()
 
 
 def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch):
@@ -500,3 +461,80 @@ def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch)
 ##############################
 # Storage
 ##############################
+
+
+##############################
+# Status
+##############################
+
+
+def test_create_status(context: Context, monkeypatch):
+    """When creating a status, a name is required"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", True))
+
+    # When
+    context.controller.create_status()
+
+    # Then
+    assert context.models.statuses_model.rowCount() == 2
+    assert context.models.statuses_model.index(1, 1).data() == "Foo"
+    assert context.models.statuses_model.isDirty() is False
+
+
+def test_rename_status(context: Context, add_status: AddStatusFunc, monkeypatch):
+    """When renaming a status, the name value should change"""
+    monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
+    add_status("Foo")
+    index = context.models.statuses_model.index(1, 1)
+
+    # When
+    context.controller.rename_status(index)
+
+    # Then
+    assert context.models.statuses_model.rowCount() == 2
+    assert index.data() == "Bar"
+    assert context.models.statuses_model.isDirty() is False
+
+
+def test_delete_status(context: Context, add_status: AddStatusFunc, monkeypatch):
+    """Delete status does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_status("Foo")
+    index = context.models.statuses_model.index(1, 1)
+
+    # When
+    context.controller.delete_status(index)
+
+    # Then
+    assert context.models.statuses_model.rowCount() == 1
+    assert context.models.statuses_model.isDirty() is False
+    assert index.isValid()
+
+
+def test_delete_status_reassigns_bases(
+    context: Context, monkeypatch, add_status: AddStatusFunc, add_base: AddBaseFunc
+):
+    """When deleting a status, any bases using that status will be set to the default 0 value"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_status("Foo")
+    status_index = context.models.statuses_model.index(1, 1)
+    assert status_index.data() == "Foo"
+    add_base([BasesRecord(name="Test", status=1)])
+    base_index = context.models.bases_model.index(
+        0, context.models.bases_model.fieldIndex("status_id")
+    )
+    assert base_index.data(Qt.ItemDataRole.DisplayRole) == "Foo"
+
+    # When
+    context.controller.delete_status(status_index)
+
+    # Then
+    assert base_index.data(Qt.ItemDataRole.EditRole) == 0

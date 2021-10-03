@@ -9,7 +9,6 @@ from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
 from adjutant.context.database_context import (
     DatabaseContext,
-    get_tag_count,
     remove_all_tags_for_base,
 )
 from adjutant.context.dataclasses import Tag
@@ -36,6 +35,36 @@ class Controller(QObject):
         if index.model() == self.models.tags_sort_model:
             index = self.models.tags_sort_model.mapToSource(index)
         return index
+
+    def create_record(
+        self, model: QSqlTableModel, desc: str = "records", default: str = ""
+    ):
+        """Creates a record in the given model and sets name field"""
+        name, success = QInputDialog.getText(
+            None, f"New {desc}", f"Please enter a name for the {desc}", text=default
+        )
+
+        if name == "" or not success:
+            return
+
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        model.insertRecord(-1, record)
+        model.submitAll()
+
+    def rename_record(self, model: QSqlTableModel, index: QModelIndex):
+        """Rename the given record"""
+        previous = index.data()
+        name, success = QInputDialog.getText(
+            None, "New tag", f"Rename tag '{previous}' to:", text=previous
+        )
+
+        if name == "" or not success:
+            return
+
+        model.setData(index, name)
+        model.submitAll()
 
     def delete_records(
         self, model: QSqlTableModel, indexes: List[QModelIndex], desc="records"
@@ -72,51 +101,17 @@ class Controller(QObject):
 
     def create_tag(self, default=""):
         """Create a new tag"""
-        name, success = QInputDialog.getText(
-            None, "New tag", "Please enter a name for the tag", text=default
-        )
-
-        if name == "" or not success:
-            return
-
-        record = self.models.tags_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        self.models.tags_model.insertRecord(-1, record)
-        self.models.tags_model.submitAll()
+        self.create_record(self.models.tags_model, "tag", default)
 
     def rename_tag(self, index: QModelIndex):
         """Rename the given tag"""
         index = self.convert_index(index)
-        index = index.siblingAtColumn(1)
-        previous = index.data()
-        name, success = QInputDialog.getText(
-            None, "New tag", f"Rename tag '{previous}' to:", text=previous
-        )
-
-        if name == "" or not success:
-            return
-
-        self.models.tags_model.setData(index, name)
-        self.models.tags_model.submitAll()
+        self.rename_record(self.models.tags_model, index.siblingAtColumn(1))
 
     def delete_tag(self, index: QModelIndex):
         """Delete the given tag"""
         index = self.convert_index(index)
-        count = get_tag_count(self.database, index.siblingAtColumn(0).data())
-        usage = f" It will be removed from {count} bases." if count else ""
-
-        result = QMessageBox.warning(
-            None,
-            "Confirm deletion",
-            "Are you sure you want to delete this tag?" + usage,
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if result == QMessageBox.StandardButton.Cancel:
-            return
-        self.models.tags_model.removeRow(index.row())
-        self.models.tags_model.submitAll()
+        self.delete_records(self.models.tags_model, [index])
 
     def apply_field_to_bases(self, source: QModelIndex, destination: List[QModelIndex]):
         """Apply the data from the source index to the same field in the destination list"""
@@ -168,32 +163,11 @@ class Controller(QObject):
 
     def delete_search(self, index: QModelIndex):
         """Delete the given search"""
-        result = QMessageBox.warning(
-            None,
-            "Confirm deletion",
-            "Are you sure you want to delete this search?",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if result == QMessageBox.StandardButton.Cancel:
-            return
-        self.models.searches_model.removeRow(index.row())
-        self.models.searches_model.submitAll()
+        self.delete_records(self.models.searches_model, [index])
 
     def rename_search(self, index: QModelIndex):
         """Rename the given search"""
-        # index = self.models.searches_model.index(row, record.)
-        index = index.siblingAtColumn(1)
-        previous = index.data()
-        name, success = QInputDialog.getText(
-            None, "New name", "Please enter a new name for the search", text=previous
-        )
-
-        if name == "" or not success:
-            return
-
-        self.models.searches_model.setData(index, name)
-        self.models.searches_model.submitAll()
+        self.rename_record(self.models.searches_model, index.siblingAtColumn(1))
 
     def edit_storage(self, index: QModelIndex):
         """Edit a storage location"""
@@ -201,3 +175,23 @@ class Controller(QObject):
     def delete_storages(self, indexes: List[QModelIndex]):
         """Delete all passed-in storages"""
         self.delete_records(self.models.storage_model, indexes, "storage locations")
+
+    def create_status(self):
+        """Creates a new status"""
+        self.create_record(self.models.statuses_model, "status")
+
+    def rename_status(self, index: QModelIndex):
+        """Rename a status"""
+        self.rename_record(self.models.statuses_model, index)
+
+    def delete_status(self, index: QModelIndex):
+        """Delete a status"""
+        old_status = index.siblingAtColumn(0).data()
+        self.delete_records(self.models.statuses_model, [index], "status")
+
+        for row in range(self.models.bases_model.rowCount()):
+            index = self.models.bases_model.index(
+                row, self.models.bases_model.fieldIndex("status_id")
+            )
+            if index.data(Qt.ItemDataRole.EditRole) == old_status:
+                self.models.bases_model.setData(index, 0)
