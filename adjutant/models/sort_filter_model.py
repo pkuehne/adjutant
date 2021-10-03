@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import yaml
 from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt, pyqtSignal
 from PyQt6.QtGui import QIcon
-from adjutant.models.bases_model import Tag
+from adjutant.context.dataclasses import Tag
 
 
 @dataclass

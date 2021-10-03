@@ -4,7 +4,7 @@ from typing import List
 import operator
 from PyQt6.QtWidgets import QListWidget, QListWidgetItem
 from PyQt6.QtCore import Qt, pyqtProperty
-from adjutant.models.bases_model import Tag
+from adjutant.context.dataclasses import Tag
 
 
 class TagListWidget(QListWidget):

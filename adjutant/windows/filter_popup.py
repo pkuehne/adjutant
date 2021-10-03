@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from adjutant.models.bases_model import Tag
+from adjutant.context.dataclasses import Tag
 from adjutant.models.sort_filter_model import SortFilterModel
 
 
