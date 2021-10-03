@@ -23,6 +23,7 @@ class BasesRecord:
     width: int = 0
     depth: int = 0
     figures: int = 0
+    status: int = 0
 
 
 AddBaseFunc = Callable[[List[BasesRecord]], None]
@@ -45,6 +46,7 @@ def add_base(context: Context) -> AddBaseFunc:
             record.setValue("width", item.width)
             record.setValue("depth", item.depth)
             record.setValue("figures", item.figures)
+            record.setValue("status_id", item.status)
 
             assert context.models.bases_model.insertRecord(-1, record)
         context.models.bases_model.submitAll()
@@ -119,6 +121,24 @@ def add_search(context: Context) -> AddSearchFunc:
         assert context.models.searches_model.lastError().text() == ""
 
     return add_search_func
+
+
+AddStatusFunc = Callable[[str], None]
+
+
+@pytest.fixture
+def add_status(context: Context) -> AddStatusFunc:
+    """Fixture to add a record to the statuses table"""
+
+    def add_status_func(name: str) -> None:
+        record = context.models.statuses_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert context.models.statuses_model.insertRecord(-1, record)
+        context.models.statuses_model.submitAll()
+        assert context.models.statuses_model.lastError().text() == ""
+
+    return add_status_func
 
 
 @pytest.fixture
