@@ -23,22 +23,12 @@ class RelationalModel(QSqlTableModel):
         super().__init__(parent=parent)
         self.m2m_relationships: List[ManyToManyRelationship] = []
         self.o2m_relationships: Dict[int, OneToManyRelationship] = {}
-        self.relational_fields = {}
         self.boolean_fields = []
         self.db_context = DatabaseContext()
 
     def set_many_to_many_relationship(self, rel: ManyToManyRelationship):
         """Adds a new many-to-many relationship"""
         self.m2m_relationships.append(rel)
-        # sts = self.tableName()
-        # tts = rel.target_table
-        # its = f"{sts}_{tts}"
-        # rel.delete_query = f"""
-        #     DELETE FROM {its} WHERE {sts}_id = :source_id
-        # """
-        # rel.insert_query = f"""
-        #     INSERT INTO {its} VALUES(NULL, :source_id, :target_id)
-        # """
 
     def set_one_to_many_relationship(self, field: int, rel: OneToManyRelationship):
         """Adds a relationship for a given field"""
@@ -66,11 +56,10 @@ class RelationalModel(QSqlTableModel):
 
         source_id = idx.siblingAtColumn(0).data()
         values = get_tags_for_base(self.db_context, source_id)
-        ids = [value.tag_id for value in values]
         names = [value.tag_name for value in values]
         return {
             Qt.ItemDataRole.DisplayRole: ",".join(names),
-            Qt.ItemDataRole.EditRole: ids,
+            Qt.ItemDataRole.EditRole: values,
             Qt.ItemDataRole.SizeHintRole: len(",".join(names)),
             Qt.ItemDataRole.ToolTipRole: "\n".join(names),
         }.get(role, None)
@@ -80,6 +69,8 @@ class RelationalModel(QSqlTableModel):
         foreign_key = super().data(idx, role)
         if role == Qt.ItemDataRole.EditRole:
             return foreign_key
+        if foreign_key is None:
+            return None
         relationship = self.o2m_relationships[idx.column()]
         query = f"""
             SELECT {relationship.target_field} 
@@ -122,6 +113,7 @@ class RelationalModel(QSqlTableModel):
     def _set_data_m2m(self, index: QModelIndex, value, role: Qt.ItemDataRole) -> bool:
         """Many to many relationship column"""
         if role != Qt.ItemDataRole.EditRole:
+            print("Don't set anything other than EditRole")
             return False
 
         source_id = index.siblingAtColumn(0).data()

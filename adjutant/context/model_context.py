@@ -3,10 +3,10 @@
 from typing import List
 from dataclasses import dataclass
 
-from PyQt6.QtSql import QSqlQueryModel, QSqlRelation, QSqlTableModel
+from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from adjutant.models.bases_model import BasesModel
-from adjutant.context.dataclasses import ManyToManyRelationship
+from adjutant.context.dataclasses import ManyToManyRelationship, OneToManyRelationship
 
 
 @dataclass
@@ -63,7 +63,6 @@ class ModelContext:
         self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
         self.storage_model = self._setup_storage_model()
-
         self.statuses_model = self._setup_statuses_model()
 
         self.refresh_models()
@@ -75,12 +74,24 @@ class ModelContext:
         self.base_tags_model.select()
         self.searches_model.select()
         self.storage_model.select()
+        self.statuses_model.select()
 
     def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""
         model = BasesModel()
         model.setTable("bases")
         model.set_many_to_many_relationship(ManyToManyRelationship("tags", "name"))
+        model.set_one_to_many_relationship(
+            model.fieldIndex("storage_id"),
+            OneToManyRelationship("storage", "id", "name"),
+        )
+        model.set_one_to_many_relationship(
+            model.fieldIndex("status_id"),
+            OneToManyRelationship("statuses", "id", "name"),
+        )
+
+        model.boolean_fields.append(model.fieldIndex("completed"))
+        model.boolean_fields.append(model.fieldIndex("damaged"))
         setup_header_data(
             model,
             [
@@ -108,17 +119,6 @@ class ModelContext:
             ],
         )
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
-        model.boolean_fields.append(model.fieldIndex("completed"))
-        model.boolean_fields.append(model.fieldIndex("damaged"))
-        model.relational_fields["storage_id"] = model.fieldIndex("storage_id")
-        model.relational_fields["status_id"] = model.fieldIndex("status_id")
-        model.setRelation(
-            model.fieldIndex("storage_id"), QSqlRelation("storage", "id", "name")
-        )
-        model.setRelation(
-            model.fieldIndex("status_id"), QSqlRelation("statuses", "id", "name")
-        )
-        model.setJoinMode(model.JoinMode.LeftJoin)
         return model
 
     def __setup_tags_model(self) -> QSqlTableModel:

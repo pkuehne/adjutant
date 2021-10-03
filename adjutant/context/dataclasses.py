@@ -18,9 +18,6 @@ class ManyToManyRelationship:
 
     target_table: str
     target_field: int
-    select_query: str = None
-    delete_query: str = None
-    insert_query: str = None
 
 
 @dataclass(eq=True, frozen=True)

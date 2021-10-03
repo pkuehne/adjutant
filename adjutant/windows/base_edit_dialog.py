@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtSql import QSqlRelationalDelegate
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -23,6 +22,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from adjutant.context import Context
+from adjutant.widgets.foreign_key_combobox import ForeignKeyCombobox
 from adjutant.widgets.nullable_date import NullableDate
 from adjutant.widgets.tag_list_widget import TagListWidget
 
@@ -52,8 +52,8 @@ class MappedWidgets:
         self.tag_list = TagListWidget()
         self.tag_edit = QComboBox()
         self.add_tag_button = QPushButton()
-        self.storage_combobox = QComboBox()
-        self.status_combobox = QComboBox()
+        self.storage_combobox = ForeignKeyCombobox()
+        self.status_combobox = ForeignKeyCombobox()
 
 
 class BaseEditDialog(QDialog):
@@ -149,20 +149,13 @@ class BaseEditDialog(QDialog):
         self.widgets.material_combobox.setModel(
             QStringListModel(["Plastic", "Resin", "Metal"])
         )
-        storage_model = self.model.relationModel(
-            self.model.relational_fields["storage_id"]
-        )
-        self.widgets.storage_combobox.setModel(storage_model)
+        self.widgets.storage_combobox.setModel(self.context.models.storage_model)
         self.widgets.storage_combobox.setModelColumn(1)
-        status_model = self.model.relationModel(
-            self.model.relational_fields["status_id"]
-        )
-        self.widgets.status_combobox.setModel(status_model)
+        self.widgets.status_combobox.setModel(self.context.models.statuses_model)
         self.widgets.status_combobox.setModelColumn(1)
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)
-        self.mapper.setItemDelegate(QSqlRelationalDelegate())
         self.mapper.addMapping(self.widgets.id_label, self.field("id"), b"text")
         self.mapper.addMapping(self.widgets.name_edit, self.field("name"))
         self.mapper.addMapping(self.widgets.scale_edit, self.field("scale"))
@@ -182,16 +175,12 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(self.widgets.date_acquired, self.field("date_acquired"))
         self.mapper.addMapping(self.widgets.completed, self.field("completed"))
         self.mapper.addMapping(self.widgets.damaged, self.field("damaged"))
-        self.mapper.addMapping(
-            self.widgets.storage_combobox, self.model.relational_fields["storage_id"]
-        )
+        self.mapper.addMapping(self.widgets.storage_combobox, self.field("storage_id"))
         self.mapper.addMapping(
             self.widgets.notes_edit, self.field("notes"), b"plainText"
         )
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
-        self.mapper.addMapping(
-            self.widgets.status_combobox, self.model.relational_fields["status_id"]
-        )
+        self.mapper.addMapping(self.widgets.status_combobox, self.field("status_id"))
         self.mapper.addMapping(
             self.widgets.tag_list,
             self.context.models.bases_model.column_id_tags(),
