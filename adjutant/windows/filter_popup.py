@@ -101,13 +101,16 @@ class FilterPopup(QDialog):
 
         items: List[FilterValue] = []
         for row in range(model.rowCount()):
-            value = model.index(row, self.column).data(Qt.ItemDataRole.EditRole)
+            index = model.index(row, self.column)
+            value = index.data(Qt.ItemDataRole.EditRole)
+            display = index.data(Qt.ItemDataRole.DisplayRole)
+
             if isinstance(value, list):
                 value: List[Tag] = value
                 for tag in value:
                     items.append(FilterValue(tag.tag_name, tag.tag_id))
             else:
-                items.append(FilterValue(str(value), value))
+                items.append(FilterValue(display, value))
         unique = list(set(items))
 
         for filter_ in unique:
