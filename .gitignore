@@ -2,7 +2,10 @@ venv
 __pycache__
 adjutant/resources.py
 *.db
+*.spec
 cov.xml
 .coverage
 cov_html
 htmlcov
+build/
+dist/

@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         # self.context.load_database(":memory:")
         self.context.models.refresh_models()
         if self.context.models.bases_model.rowCount() == 0:
-            self.context.database.execute_sql_file("resources/populate_test_data.sql")
+            self.context.database.execute_sql_file("populate_test_data.sql")
         self.context.models.refresh_models()
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)

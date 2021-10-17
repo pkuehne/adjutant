@@ -2,6 +2,7 @@
 Program entry
 """
 import sys
+from os import path
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QDir
 from adjutant.windows.main_window import MainWindow
@@ -9,12 +10,10 @@ from adjutant.windows.main_window import MainWindow
 
 def main(argv):
     """The main"""
-    # QApplication.setAttribute(Qt.AA_DisableWindowContextHelpButton)
-    # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QApplication.setStyle("windows")
 
-    QDir.addSearchPath("icons", "resources/icons")
-    QDir.addSearchPath("migrations", "resources/migrations")
+    icons_path = path.abspath(path.join(path.dirname(__file__), "resources/icons"))
+    QDir.addSearchPath("icons", icons_path)
 
     app = QApplication(argv)
 
