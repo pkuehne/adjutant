@@ -2,6 +2,7 @@
 
 from typing import Dict, List
 from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtGui import QColor
 from PyQt6.QtSql import QSqlQuery, QSqlTableModel
 from adjutant.context.dataclasses import (
     OneToManyRelationship,
@@ -24,6 +25,7 @@ class RelationalModel(QSqlTableModel):
         self.m2m_relationships: List[ManyToManyRelationship] = []
         self.o2m_relationships: Dict[int, OneToManyRelationship] = {}
         self.boolean_fields = []
+        self.colour_fields = []
         self.db_context = DatabaseContext()
 
     def set_many_to_many_relationship(self, rel: ManyToManyRelationship):
@@ -93,6 +95,14 @@ class RelationalModel(QSqlTableModel):
             return "Yes" if value == 1 else "No"
         return value
 
+    def _data_colour(self, idx, role: int):
+        """Colour field handling"""
+        if role != Qt.ItemDataRole.DecorationRole:
+            return super().data(idx, role=role)
+
+        hexvalue = super().data(idx, role=Qt.ItemDataRole.EditRole)
+        return QColor(hexvalue)
+
     def data(self, idx: QModelIndex, role: int):
         """Return many-to-many relationships as well"""
         if idx.column() >= super().columnCount():
@@ -103,6 +113,9 @@ class RelationalModel(QSqlTableModel):
 
         if idx.column() in self.boolean_fields:
             return self._data_boolean(idx, role)
+
+        if idx.column() in self.colour_fields:
+            return self._data_colour(idx, role)
 
         return super().data(idx, role=role)
 

@@ -177,9 +177,12 @@ class ModelContext:
 
     def _setup_colours_model(self) -> None:
         """Setup the colours models"""
-        self.colours_model = QSqlTableModel()
+        self.colours_model = RelationalModel()
         self.colours_model.setTable("colours")
         self.colours_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.colours_model.colour_fields.append(
+            self.colours_model.fieldIndex("hexvalue")
+        )
         setup_header_data(
             self.colours_model,
             [
