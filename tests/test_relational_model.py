@@ -1,7 +1,14 @@
 """ Tests for the RelationalModel"""
 
 from PyQt6.QtCore import Qt
-from tests.conftest import AddEmptyBasesFunc, AddTagFunc, AddTagUseFunc
+from PyQt6.QtGui import QColor
+from tests.conftest import (
+    AddBaseFunc,
+    AddEmptyBasesFunc,
+    AddTagFunc,
+    AddTagUseFunc,
+    BasesRecord,
+)
 from adjutant.context.dataclasses import ManyToManyRelationship, Tag
 from adjutant.models.relational_model import OneToManyRelationship, RelationalModel
 from adjutant.context.context import Context
@@ -62,6 +69,25 @@ def test_boolean_column_returns_boolean_for_edit_role(
 
     # Then
     assert completed == 0
+
+
+def test_colour_column_returns_qcolor_for_decoration_role(
+    relational_model: RelationalModel, add_base: AddBaseFunc
+):
+    """A column marked as a colour column should return a QColor for its decoration role"""
+
+    # Given
+    expected = "#ff00aa"
+    relational_model.colour_fields.append(relational_model.fieldIndex("name"))
+    add_base([BasesRecord(name=expected)])
+
+    # When
+    color = relational_model.index(0, relational_model.fieldIndex("name")).data(
+        Qt.ItemDataRole.DecorationRole
+    )
+
+    # Then
+    assert color == QColor(expected)
 
 
 def test_relationship_returns_own_value_for_edit(
