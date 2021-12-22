@@ -73,3 +73,28 @@ CREATE TABLE IF NOT EXISTS settings (
     version INTEGER
 );
 INSERT into settings(version) VALUES(1);
+
+DROP TABLE IF EXISTS colours;
+CREATE TABLE IF NOT EXISTS colours (
+    id INTEGER PRIMARY KEY,
+    name TEXT DEFAULT "",
+    manufacturer TEXT DEFAULT "",
+    range TEXT DEFAULT "",
+    hexvalue TEXT DEFAULT ""
+    
+);
+
+DROP TABLE IF EXISTS recipes;
+CREATE TABLE IF NOT EXISTS recipes (
+    id INTEGER PRIMARY KEY,
+    name TEXT DEFAULT ""
+);
+
+DROP TABLE IF EXISTS recipe_steps;
+CREATE TABLE IF NOT EXISTS recipe_steps (
+    id INTEGER PRIMARY KEY,
+    recipes_id INTEGER DEFAULT 0,
+    colours_id INTEGER DEFAULT 0,
+    step_num INTEGER DEFAULT 0
+);
+

@@ -39,11 +39,14 @@ class MainWindowMenuBar(QMenuBar):
         tags_action.triggered.connect(lambda _: self.context.controller.create_tag())
         storage_action = QAction("&Storage", self)
         storage_action.triggered.connect(self.context.signals.show_add_storage_dialog)
+        colour_action = QAction("&Colour", self)
+        colour_action.triggered.connect(self.context.signals.show_add_colour_dialog)
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)
         add_menu.addAction(tags_action)
         add_menu.addAction(storage_action)
+        add_menu.addAction(colour_action)
 
     def _setup_manage_menu(self):
         """Setup the Manage menu"""

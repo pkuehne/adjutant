@@ -9,6 +9,7 @@ from tests.conftest import (
     AddSearchFunc,
     AddStatusFunc,
     AddTagFunc,
+    AddColourFunc,
     BasesRecord,
 )
 from adjutant.context.context import Context
@@ -538,3 +539,25 @@ def test_delete_status_reassigns_bases(
 
     # Then
     assert base_index.data(Qt.ItemDataRole.EditRole) == 0
+
+
+##############################
+# Colours
+##############################
+def test_delete_colour(context: Context, add_colour: AddColourFunc, monkeypatch):
+    """Delete colour does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_colour("Foo")
+    index = context.models.colours_model.index(0, 1)
+
+    # When
+    context.controller.delete_colour(index)
+
+    # Then
+    assert context.models.colours_model.rowCount() == 0
+    assert context.models.colours_model.isDirty() is False
+    assert index.isValid()

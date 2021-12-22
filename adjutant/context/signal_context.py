@@ -17,5 +17,8 @@ class SignalContext(QObject):
     show_add_storage_dialog = pyqtSignal()
     show_edit_storage_dialog = pyqtSignal(QModelIndex)
 
+    show_add_colour_dialog = pyqtSignal()
+    show_edit_colour_dialog = pyqtSignal(QModelIndex)
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)

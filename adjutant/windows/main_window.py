@@ -9,6 +9,7 @@ from adjutant.widgets.main_window_toolbar import MainWindowToolbar
 from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
 from adjutant.windows.bases_screen import BasesScreen
 from adjutant.windows.storage_screen import StorageScreen
+from adjutant.windows.colours_screen import ColoursScreen
 
 
 class MainWindow(QMainWindow):
@@ -31,12 +32,14 @@ class MainWindow(QMainWindow):
 
         self.bases = BasesScreen(self.context)
         self.storage = StorageScreen(self.context)
+        self.colours = ColoursScreen(self.context)
 
         self.tabbar = QTabWidget(self)
         self.tabbar.addTab(self.bases, "Bases")
         self.tabbar.addTab(QWidget(), "Units")
         self.tabbar.addTab(QWidget(), "Forces")
         self.tabbar.addTab(self.storage, "Storage")
+        self.tabbar.addTab(self.colours, self.tr("Colours"))
 
         self.setCentralWidget(self.tabbar)
 

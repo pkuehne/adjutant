@@ -141,6 +141,24 @@ def add_status(context: Context) -> AddStatusFunc:
     return add_status_func
 
 
+AddColourFunc = Callable[[str], None]
+
+
+@pytest.fixture
+def add_colour(context: Context) -> AddColourFunc:
+    """Fixture to add a record to the colours table"""
+
+    def add_colour_func(name: str) -> None:
+        record = context.models.colours_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert context.models.colours_model.insertRecord(-1, record)
+        context.models.colours_model.submitAll()
+        assert context.models.colours_model.lastError().text() == ""
+
+    return add_colour_func
+
+
 @pytest.fixture
 def context():
     """Sets up and tears down the database"""

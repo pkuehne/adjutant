@@ -83,3 +83,5 @@ INSERT INTO statuses VALUES (NULL, "Undercoated");
 INSERT INTO statuses VALUES (NULL, "Painted");
 INSERT INTO statuses VALUES (NULL, "Varnished");
 INSERT INTO statuses VALUES (NULL, "Complete");
+
+INSERT INTO colours VALUES (NULL, "Mephiston Red", "Citadel", "Base Colors", "#991115")

@@ -195,3 +195,7 @@ class Controller(QObject):
             )
             if index.data(Qt.ItemDataRole.EditRole) == old_status:
                 self.models.bases_model.setData(index, 0)
+
+    def delete_colour(self, index: QModelIndex):
+        """Deletes a given colour"""
+        self.delete_records(self.models.colours_model, [index], "colour")

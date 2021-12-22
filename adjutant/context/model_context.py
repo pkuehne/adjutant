@@ -7,6 +7,7 @@ from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from adjutant.models.bases_model import BasesModel
 from adjutant.context.dataclasses import ManyToManyRelationship, OneToManyRelationship
+from adjutant.models.relational_model import RelationalModel
 
 
 @dataclass
@@ -41,6 +42,9 @@ class ModelContext:
         self.searches_model = None
         self.storage_model = None
         self.statuses_model = None
+        self.colours_model = None
+        self.recipes_model = None
+        self.recipe_steps_model = None
 
     def load(self):
         """load the models from the database"""
@@ -65,6 +69,10 @@ class ModelContext:
         self.storage_model = self._setup_storage_model()
         self.statuses_model = self._setup_statuses_model()
 
+        self._setup_colours_model()
+        self._setup_recipes_model()
+        self._setup_recipe_steps_model()
+
         self.refresh_models()
 
     def refresh_models(self) -> None:
@@ -75,6 +83,9 @@ class ModelContext:
         self.searches_model.select()
         self.storage_model.select()
         self.statuses_model.select()
+        self.colours_model.select()
+        self.recipes_model.select()
+        self.recipe_steps_model.select()
 
     def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""
@@ -163,3 +174,65 @@ class ModelContext:
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         setup_header_data(model, [HeaderRoles("Name", "What this status represents")])
         return model
+
+    def _setup_colours_model(self) -> None:
+        """Setup the colours models"""
+        self.colours_model = QSqlTableModel()
+        self.colours_model.setTable("colours")
+        self.colours_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        setup_header_data(
+            self.colours_model,
+            [
+                HeaderRoles("ID", "The internal ID of the colour"),
+                HeaderRoles("Name", "The name of this colour"),
+                HeaderRoles(
+                    "Manufacturer",
+                    "The manufacturer of this colour (Citadel, Vallejo, etc)",
+                ),
+                HeaderRoles("Range", "What group this is (e.g. Layer, Model Air, etc)"),
+                HeaderRoles(
+                    "Hex Value", "The RGB values of this colour in hexadecimal notation"
+                ),
+            ],
+        )
+
+    def _setup_recipes_model(self) -> None:
+        """Setup the recipes model"""
+        self.recipes_model = QSqlTableModel()
+        self.recipes_model.setTable("recipes")
+        self.recipes_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        setup_header_data(
+            self.recipes_model,
+            [
+                HeaderRoles("ID", "Internal ID of the recipe"),
+                HeaderRoles("Name", "The name for this colour recipe"),
+            ],
+        )
+
+    def _setup_recipe_steps_model(self) -> None:
+        """Setup the recipe steps model"""
+        self.recipe_steps_model = RelationalModel()
+        self.recipe_steps_model.setTable("recipe_steps")
+        self.recipe_steps_model.setEditStrategy(
+            QSqlTableModel.EditStrategy.OnManualSubmit
+        )
+
+        self.recipe_steps_model.set_one_to_many_relationship(
+            self.recipe_steps_model.fieldIndex("recipes_id"),
+            OneToManyRelationship("recipes", "id", "name"),
+        )
+
+        self.recipe_steps_model.set_one_to_many_relationship(
+            self.recipe_steps_model.fieldIndex("colours_id"),
+            OneToManyRelationship("colours", "id", "name"),
+        )
+
+        setup_header_data(
+            self.recipe_steps_model,
+            [
+                HeaderRoles("ID", "The internal ID of this recipe step"),
+                HeaderRoles("Recipe", "The recipe this step belongs to"),
+                HeaderRoles("Colour", "The colour to apply at this step"),
+                HeaderRoles("Number", "Which step number this step is"),
+            ],
+        )
