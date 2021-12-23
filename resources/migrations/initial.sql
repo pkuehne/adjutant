@@ -20,9 +20,11 @@ CREATE TABLE IF NOT EXISTS bases (
     custom_id TEXT DEFAULT "",
     storage_id INTEGER DEFAULT 0,
     status_id INTEGER DEFAULT 0,
+    colour_scheme_id INTEGER DEFAULT 0,
 
     CONSTRAINT fk_storage_id FOREIGN KEY(storage_id) REFERENCES storage(id),
-    CONSTRAINT fk_status_id FOREIGN KEY(status_id) REFERENCES statuses(id)
+    CONSTRAINT fk_status_id FOREIGN KEY(status_id) REFERENCES statuses(id),
+    CONSTRAINT fk_scheme_id FOREIGN KEY(colour_scheme_id) REFERENCES colour_schemes(id)
 );
 
 DROP TABLE IF EXISTS tags;
@@ -80,14 +82,15 @@ CREATE TABLE IF NOT EXISTS colours (
     name TEXT DEFAULT "",
     manufacturer TEXT DEFAULT "",
     range TEXT DEFAULT "",
-    hexvalue TEXT DEFAULT ""
-    
+    hexvalue TEXT DEFAULT "",
+    notes TEXT DEFAULT ""    
 );
 
 DROP TABLE IF EXISTS recipes;
 CREATE TABLE IF NOT EXISTS recipes (
     id INTEGER PRIMARY KEY,
-    name TEXT DEFAULT ""
+    name TEXT DEFAULT "",
+    notes TEXT DEFAULT ""
 );
 
 DROP TABLE IF EXISTS recipe_steps;
@@ -98,3 +101,17 @@ CREATE TABLE IF NOT EXISTS recipe_steps (
     step_num INTEGER DEFAULT 0
 );
 
+DROP TABLE IF EXISTS colour_schemes;
+CREATE TABLE IF NOT EXISTS colour_schemes (
+    id INTEGER PRIMARY KEY,
+    name TEXT DEFAULT ""
+);
+INSERT INTO colour_schemes(id, name) VALUES (0, "<None>");
+
+
+DROP TABLE IF EXISTS scheme_components;
+CREATE TABLE IF NOT EXISTS scheme_components (
+    id INTEGER PRIMARY KEY,
+    name TEXT DEFAULT "",
+    recipes_id INTEGER DEFAULT 0
+);

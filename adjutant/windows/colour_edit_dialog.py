@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QTextEdit,
     QVBoxLayout,
 )
 
@@ -27,6 +28,7 @@ class MappedWidgets:
         self.manufacturer_edit = QLineEdit()
         self.range_edit = QLineEdit()
         self.hexvalue_edit = ColourPick()
+        self.notes_edit = QTextEdit()
 
 
 class ColourEditDialog(QDialog):
@@ -67,6 +69,7 @@ class ColourEditDialog(QDialog):
         form_layout.addRow("Manufacturer: ", self.widgets.manufacturer_edit)
         form_layout.addRow("Range: ", self.widgets.range_edit)
         form_layout.addRow("Colour: ", self.widgets.hexvalue_edit)
+        form_layout.addRow("Notes: ", self.widgets.notes_edit)
 
         action_button_layout = QHBoxLayout()
         action_button_layout.addWidget(self.delete_button)
@@ -93,6 +96,9 @@ class ColourEditDialog(QDialog):
         )
         self.mapper.addMapping(self.widgets.range_edit, self.field("range"))
         self.mapper.addMapping(self.widgets.hexvalue_edit, self.field("hexvalue"))
+        self.mapper.addMapping(
+            self.widgets.notes_edit, self.field("notes"), b"plainText"
+        )
 
         self.mapper.setCurrentModelIndex(self.index)
 

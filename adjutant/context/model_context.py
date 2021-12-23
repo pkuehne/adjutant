@@ -45,6 +45,8 @@ class ModelContext:
         self.colours_model = None
         self.recipes_model = None
         self.recipe_steps_model = None
+        self.colour_schemes_model = None
+        self.scheme_components_model = None
 
     def load(self):
         """load the models from the database"""
@@ -72,6 +74,8 @@ class ModelContext:
         self._setup_colours_model()
         self._setup_recipes_model()
         self._setup_recipe_steps_model()
+        self._setup_colour_schemes_model()
+        self._setup_scheme_components_model()
 
         self.refresh_models()
 
@@ -86,6 +90,8 @@ class ModelContext:
         self.colours_model.select()
         self.recipes_model.select()
         self.recipe_steps_model.select()
+        self.colour_schemes_model.select()
+        self.scheme_components_model.select()
 
     def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""
@@ -99,6 +105,10 @@ class ModelContext:
         model.set_one_to_many_relationship(
             model.fieldIndex("status_id"),
             OneToManyRelationship("statuses", "id", "name"),
+        )
+        model.set_one_to_many_relationship(
+            model.fieldIndex("colour_scheme_id"),
+            OneToManyRelationship("colour_schemes", "id", "name"),
         )
 
         model.boolean_fields.append(model.fieldIndex("completed"))
@@ -126,6 +136,7 @@ class ModelContext:
                 HeaderRoles("Custom ID", "How you refer to this base"),
                 HeaderRoles("Storage", "Where this base is kept"),
                 HeaderRoles("Status", "What status this base is in"),
+                HeaderRoles("Colour Scheme", "The colour scheme for this mini"),
                 HeaderRoles("Tags", "All tags associated with this base"),
             ],
         )
@@ -196,6 +207,7 @@ class ModelContext:
                 HeaderRoles(
                     "Hex Value", "The RGB values of this colour in hexadecimal notation"
                 ),
+                HeaderRoles("Notes", "General notes about this colour"),
             ],
         )
 
@@ -209,6 +221,7 @@ class ModelContext:
             [
                 HeaderRoles("ID", "Internal ID of the recipe"),
                 HeaderRoles("Name", "The name for this colour recipe"),
+                HeaderRoles("Notes", "General notes about this recipe"),
             ],
         )
 
@@ -238,4 +251,20 @@ class ModelContext:
                 HeaderRoles("Colour", "The colour to apply at this step"),
                 HeaderRoles("Number", "Which step number this step is"),
             ],
+        )
+
+    def _setup_colour_schemes_model(self) -> None:
+        """Setup the colour schemes"""
+        self.colour_schemes_model = RelationalModel()
+        self.colour_schemes_model.setTable("colour_schemes")
+        self.colour_schemes_model.setEditStrategy(
+            QSqlTableModel.EditStrategy.OnManualSubmit
+        )
+
+    def _setup_scheme_components_model(self) -> None:
+        """Setup the colour schemes"""
+        self.scheme_components_model = RelationalModel()
+        self.scheme_components_model.setTable("colour_schemes")
+        self.scheme_components_model.setEditStrategy(
+            QSqlTableModel.EditStrategy.OnManualSubmit
         )
