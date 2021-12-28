@@ -7,7 +7,7 @@ from PyQt6.QtCore import QFile, QTextStream, qWarning
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.settings_context import SettingsContext
-from adjutant.context.dataclasses import Tag
+from adjutant.context.dataclasses import RecipeStep, Tag
 
 
 @dataclass
@@ -96,7 +96,6 @@ def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     result = context.execute_sql_command(query, bindings)
     if not result:
         print("Failed to remove old tags")
-    return
 
 
 def add_tag_to_base(context: DatabaseContext, base_id: int, tag_id: int):
@@ -106,7 +105,6 @@ def add_tag_to_base(context: DatabaseContext, base_id: int, tag_id: int):
     result = context.execute_sql_command(query, bindings)
     if not result:
         print("Failed to associate tag to base")
-    return
 
 
 def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[Tag]:
@@ -144,7 +142,7 @@ def get_bases_for_tag(context: DatabaseContext, tag_id: int) -> List[int]:
     bindings = [QueryBinding(":tag_id", tag_id)]
     result: QSqlQuery = context.execute_sql_command(query, bindings)
     if not result:
-        return
+        return []
     bases = []
     while result.next():
         bases.append(result.value("base_id"))
@@ -164,3 +162,40 @@ def get_tag_count(context: DatabaseContext, tag_id: int) -> int:
         return 0
     result.next()
     return result.value("cnt")
+
+
+def get_recipe_steps(context: DatabaseContext, recipe_id: int) -> List[RecipeStep]:
+    """Retrieve all steps for a given recipe as RecipeStep objects"""
+    query = """
+        SELECT colours.id, colours.name, colours.hexvalue, step_operations.id, step_operations.name
+        FROM recipe_steps
+        INNER JOIN colours ON recipe_steps.colours_id == colours.id
+        INNER JOIN step_operations ON recipe_steps.operations_id == step_operations.id
+        WHERE recipes_id = :recipes_id
+    """
+    bindings = [QueryBinding(":recipes_id", recipe_id)]
+    result: QSqlQuery = context.execute_sql_command(query, bindings)
+    if not result:
+        return []
+    steps = []
+    while result.next():
+        step = RecipeStep(
+            result.value("colours.id"),
+            result.value("colours.name"),
+            result.value("step_operations.id"),
+            result.value("step_operations.name"),
+            result.value("hexvalue"),
+        )
+        steps.append(step)
+    return steps
+
+
+def remove_recipe_steps(context: DatabaseContext, recipe_id: int) -> bool:
+    """Remove all steps for the given recipe"""
+    query = """
+        DELETE FROM recipe_steps
+        WHERE recipes_id = :recipes_id
+    """
+    bindings = [QueryBinding(":recipes_id", recipe_id)]
+    result: QSqlQuery = context.execute_sql_command(query, bindings)
+    return bool(result)

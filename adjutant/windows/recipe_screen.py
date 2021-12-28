@@ -4,11 +4,11 @@ from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from adjutant.widgets.sort_filter_table import SortFilterTable
 from adjutant.context import Context
 
-from adjutant.windows.colour_edit_dialog import ColourEditDialog
+from adjutant.windows.recipe_edit_dialog import RecipeEditDialog
 
 
-class ColoursScreen(QWidget):
-    """Main widget for all colours-related content"""
+class RecipeScreen(QWidget):
+    """Main widget for all colour recipes"""
 
     def __init__(self, context: Context, parent=None) -> None:
         super().__init__(parent=parent)
@@ -28,17 +28,17 @@ class ColoursScreen(QWidget):
 
     def _setup_widgets(self):
         """Set up the widgets"""
-        self.table.setModel(self.context.models.colours_model)
+        self.table.setModel(self.context.models.recipes_model)
 
     def _setup_signals(self):
         """Setup the signals"""
-        self.context.signals.show_add_colour_dialog.connect(
-            lambda: ColourEditDialog.add(self.context, self)
+        self.context.signals.show_add_recipe_dialog.connect(
+            lambda: RecipeEditDialog.add(self.context, self)
         )
-        self.context.signals.show_edit_colour_dialog.connect(
-            lambda idx: ColourEditDialog.edit(self.context, idx, self)
+        self.context.signals.show_edit_recipe_dialog.connect(
+            lambda idx: RecipeEditDialog.edit(self.context, idx, self)
         )
         self.table.item_edited.connect(
-            lambda idx: ColourEditDialog.edit(self.context, idx, self)
+            lambda idx: RecipeEditDialog.edit(self.context, idx, self)
         )
-        self.table.item_deleted.connect(self.context.controller.delete_colours)
+        self.table.item_deleted.connect(self.context.controller.delete_recipes)

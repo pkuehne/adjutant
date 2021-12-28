@@ -2,13 +2,20 @@
 
 from tests.conftest import (
     AddBaseFunc,
+    AddColourFunc,
     AddEmptyBasesFunc,
+    AddStepFunc,
     AddTagFunc,
     AddTagUseFunc,
     BasesRecord,
 )
 from adjutant.context import Context
-from adjutant.context.database_context import add_tag_to_base, get_tag_count
+from adjutant.context.database_context import (
+    add_tag_to_base,
+    get_recipe_steps,
+    get_tag_count,
+    remove_recipe_steps,
+)
 
 
 def test_tag_count_is_zero_no_usage(context: Context, add_tag: AddTagFunc):
@@ -98,3 +105,64 @@ def test_add_tag_to_base_invalid_id(
     # Then
     context.models.base_tags_model.select()
     assert context.models.base_tags_model.rowCount() == 0
+
+
+def test_recipe_steps_only_for_given_recipe(
+    context: Context, add_colour: AddColourFunc, add_step: AddStepFunc
+):
+    """Steps are retrieved and converted"""
+    # Given
+    add_colour("Foo")
+    add_colour("Bar")
+    add_step(1, 1, 1)
+    add_step(1, 2, 2)
+    add_step(2, 2, 2)
+    # monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
+
+    # When
+    steps = get_recipe_steps(context.database, 1)
+
+    # Then
+    assert len(steps) == 2
+    assert steps[0].colour_id == 1
+    assert steps[0].colour_name == "Foo"
+    assert steps[1].colour_id == 2
+
+
+def test_recipe_steps_returns_empty_list_on_failure(
+    context: Context, add_colour: AddColourFunc, add_step: AddStepFunc, monkeypatch
+):
+    """Steps are retrieved and converted"""
+    # Given
+    add_colour("Foo")
+    add_colour("Bar")
+    add_step(1, 1, 1)
+    add_step(1, 2, 2)
+    add_step(2, 2, 2)
+    monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
+
+    # When
+    steps = get_recipe_steps(context.database, 1)
+
+    # Then
+    assert len(steps) == 0
+
+
+def test_recipe_steps_remove(
+    context: Context, add_colour: AddColourFunc, add_step: AddStepFunc
+):
+    """Steps are retrieved and converted"""
+    # Given
+    add_colour("Foo")
+    add_colour("Bar")
+    add_step(1, 1, 1)
+    add_step(1, 2, 2)
+    add_step(2, 2, 2)
+
+    # When
+    success = remove_recipe_steps(context.database, 1)
+
+    # Then
+    assert success
+    context.models.recipe_steps_model.select()
+    assert context.models.recipe_steps_model.rowCount() == 1

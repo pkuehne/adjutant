@@ -98,13 +98,23 @@ CREATE TABLE IF NOT EXISTS recipe_steps (
     id INTEGER PRIMARY KEY,
     recipes_id INTEGER DEFAULT 0,
     colours_id INTEGER DEFAULT 0,
+    operations_id INTEGER DEFAULT 0,
     step_num INTEGER DEFAULT 0
 );
+
+DROP TABLE IF EXISTS step_operations;
+CREATE TABLE IF NOT EXISTS step_operations (
+    id INTEGER PRIMARY KEY,
+    name TEXT DEFAULT ""
+);
+INSERT INTO step_operations(id, name) VALUES (0, "<None>");
+
 
 DROP TABLE IF EXISTS colour_schemes;
 CREATE TABLE IF NOT EXISTS colour_schemes (
     id INTEGER PRIMARY KEY,
-    name TEXT DEFAULT ""
+    name TEXT DEFAULT "",
+    notes TEXT DEFAULT ""
 );
 INSERT INTO colour_schemes(id, name) VALUES (0, "<None>");
 

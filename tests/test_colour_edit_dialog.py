@@ -67,10 +67,10 @@ def test_delete_button_calls_controller(
     dialog = ColourEditDialog(context, context.models.colours_model.index(1, 0))
     qtbot.addWidget(dialog)
 
-    context.controller.delete_colour = MagicMock()
+    context.controller.delete_colours = MagicMock()
 
     # When
     dialog.delete_button_pressed()
 
     # Then
-    assert context.controller.delete_colour.call_count == 1
+    assert context.controller.delete_colours.call_count == 1

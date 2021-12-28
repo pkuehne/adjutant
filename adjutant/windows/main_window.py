@@ -1,7 +1,7 @@
 """ The Main Window """
 
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QWidget
+from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
 from adjutant.context import Context
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
@@ -10,6 +10,7 @@ from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
 from adjutant.windows.bases_screen import BasesScreen
 from adjutant.windows.storage_screen import StorageScreen
 from adjutant.windows.colours_screen import ColoursScreen
+from adjutant.windows.recipe_screen import RecipeScreen
 
 
 class MainWindow(QMainWindow):
@@ -33,13 +34,15 @@ class MainWindow(QMainWindow):
         self.bases = BasesScreen(self.context)
         self.storage = StorageScreen(self.context)
         self.colours = ColoursScreen(self.context)
+        self.recipes = RecipeScreen(self.context)
 
         self.tabbar = QTabWidget(self)
-        self.tabbar.addTab(self.bases, "Bases")
-        self.tabbar.addTab(QWidget(), "Units")
-        self.tabbar.addTab(QWidget(), "Forces")
-        self.tabbar.addTab(self.storage, "Storage")
+        self.tabbar.addTab(self.bases, self.tr("Bases"))
+        # self.tabbar.addTab(QWidget(), self.tr("Units"))
+        # self.tabbar.addTab(QWidget(), self.tr("Forces"))
+        self.tabbar.addTab(self.storage, self.tr("Storage"))
         self.tabbar.addTab(self.colours, self.tr("Colours"))
+        self.tabbar.addTab(self.recipes, self.tr("Recipes"))
 
         self.setCentralWidget(self.tabbar)
 

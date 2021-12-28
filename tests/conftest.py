@@ -141,6 +141,24 @@ def add_status(context: Context) -> AddStatusFunc:
     return add_status_func
 
 
+AddStorageFunc = Callable[[str], None]
+
+
+@pytest.fixture
+def add_storage(context: Context) -> AddStorageFunc:
+    """Fixture to add a record to the storage table"""
+
+    def internal_func(name: str) -> None:
+        record = context.models.storage_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert context.models.storage_model.insertRecord(-1, record)
+        context.models.storage_model.submitAll()
+        assert context.models.storage_model.lastError().text() == ""
+
+    return internal_func
+
+
 AddColourFunc = Callable[[str], None]
 
 
@@ -148,7 +166,7 @@ AddColourFunc = Callable[[str], None]
 def add_colour(context: Context) -> AddColourFunc:
     """Fixture to add a record to the colours table"""
 
-    def add_colour_func(name: str) -> None:
+    def internal_func(name: str) -> None:
         record = context.models.colours_model.record()
         record.setNull("id")
         record.setValue("name", name)
@@ -156,7 +174,46 @@ def add_colour(context: Context) -> AddColourFunc:
         context.models.colours_model.submitAll()
         assert context.models.colours_model.lastError().text() == ""
 
-    return add_colour_func
+    return internal_func
+
+
+AddRecipeFunc = Callable[[str], None]
+
+
+@pytest.fixture
+def add_recipe(context: Context) -> AddRecipeFunc:
+    """Fixture to add a record to the colour recipes table"""
+
+    def internal_func(name: str) -> None:
+        record = context.models.recipes_model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert context.models.recipes_model.insertRecord(-1, record)
+        context.models.recipes_model.submitAll()
+        assert context.models.recipes_model.lastError().text() == ""
+
+    return internal_func
+
+
+AddStepFunc = Callable[[int, int, int], None]
+
+
+@pytest.fixture
+def add_step(context: Context) -> AddStepFunc:
+    """Fixture to add a record to the recipe steps table"""
+
+    def internal_func(recipe_id: int, colour_id: int, num: int) -> None:
+        record = context.models.recipe_steps_model.record()
+        record.setNull("id")
+        record.setValue("colours_id", colour_id)
+        record.setValue("recipes_id", recipe_id)
+        record.setValue("step_num", num)
+
+        assert context.models.recipe_steps_model.insertRecord(-1, record)
+        context.models.recipe_steps_model.submitAll()
+        assert context.models.recipe_steps_model.lastError().text() == ""
+
+    return internal_func
 
 
 @pytest.fixture

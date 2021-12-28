@@ -26,3 +26,14 @@ class Tag:
 
     tag_id: int
     tag_name: str
+
+
+@dataclass(eq=True, frozen=True)
+class RecipeStep:
+    """Recipe Step"""
+
+    colour_id: int
+    colour_name: str
+    operation_id: int
+    operation_name: str
+    hexvalue: str

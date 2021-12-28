@@ -10,8 +10,9 @@ from adjutant.context.model_context import ModelContext
 from adjutant.context.database_context import (
     DatabaseContext,
     remove_all_tags_for_base,
+    remove_recipe_steps,
 )
-from adjutant.context.dataclasses import Tag
+from adjutant.context.dataclasses import RecipeStep, Tag
 
 
 class Controller(QObject):
@@ -196,6 +197,28 @@ class Controller(QObject):
             if index.data(Qt.ItemDataRole.EditRole) == old_status:
                 self.models.bases_model.setData(index, 0)
 
-    def delete_colour(self, index: QModelIndex):
+    def delete_colours(self, indexes: List[QModelIndex]):
         """Deletes a given colour"""
-        self.delete_records(self.models.colours_model, [index], "colour")
+        self.delete_records(self.models.colours_model, indexes, "colour")
+
+    def delete_recipes(self, indexes: List[QModelIndex]):
+        """Deleted a given colour recipe"""
+        for index in indexes:
+            recipe_id = index.siblingAtColumn(0).data()
+            self.replace_recipe_steps(recipe_id, [])
+        self.delete_records(self.models.recipes_model, indexes, "colour recipe")
+
+    def replace_recipe_steps(self, recipe_id: int, steps: List[RecipeStep]):
+        """Add a new recipe step"""
+        model = self.models.recipe_steps_model
+        remove_recipe_steps(self.database, recipe_id)
+        model.select()
+        for step in steps:
+            record = model.record()
+            record.setNull("id")
+            record.setValue("recipes_id", recipe_id)
+            record.setValue("colours_id", step.colour_id)
+            record.setValue("operations_id", step.operation_id)
+            record.setValue("step_num", 0)
+            model.insertRecord(-1, record)
+        model.submitAll()

@@ -45,6 +45,7 @@ class ModelContext:
         self.colours_model = None
         self.recipes_model = None
         self.recipe_steps_model = None
+        self.step_operations_model = None
         self.colour_schemes_model = None
         self.scheme_components_model = None
 
@@ -74,6 +75,7 @@ class ModelContext:
         self._setup_colours_model()
         self._setup_recipes_model()
         self._setup_recipe_steps_model()
+        self._setup_step_operations_model()
         self._setup_colour_schemes_model()
         self._setup_scheme_components_model()
 
@@ -90,6 +92,7 @@ class ModelContext:
         self.colours_model.select()
         self.recipes_model.select()
         self.recipe_steps_model.select()
+        self.step_operations_model.select()
         self.colour_schemes_model.select()
         self.scheme_components_model.select()
 
@@ -242,14 +245,33 @@ class ModelContext:
             self.recipe_steps_model.fieldIndex("colours_id"),
             OneToManyRelationship("colours", "id", "name"),
         )
-
+        self.recipe_steps_model.set_one_to_many_relationship(
+            self.recipe_steps_model.fieldIndex("operations_id"),
+            OneToManyRelationship("step_operations", "id", "name"),
+        )
         setup_header_data(
             self.recipe_steps_model,
             [
                 HeaderRoles("ID", "The internal ID of this recipe step"),
                 HeaderRoles("Recipe", "The recipe this step belongs to"),
                 HeaderRoles("Colour", "The colour to apply at this step"),
+                HeaderRoles("Operation", "How to apply the colour"),
                 HeaderRoles("Number", "Which step number this step is"),
+            ],
+        )
+
+    def _setup_step_operations_model(self) -> None:
+        """Setup the steps operation model"""
+        self.step_operations_model = QSqlTableModel()
+        self.step_operations_model.setTable("step_operations")
+        self.step_operations_model.setEditStrategy(
+            QSqlTableModel.EditStrategy.OnManualSubmit
+        )
+        setup_header_data(
+            self.step_operations_model,
+            [
+                HeaderRoles("ID", "Internal ID of the recipe"),
+                HeaderRoles("Name", "The name for this colour recipe"),
             ],
         )
 

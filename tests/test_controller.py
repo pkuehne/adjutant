@@ -6,12 +6,16 @@ from PyQt6.QtWidgets import QInputDialog, QMessageBox
 from tests.conftest import (
     AddBaseFunc,
     AddEmptyBasesFunc,
+    AddRecipeFunc,
     AddSearchFunc,
     AddStatusFunc,
+    AddStepFunc,
+    AddStorageFunc,
     AddTagFunc,
     AddColourFunc,
     BasesRecord,
 )
+from adjutant.context.dataclasses import RecipeStep
 from adjutant.context.context import Context
 
 
@@ -464,6 +468,25 @@ def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch)
 ##############################
 
 
+def test_delete_storage(context: Context, add_storage: AddStorageFunc, monkeypatch):
+    """Delete recipe does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_storage("Foo")
+    index = context.models.storage_model.index(1, 1)
+
+    # When
+    context.controller.delete_storages([index])
+
+    # Then
+    assert context.models.storage_model.rowCount() == 1
+    assert context.models.storage_model.isDirty() is False
+    assert index.isValid()
+
+
 ##############################
 # Status
 ##############################
@@ -555,9 +578,93 @@ def test_delete_colour(context: Context, add_colour: AddColourFunc, monkeypatch)
     index = context.models.colours_model.index(0, 1)
 
     # When
-    context.controller.delete_colour(index)
+    context.controller.delete_colours([index])
 
     # Then
     assert context.models.colours_model.rowCount() == 0
     assert context.models.colours_model.isDirty() is False
     assert index.isValid()
+
+
+##############################
+# Recipes
+##############################
+def test_delete_recipe(context: Context, add_recipe: AddRecipeFunc, monkeypatch):
+    """Delete recipe does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_recipe("Foo")
+    index = context.models.recipes_model.index(0, 1)
+
+    # When
+    context.controller.delete_recipes([index])
+
+    # Then
+    assert context.models.recipes_model.rowCount() == 0
+    assert context.models.recipes_model.isDirty() is False
+    assert index.isValid()
+
+
+def test_delete_recipe_removes_steps(
+    context: Context, add_recipe: AddRecipeFunc, add_step: AddStepFunc, monkeypatch
+):
+    """Delete recipe does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    add_recipe("Foo")
+    add_step(1, 0, 0)
+    add_step(1, 1, 1)
+    index = context.models.recipes_model.index(0, 1)
+
+    # When
+    context.controller.delete_recipes([index])
+
+    # Then
+    assert context.models.recipe_steps_model.rowCount() == 0
+
+
+def test_replace_recipe_steps_add_new_ones(context: Context):
+    """Adding a recipe step puts it into the model"""
+    # Given
+    recipe_id = 1
+    steps = [
+        RecipeStep(1, "Foo", 2, "Foo2", "Foo3"),
+        RecipeStep(3, "Bar", 5, "Bar2", "Bar3"),
+    ]
+
+    # When
+    context.controller.replace_recipe_steps(recipe_id, steps)
+
+    # Then
+    assert context.models.recipe_steps_model.rowCount() == 2
+    assert (
+        context.models.recipe_steps_model.index(0, 2).data(Qt.ItemDataRole.EditRole)
+        == 1
+    )
+    assert (
+        context.models.recipe_steps_model.index(1, 2).data(Qt.ItemDataRole.EditRole)
+        == 3
+    )
+
+
+def test_replace_recipe_steps_removes_old(context: Context, add_step: AddStepFunc):
+    """Adding a recipe step puts it into the model"""
+    # Given
+    recipe_id = 1
+    add_step(recipe_id, 9, 0)
+    add_step(recipe_id, 8, 0)
+    add_step(recipe_id, 7, 0)
+
+    steps = []
+
+    # When
+    context.controller.replace_recipe_steps(recipe_id, steps)
+
+    # Then
+    assert context.models.recipe_steps_model.rowCount() == 0

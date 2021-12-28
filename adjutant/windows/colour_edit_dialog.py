@@ -128,7 +128,7 @@ class ColourEditDialog(QDialog):
 
     def delete_button_pressed(self):
         """Delete the current index"""
-        self.context.controller.delete_colour(self.index)
+        self.context.controller.delete_colours(self.index)
         self.reject()
 
     def field(self, name: str) -> int:

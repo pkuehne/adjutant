@@ -84,4 +84,25 @@ INSERT INTO statuses VALUES (NULL, "Painted");
 INSERT INTO statuses VALUES (NULL, "Varnished");
 INSERT INTO statuses VALUES (NULL, "Complete");
 
-INSERT INTO colours VALUES (NULL, "Mephiston Red", "Citadel", "Base Colors", "#991115", "");
+INSERT INTO step_operations VALUES (NULL, "Base");
+INSERT INTO step_operations VALUES (NULL, "Wash");
+INSERT INTO step_operations VALUES (NULL, "Layer");
+INSERT INTO step_operations VALUES (NULL, "Highlight");
+INSERT INTO step_operations VALUES (NULL, "Glaze");
+INSERT INTO step_operations VALUES (NULL, "Varnish");
+
+INSERT INTO colours VALUES (NULL, "Mournfang Brown", "Citadel", "Base", "#640909", "");
+INSERT INTO colours VALUES (NULL, "Gorthor Brown ", "Citadel", "Layer", "#654741", "");
+INSERT INTO colours VALUES (NULL, "Skrag Brown", "Citadel", "Layer", "#90490F", "");
+INSERT INTO colours VALUES (NULL, "Tallarn Sand", "Citadel", "Layer", "#A67610", "");
+INSERT INTO colours VALUES (NULL, "Agrax Earthshade", "Citadel", "Shade", "#5A573F", "");
+
+INSERT INTO recipes VALUES (NULL, "Light Leather", "Useful for belts, bags and any other straps");
+
+INSERT INTO recipe_steps VALUES(NULL, 1, 1, 1, 1);
+INSERT INTO recipe_steps VALUES(NULL, 1, 5, 2, 2);
+INSERT INTO recipe_steps VALUES(NULL, 1, 2, 3, 3);
+INSERT INTO recipe_steps VALUES(NULL, 1, 3, 4, 4);
+INSERT INTO recipe_steps VALUES(NULL, 1, 4, 4, 5);
+
+INSERT INTO colour_schemes VALUES(NULL, "Orks", "Mainly for old-school warhammer orks, but also applies to Oathmark conversions")
