@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS settings;
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY,
+    version INTEGER,
+    font_size INTEGER
+);
+INSERT into settings(version, font_size) VALUES(1, 9);
+
 DROP TABLE IF EXISTS bases;
 CREATE TABLE IF NOT EXISTS bases ( 
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,13 +76,6 @@ CREATE TABLE IF NOT EXISTS statuses (
     name TEXT DEFAULT ""
 );
 INSERT INTO statuses(id, name) VALUES (0, "<None>");
-
-DROP TABLE IF EXISTS settings;
-CREATE TABLE IF NOT EXISTS settings (
-    id INTEGER PRIMARY KEY,
-    version INTEGER
-);
-INSERT into settings(version) VALUES(1);
 
 DROP TABLE IF EXISTS colours;
 CREATE TABLE IF NOT EXISTS colours (

@@ -30,6 +30,9 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)
         self.setWindowIcon(QIcon("icons:adjutant.png"))
+        self.context.controller.set_font_size(
+            self.context.models.settings_model.record(0).value("font_size")
+        )
 
         self.bases = BasesScreen(self.context)
         self.storage = StorageScreen(self.context)

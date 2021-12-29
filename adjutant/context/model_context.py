@@ -35,6 +35,7 @@ class ModelContext:
     """Context for models"""
 
     def __init__(self):
+        self.settings_model = None
         self.bases_model = None
         self.tags_model = None
         self.tags_sort_model = None
@@ -51,6 +52,8 @@ class ModelContext:
 
     def load(self):
         """load the models from the database"""
+        self._setup_settings_model()
+
         self.bases_model = self.__setup_bases_model()
 
         self.tags_model = self.__setup_tags_model()
@@ -83,6 +86,7 @@ class ModelContext:
 
     def refresh_models(self) -> None:
         """Reselects rows on all models"""
+        self.settings_model.select()
         self.bases_model.select()
         self.tags_model.select()
         self.base_tags_model.select()
@@ -95,6 +99,12 @@ class ModelContext:
         self.step_operations_model.select()
         self.colour_schemes_model.select()
         self.scheme_components_model.select()
+
+    def _setup_settings_model(self) -> None:
+        """Load settings model"""
+        self.settings_model = QSqlTableModel()
+        self.settings_model.setTable("settings")
+        self.settings_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
     def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""

@@ -2,7 +2,7 @@
 
 from typing import List
 from PyQt6.QtCore import QModelIndex, QObject, Qt
-from PyQt6.QtWidgets import QInputDialog, QMessageBox
+from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 from PyQt6.QtSql import QSqlTableModel
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.signal_context import SignalContext
@@ -83,6 +83,23 @@ class Controller(QObject):
         for index in indexes:
             model.removeRow(index.row())
         model.submitAll()
+
+    def set_font_size(self, font_size: int):
+        """Set the applications font size"""
+        if font_size < 5:
+            print(f"Invalid font size: {font_size}")
+            return
+
+        app: QApplication = QApplication.instance()
+        font = app.font()
+        font.setPointSize(font_size)
+        app.setFont(font)
+
+        index = self.models.settings_model.index(
+            0, self.models.settings_model.fieldIndex("font_size")
+        )
+        self.models.settings_model.setData(index, font_size)
+        self.models.settings_model.submitAll()
 
     def delete_bases(self, indexes: List[QModelIndex]):
         """Delete all currently selected rows"""

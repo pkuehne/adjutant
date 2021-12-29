@@ -1,12 +1,13 @@
 """ Menu bar for the main window"""
 
-from PyQt6.QtWidgets import QApplication, QMenuBar, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMenu, QMenuBar, QMessageBox
 from PyQt6.QtGui import QAction
 
 from adjutant.context import Context
 from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
 from adjutant.windows.manage_searches_dialog import ManageSearchesDialog
+from adjutant.windows.preferences_dialog import PreferencesDialog
 
 
 class MainWindowMenuBar(QMenuBar):
@@ -18,7 +19,7 @@ class MainWindowMenuBar(QMenuBar):
 
         self._setup_file_menu()
         self._setup_add_menu()
-        self._setup_manage_menu()
+        self._setup_tools_menu()
         self._setup_help_menu()
 
     def _setup_file_menu(self):
@@ -51,7 +52,20 @@ class MainWindowMenuBar(QMenuBar):
         add_menu.addAction(colour_action)
         add_menu.addAction(recipe_action)
 
-    def _setup_manage_menu(self):
+    def _setup_tools_menu(self):
+        """Setup the Tools menu"""
+        preferences_action = QAction("&Preferences", self)
+        preferences_action.triggered.connect(
+            lambda: PreferencesDialog.show(self.parent(), self.context)
+        )
+
+        tools_menu = self.addMenu("&Tools")
+        manage_menu = tools_menu.addMenu("&Manage Data")
+        self._setup_manage_menu(manage_menu)
+        tools_menu.addSeparator()
+        tools_menu.addAction(preferences_action)
+
+    def _setup_manage_menu(self, manage_menu: QMenu):
         """Setup the Manage menu"""
         tags_action = QAction("Manage &Tags", self)
         tags_action.triggered.connect(
@@ -66,10 +80,10 @@ class MainWindowMenuBar(QMenuBar):
             lambda: ManageStatusesDialog.show(self.parent(), self.context)
         )
 
-        manage_menu = self.addMenu("&Manage")
         manage_menu.addAction(tags_action)
         manage_menu.addAction(searches_action)
         manage_menu.addAction(statuses_action)
+        return manage_menu
 
     def _setup_help_menu(self):
         """Setup the help menu"""

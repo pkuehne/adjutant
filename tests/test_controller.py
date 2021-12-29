@@ -1,7 +1,7 @@
 """ Tests for the Controller class"""
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QInputDialog, QMessageBox
+from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 
 from tests.conftest import (
     AddBaseFunc,
@@ -245,6 +245,42 @@ def test_rename_record_uses_passed_default(
     assert context.models.tags_model.rowCount() == 1
     assert context.models.tags_model.index(0, 1).data() == "Foobar"
     assert context.models.tags_model.isDirty() is False
+
+
+###################################
+# Settings
+###################################
+
+
+def test_font_size_not_less_than_5(context: Context):
+    """Font size should be less than five"""
+    # Given
+    font_size = 3
+
+    # When
+    context.controller.set_font_size(font_size)
+
+    # Then
+    assert context.models.settings_model.index(0, 1).data() != font_size
+
+
+def test_font_size_sets_value_in_db(context: Context, qapp: QApplication, monkeypatch):
+    """Setting the font size should update the database"""
+    # Given
+    font_size = 12
+    monkeypatch.setattr(QApplication, "instance", lambda: qapp)
+
+    # When
+    context.controller.set_font_size(font_size)
+
+    # Then
+    assert (
+        context.models.settings_model.index(
+            0, context.models.settings_model.fieldIndex("font_size")
+        ).data()
+        == font_size
+    )
+    assert qapp.font().pointSize() == font_size
 
 
 ###################################
