@@ -8,11 +8,9 @@ def test_combobox_set_to_current_value(qtbot, context: Context):
     """The combobox should default to the current font_size"""
     # Given
     font_size = 12
-    index = context.models.settings_model.index(
-        0, context.models.settings_model.fieldIndex("font_size")
-    )
-    context.models.settings_model.setData(index, font_size)
-    context.models.settings_model.submitAll()
+    record = context.models.settings_model.record(0)
+    record.setValue("font_size", font_size)
+    context.models.settings_model.setRecord(0, record)
 
     # When
     dialog = PreferencesDialog(None, context)
@@ -26,11 +24,9 @@ def test_combobox_changing_combobox_updates_model(qtbot, context: Context):
     """The combobox should default to the current font_size"""
     # Given
     font_size = 12
-    index = context.models.settings_model.index(
-        0, context.models.settings_model.fieldIndex("font_size")
-    )
-    context.models.settings_model.setData(index, font_size)
-    context.models.settings_model.submitAll()
+    record = context.models.settings_model.record(0)
+    record.setValue("font_size", font_size)
+    context.models.settings_model.setRecord(0, record)
     dialog = PreferencesDialog(None, context)
     qtbot.addWidget(dialog)
 
@@ -39,4 +35,4 @@ def test_combobox_changing_combobox_updates_model(qtbot, context: Context):
     dialog.font_size_changed()
 
     # Then
-    assert index.data() != font_size
+    assert context.models.settings_model.record(0).value("font_size") != font_size

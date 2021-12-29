@@ -274,12 +274,7 @@ def test_font_size_sets_value_in_db(context: Context, qapp: QApplication, monkey
     context.controller.set_font_size(font_size)
 
     # Then
-    assert (
-        context.models.settings_model.index(
-            0, context.models.settings_model.fieldIndex("font_size")
-        ).data()
-        == font_size
-    )
+    assert context.models.settings_model.record(0).value("font_size") == font_size
     assert qapp.font().pointSize() == font_size
 
 
