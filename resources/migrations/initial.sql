@@ -123,6 +123,7 @@ INSERT INTO colour_schemes(id, name) VALUES (0, "<None>");
 DROP TABLE IF EXISTS scheme_components;
 CREATE TABLE IF NOT EXISTS scheme_components (
     id INTEGER PRIMARY KEY,
+    schemes_id INTEGER DEFAULT 0,
     name TEXT DEFAULT "",
     recipes_id INTEGER DEFAULT 0
 );

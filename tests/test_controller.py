@@ -14,8 +14,9 @@ from tests.conftest import (
     AddTagFunc,
     AddColourFunc,
     BasesRecord,
+    Models,
 )
-from adjutant.context.dataclasses import RecipeStep
+from adjutant.context.dataclasses import RecipeStep, SchemeComponent
 from adjutant.context.context import Context
 
 
@@ -699,3 +700,83 @@ def test_replace_recipe_steps_removes_old(context: Context, add_step: AddStepFun
 
     # Then
     assert context.models.recipe_steps_model.rowCount() == 0
+
+
+##############################
+# Schemes
+##############################
+def test_delete_scheme(context: Context, models: Models, monkeypatch):
+    """Delete scheme does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+
+    models.add_scheme("Foo")
+    model = context.models.colour_schemes_model
+    index = model.index(0, 1)
+
+    # When
+    context.controller.delete_schemes([index])
+
+    # Then
+    assert model.rowCount() == 1  # Always includes <None>
+    assert model.isDirty() is False
+    assert index.isValid()
+
+
+def test_delete_scheme_removes_components(
+    context: Context, models: Models, monkeypatch
+):
+    """Delete recipe does just that"""
+    # Given
+    monkeypatch.setattr(
+        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
+    )
+    model = context.models.colour_schemes_model
+
+    models.add_scheme("Foo")
+    models.add_component(1, "Bar", 0)
+    models.add_component(1, "Baz", 1)
+    index = model.index(0, 1)
+
+    # When
+    context.controller.delete_schemes([index])
+
+    # Then
+    assert model.rowCount() == 1  # Always <None>
+
+
+def test_replace_scheme_components_add_new_ones(context: Context):
+    """Adding a recipe step puts it into the model"""
+    # Given
+    scheme_id = 1
+    components = [
+        SchemeComponent("Foo", 1),
+        SchemeComponent("Bar", 2),
+    ]
+    model = context.models.scheme_components_model
+
+    # When
+    context.controller.replace_scheme_components(scheme_id, components)
+
+    # Then
+    assert model.rowCount() == 2
+    assert model.index(0, 3).data(Qt.ItemDataRole.EditRole) == 1
+    assert model.index(1, 3).data(Qt.ItemDataRole.EditRole) == 2
+
+
+def test_replace_scheme_components_removes_old(context: Context, models: Models):
+    """Adding a recipe step puts it into the model"""
+    # Given
+    scheme_id = 1
+    models.add_component(1, "Bar", 0)
+    models.add_component(1, "Baz", 1)
+
+    components = []
+
+    # When
+    context.controller.replace_scheme_components(scheme_id, components)
+
+    # Then
+    assert context.models.scheme_components_model.rowCount() == 0

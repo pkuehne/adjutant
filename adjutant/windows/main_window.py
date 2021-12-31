@@ -8,6 +8,7 @@ from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
 from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
 from adjutant.windows.bases_screen import BasesScreen
+from adjutant.windows.schemes_screen import SchemeScreen
 from adjutant.windows.storage_screen import StorageScreen
 from adjutant.windows.colours_screen import ColoursScreen
 from adjutant.windows.recipe_screen import RecipeScreen
@@ -38,14 +39,16 @@ class MainWindow(QMainWindow):
         self.storage = StorageScreen(self.context)
         self.colours = ColoursScreen(self.context)
         self.recipes = RecipeScreen(self.context)
+        self.schemes = SchemeScreen(self.context)
 
         self.tabbar = QTabWidget(self)
         self.tabbar.addTab(self.bases, self.tr("Bases"))
+        self.tabbar.addTab(self.storage, self.tr("Storage"))
         # self.tabbar.addTab(QWidget(), self.tr("Units"))
         # self.tabbar.addTab(QWidget(), self.tr("Forces"))
-        self.tabbar.addTab(self.storage, self.tr("Storage"))
         self.tabbar.addTab(self.colours, self.tr("Colours"))
         self.tabbar.addTab(self.recipes, self.tr("Recipes"))
+        self.tabbar.addTab(self.schemes, self.tr("Schemes"))
 
         self.setCentralWidget(self.tabbar)
 

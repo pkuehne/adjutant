@@ -44,6 +44,8 @@ class MainWindowMenuBar(QMenuBar):
         colour_action.triggered.connect(self.context.signals.show_add_colour_dialog)
         recipe_action = QAction("&Recipe", self)
         recipe_action.triggered.connect(self.context.signals.show_add_recipe_dialog)
+        scheme_action = QAction("&Scheme", self)
+        scheme_action.triggered.connect(self.context.signals.show_add_scheme_dialog)
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)
@@ -51,6 +53,7 @@ class MainWindowMenuBar(QMenuBar):
         add_menu.addAction(storage_action)
         add_menu.addAction(colour_action)
         add_menu.addAction(recipe_action)
+        add_menu.addAction(scheme_action)
 
     def _setup_tools_menu(self):
         """Setup the Tools menu"""

@@ -280,8 +280,8 @@ class ModelContext:
         setup_header_data(
             self.step_operations_model,
             [
-                HeaderRoles("ID", "Internal ID of the recipe"),
-                HeaderRoles("Name", "The name for this colour recipe"),
+                HeaderRoles("ID", "Internal ID of the operation"),
+                HeaderRoles("Name", "The descriptive name for this operation"),
             ],
         )
 
@@ -292,11 +292,23 @@ class ModelContext:
         self.colour_schemes_model.setEditStrategy(
             QSqlTableModel.EditStrategy.OnManualSubmit
         )
+        setup_header_data(
+            self.colour_schemes_model,
+            [
+                HeaderRoles("ID", "Internal ID of the colour scheme"),
+                HeaderRoles("Name", "The name for this colour scheme"),
+                HeaderRoles("Notes", "General notes about this colour scheme"),
+            ],
+        )
 
     def _setup_scheme_components_model(self) -> None:
         """Setup the colour schemes"""
         self.scheme_components_model = RelationalModel()
-        self.scheme_components_model.setTable("colour_schemes")
+        self.scheme_components_model.setTable("scheme_components")
         self.scheme_components_model.setEditStrategy(
             QSqlTableModel.EditStrategy.OnManualSubmit
+        )
+        self.scheme_components_model.set_one_to_many_relationship(
+            self.scheme_components_model.fieldIndex("recipes_id"),
+            OneToManyRelationship("recipes", "id", "name"),
         )

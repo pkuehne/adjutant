@@ -37,3 +37,11 @@ class RecipeStep:
     operation_id: int
     operation_name: str
     hexvalue: str
+
+
+@dataclass(eq=True, frozen=True)
+class SchemeComponent:
+    """Colour scheme component"""
+
+    name: str
+    recipe_id: int

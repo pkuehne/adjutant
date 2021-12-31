@@ -11,8 +11,9 @@ from adjutant.context.database_context import (
     DatabaseContext,
     remove_all_tags_for_base,
     remove_recipe_steps,
+    remove_scheme_components,
 )
-from adjutant.context.dataclasses import RecipeStep, Tag
+from adjutant.context.dataclasses import RecipeStep, SchemeComponent, Tag
 
 
 class Controller(QObject):
@@ -235,5 +236,28 @@ class Controller(QObject):
             record.setValue("colours_id", step.colour_id)
             record.setValue("operations_id", step.operation_id)
             record.setValue("step_num", 0)
+            model.insertRecord(-1, record)
+        model.submitAll()
+
+    def delete_schemes(self, indexes: List[QModelIndex]):
+        """Deleted a given colour recipe"""
+        for index in indexes:
+            scheme_id = index.siblingAtColumn(0).data()
+            self.replace_scheme_components(scheme_id, [])
+        self.delete_records(self.models.colour_schemes_model, indexes, "colour scheme")
+
+    def replace_scheme_components(
+        self, scheme_id: int, components: List[SchemeComponent]
+    ):
+        """Add a new recipe step"""
+        model = self.models.scheme_components_model
+        remove_scheme_components(self.database, scheme_id)
+        model.select()
+        for component in components:
+            record = model.record()
+            record.setNull("id")
+            record.setValue("schemes_id", scheme_id)
+            record.setValue("name", component.name)
+            record.setValue("recipes_id", component.recipe_id)
             model.insertRecord(-1, record)
         model.submitAll()

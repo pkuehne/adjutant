@@ -199,3 +199,14 @@ def remove_recipe_steps(context: DatabaseContext, recipe_id: int) -> bool:
     bindings = [QueryBinding(":recipes_id", recipe_id)]
     result: QSqlQuery = context.execute_sql_command(query, bindings)
     return bool(result)
+
+
+def remove_scheme_components(context: DatabaseContext, scheme_id: int) -> bool:
+    """Remove all components for the given colour scheme"""
+    query = """
+        DELETE FROM scheme_components
+        WHERE schemes_id = :schemes_id
+    """
+    bindings = [QueryBinding(":schemes_id", scheme_id)]
+    result: QSqlQuery = context.execute_sql_command(query, bindings)
+    return bool(result)

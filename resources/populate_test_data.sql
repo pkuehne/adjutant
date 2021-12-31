@@ -105,4 +105,5 @@ INSERT INTO recipe_steps VALUES(NULL, 1, 2, 3, 3);
 INSERT INTO recipe_steps VALUES(NULL, 1, 3, 4, 4);
 INSERT INTO recipe_steps VALUES(NULL, 1, 4, 4, 5);
 
-INSERT INTO colour_schemes VALUES(NULL, "Orks", "Mainly for old-school warhammer orks, but also applies to Oathmark conversions")
+INSERT INTO colour_schemes VALUES(NULL, "Orks", "Mainly for old-school warhammer orks, but also applies to Oathmark conversions");
+INSERT INTO scheme_components VALUES(NULL, 1, "Leather", 1);

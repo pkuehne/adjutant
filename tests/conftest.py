@@ -216,6 +216,53 @@ def add_step(context: Context) -> AddStepFunc:
     return internal_func
 
 
+class Models:
+    """Utility class to connect add_* functions together"""
+
+    def __init__(self, context: Context) -> None:
+        self.context = context
+
+    def add_scheme(self, name: str):
+        """Fixture to add a scheme to the database"""
+        model = self.context.models.colour_schemes_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+    def add_component(self, scheme_id: int, name: str, recipe_id: int):
+        """Fixture to add a record to the recipe steps table"""
+        model = self.context.models.scheme_components_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("schemes_id", scheme_id)
+        record.setValue("name", name)
+        record.setValue("recipes_id", recipe_id)
+
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+    def add_recipe(self, name):
+        """Fixture to add a record to the colour recipes table"""
+        model = self.context.models.recipes_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+
+@pytest.fixture
+def models(context: Context):
+    """Fixture for model access"""
+    models = Models(context)
+    return models
+
+
 @pytest.fixture
 def context():
     """Sets up and tears down the database"""

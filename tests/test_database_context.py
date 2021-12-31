@@ -8,6 +8,7 @@ from tests.conftest import (
     AddTagFunc,
     AddTagUseFunc,
     BasesRecord,
+    Models,
 )
 from adjutant.context import Context
 from adjutant.context.database_context import (
@@ -15,6 +16,7 @@ from adjutant.context.database_context import (
     get_recipe_steps,
     get_tag_count,
     remove_recipe_steps,
+    remove_scheme_components,
 )
 
 
@@ -166,3 +168,19 @@ def test_recipe_steps_remove(
     assert success
     context.models.recipe_steps_model.select()
     assert context.models.recipe_steps_model.rowCount() == 1
+
+
+def test_scheme_components_remove(context: Context, models: Models):
+    """Steps are retrieved and converted"""
+    # Given
+    models.add_component(1, "Foo", 1)
+    models.add_component(1, "Bar", 2)
+    models.add_component(2, "Baz", 2)
+
+    # When
+    success = remove_scheme_components(context.database, 1)
+
+    # Then
+    assert success
+    context.models.scheme_components_model.select()
+    assert context.models.scheme_components_model.rowCount() == 1

@@ -23,5 +23,8 @@ class SignalContext(QObject):
     show_add_recipe_dialog = pyqtSignal()
     show_edit_recipe_dialog = pyqtSignal(QModelIndex)
 
+    show_add_scheme_dialog = pyqtSignal()
+    show_edit_scheme_dialog = pyqtSignal(QModelIndex)
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
