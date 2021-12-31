@@ -188,7 +188,7 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(self.widgets.custom_id_edit, self.field("custom_id"))
         self.mapper.addMapping(self.widgets.status_combobox, self.field("status_id"))
         self.mapper.addMapping(
-            self.widgets.colour_scheme_combobox, self.field("colour_scheme_id")
+            self.widgets.colour_scheme_combobox, self.field("schemes_id")
         )
         self.mapper.addMapping(
             self.widgets.tag_list,

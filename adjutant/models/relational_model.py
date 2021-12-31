@@ -119,6 +119,19 @@ class RelationalModel(QSqlTableModel):
 
         return super().data(idx, role=role)
 
+    def field_data(self, row: int, field: str, edit: bool = False):
+        """Retrieves the edit/display role for the given field name and row"""
+        index = self.index(row, self.fieldIndex(field))
+        if not index.isValid():
+            print(f"Failed to retrieve index for {row}-{field} on {self.tableName()}")
+            return None
+        role = Qt.ItemDataRole.EditRole if edit else Qt.ItemDataRole.DisplayRole
+        return self.data(index, role)
+
+    def field_index(self, row: int, field: str):
+        """Get an index by field name instead of column number"""
+        return self.index(row, self.fieldIndex(field))
+
     def _set_data_o2m(self, index: QModelIndex, value, role: Qt.ItemDataRole) -> bool:
         """One to many relationship column setting"""
         return super().setData(index, value, role)

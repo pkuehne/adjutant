@@ -129,7 +129,7 @@ class SchemeEditDialog(QDialog):
         """Load the steps for an existing scheme"""
         model = self.context.models.scheme_components_model
         for row in range(model.rowCount()):
-            index = model.index(row, model.fieldIndex("schemes_id"))
+            index = model.field_index(row, "schemes_id")
             if index.data() == self.index.data():
                 name = index.siblingAtColumn(model.fieldIndex("name")).data()
                 recipe_index = index.siblingAtColumn(model.fieldIndex("recipes_id"))

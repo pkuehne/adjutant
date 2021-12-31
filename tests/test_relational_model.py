@@ -8,6 +8,7 @@ from tests.conftest import (
     AddTagFunc,
     AddTagUseFunc,
     BasesRecord,
+    Models,
 )
 from adjutant.context.dataclasses import ManyToManyRelationship, Tag
 from adjutant.models.relational_model import OneToManyRelationship, RelationalModel
@@ -317,3 +318,84 @@ def test_m2m_set_tags_removes_old(
     assert success
     context.models.base_tags_model.select()
     assert context.models.base_tags_model.rowCount() == 0
+
+
+def test_field_name_must_be_valid(relational_model: RelationalModel, models: Models):
+    """In the field() function, invalid field names return invalid index"""
+    # Given
+    models.add_base(BasesRecord())
+
+    # When
+    data = relational_model.field_data(0, "Foo")
+
+    # Then
+    assert data is None
+
+
+def test_field_by_default_returns_display_role(
+    relational_model: RelationalModel, models: Models
+):
+    """In the field() function, passing edit=True will return the edit role"""
+    # Given
+    models.add_scheme("Foo")
+    models.add_base(BasesRecord(scheme_id=1))
+    relational_model.set_one_to_many_relationship(
+        relational_model.fieldIndex("schemes_id"),
+        OneToManyRelationship("colour_schemes", "id", "name"),
+    )
+
+    # When
+    data = relational_model.field_data(0, "schemes_id")
+
+    # Then
+    assert data == "Foo"
+
+
+def test_field_edit_returns_edit_role(
+    relational_model: RelationalModel, models: Models
+):
+    """In the field() function, passing edit=True will return the edit role"""
+    # Given
+    models.add_scheme("Foo")
+    models.add_base(BasesRecord(scheme_id=1))
+    relational_model.set_one_to_many_relationship(
+        relational_model.fieldIndex("schemes_id"),
+        OneToManyRelationship("colour_schemes", "id", "name"),
+    )
+
+    # When
+    data = relational_model.field_data(0, "schemes_id", True)
+
+    # Then
+    assert data == 1
+
+
+def test_field_index_returns_index_based_on_field_name(
+    relational_model: RelationalModel, models: Models
+):
+    """field_index() takes a field name and returns the right index"""
+    # Given
+    models.add_base(BasesRecord())
+
+    # When
+    index = relational_model.field_index(0, "name")
+
+    # Then
+    assert index is not None
+    assert index.isValid()
+    assert index.column() == 1
+
+
+def test_field_index_returns_invalid_index_if_invalid_field_name(
+    relational_model: RelationalModel, models: Models
+):
+    """field_index() return QModelIndex() if the field name doesn't exist"""
+    # Given
+    models.add_base(BasesRecord())
+
+    # When
+    index = relational_model.field_index(0, "Foo")
+
+    # Then
+    assert index is not None
+    assert not index.isValid()

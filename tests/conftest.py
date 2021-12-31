@@ -24,6 +24,7 @@ class BasesRecord:
     depth: int = 0
     figures: int = 0
     status: int = 0
+    scheme_id: int = 0
 
 
 AddBaseFunc = Callable[[List[BasesRecord]], None]
@@ -221,6 +222,27 @@ class Models:
 
     def __init__(self, context: Context) -> None:
         self.context = context
+
+    def add_base(self, item: BasesRecord):
+        """Fixture to add a new base"""
+        model = self.context.models.bases_model
+        record = model.record()
+        if item.base_id is None:
+            record.setNull("id")
+        else:
+            record.setValue("id", item.base_id)
+        record.setValue("name", item.name)
+        record.setValue("scale", item.scale)
+        record.setValue("base", item.base)
+        record.setValue("width", item.width)
+        record.setValue("depth", item.depth)
+        record.setValue("figures", item.figures)
+        record.setValue("status_id", item.status)
+        record.setValue("schemes_id", item.scheme_id)
+
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
 
     def add_scheme(self, name: str):
         """Fixture to add a scheme to the database"""

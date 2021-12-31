@@ -120,7 +120,7 @@ class ModelContext:
             OneToManyRelationship("statuses", "id", "name"),
         )
         model.set_one_to_many_relationship(
-            model.fieldIndex("colour_scheme_id"),
+            model.fieldIndex("schemes_id"),
             OneToManyRelationship("colour_schemes", "id", "name"),
         )
 

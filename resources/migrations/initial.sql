@@ -28,11 +28,11 @@ CREATE TABLE IF NOT EXISTS bases (
     custom_id TEXT DEFAULT "",
     storage_id INTEGER DEFAULT 0,
     status_id INTEGER DEFAULT 0,
-    colour_scheme_id INTEGER DEFAULT 0,
+    schemes_id INTEGER DEFAULT 0,
 
     CONSTRAINT fk_storage_id FOREIGN KEY(storage_id) REFERENCES storage(id),
     CONSTRAINT fk_status_id FOREIGN KEY(status_id) REFERENCES statuses(id),
-    CONSTRAINT fk_scheme_id FOREIGN KEY(colour_scheme_id) REFERENCES colour_schemes(id)
+    CONSTRAINT fk_scheme_id FOREIGN KEY(schemes_id) REFERENCES colour_schemes(id)
 );
 
 DROP TABLE IF EXISTS tags;
