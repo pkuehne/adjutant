@@ -3,7 +3,7 @@
 from typing import Dict, List
 from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtGui import QColor
-from PyQt6.QtSql import QSqlQuery, QSqlTableModel
+from PyQt6.QtSql import QSqlQuery, QSqlRecord, QSqlTableModel
 from adjutant.context.dataclasses import (
     OneToManyRelationship,
     ManyToManyRelationship,
@@ -26,6 +26,7 @@ class RelationalModel(QSqlTableModel):
         self.o2m_relationships: Dict[int, OneToManyRelationship] = {}
         self.boolean_fields = []
         self.colour_fields = []
+        self.id_row_map = {}
         self.db_context = DatabaseContext()
 
     def set_many_to_many_relationship(self, rel: ManyToManyRelationship):
@@ -36,9 +37,26 @@ class RelationalModel(QSqlTableModel):
         """Adds a relationship for a given field"""
         self.o2m_relationships[field] = rel
 
-    # def select(self) -> bool:
-    #     """Reload all data from the database"""
-    #     return super().select()
+    def update_id_row_map(self) -> None:
+        """Update the internal map from ID -> row number"""
+        self.id_row_map = {}
+        for row in range(self.rowCount()):
+            record = self.record(row)
+            self.id_row_map[record.value(0)] = row
+
+    def record_by_id(self, id_: int) -> QSqlRecord:
+        """Get record by given ID"""
+        return self.record(self.id_row_map[id_])
+
+    def index_by_id(self, id_: int, field: str) -> QModelIndex:
+        """Get index by given ID for field"""
+        return self.field_index(self.id_row_map[id_], field)
+
+    def select(self) -> bool:
+        """Reload all data from the database"""
+        retval = super().select()
+        self.update_id_row_map()
+        return retval
 
     def flags(self, index: QModelIndex) -> Qt.ItemFlag:
         """Flags for the items"""

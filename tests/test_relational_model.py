@@ -399,3 +399,72 @@ def test_field_index_returns_invalid_index_if_invalid_field_name(
     # Then
     assert index is not None
     assert not index.isValid()
+
+
+def test_id_row_map_updated_on_select(context: Context):
+    """Test that a signal is emitted"""
+    # Given
+    record = context.models.bases_model.record()
+    record.setNull("id")
+    context.models.bases_model.insertRecord(-1, record)
+    assert len(context.models.bases_model.id_row_map) == 0
+
+    # When
+    context.models.bases_model.submitAll()
+
+    # Then
+    assert len(context.models.bases_model.id_row_map) == 1
+
+
+def test_update_assigns_rows_to_ids(models: Models, context: Context):
+    """update_id_row_map sets the row for a given id"""
+    # Given
+    models.add_base(BasesRecord())
+    models.add_base(BasesRecord())
+    context.models.bases_model.id_row_map = {}
+
+    # When
+    context.models.bases_model.update_id_row_map()
+
+    # Then
+    assert len(context.models.bases_model.id_row_map) == 2
+
+
+def test_update_removes_previous_mappings(models: Models, context: Context):
+    """WHen updating id->row mappings, old ones should be removed"""
+    # Given
+    models.add_base(BasesRecord())
+    models.add_base(BasesRecord())
+
+    # When
+    context.models.bases_model.removeRow(0)
+    context.models.bases_model.removeRow(1)
+    context.models.bases_model.submitAll()
+
+    # Then
+    assert len(context.models.bases_model.id_row_map) == 0
+
+
+def test_record_by_id(models: Models, context: Context):
+    """Retrieving record by ID"""
+    # Given
+    models.add_base(BasesRecord(name="Foo"))
+
+    # When
+    record = context.models.bases_model.record_by_id(1)
+
+    # Then
+    assert record is not None
+    assert record.value("name") == "Foo"
+
+
+def test_index_by_id(models: Models, context: Context):
+    """Retrieving index by ID and field name"""
+    # Given
+    models.add_base(BasesRecord(name="Foo"))
+
+    # When
+    index = context.models.bases_model.index_by_id(1, "name")
+
+    # Then
+    assert index.data() == "Foo"
