@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QApplication, QMenu, QMenuBar, QMessageBox
 from PyQt6.QtGui import QAction
 
 from adjutant.context import Context
+from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
 from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
 from adjutant.windows.manage_searches_dialog import ManageSearchesDialog
@@ -19,6 +20,7 @@ class MainWindowMenuBar(QMenuBar):
 
         self._setup_file_menu()
         self._setup_add_menu()
+        self._setup_reports_menu()
         self._setup_tools_menu()
         self._setup_help_menu()
 
@@ -54,6 +56,17 @@ class MainWindowMenuBar(QMenuBar):
         add_menu.addAction(colour_action)
         add_menu.addAction(recipe_action)
         add_menu.addAction(scheme_action)
+
+    def _setup_reports_menu(self):
+        """Setup the Reports menu"""
+
+        colour_scheme_report_action = QAction("Colour Scheme Report", self)
+        colour_scheme_report_action.triggered.connect(
+            lambda: ColourSchemeReportDialog.show(self.context, None)
+        )
+
+        reports_menu = self.addMenu("&Reports")
+        reports_menu.addAction(colour_scheme_report_action)
 
     def _setup_tools_menu(self):
         """Setup the Tools menu"""

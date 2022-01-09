@@ -226,7 +226,7 @@ class ModelContext:
 
     def _setup_recipes_model(self) -> None:
         """Setup the recipes model"""
-        self.recipes_model = QSqlTableModel()
+        self.recipes_model = RelationalModel()
         self.recipes_model.setTable("recipes")
         self.recipes_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
         setup_header_data(
@@ -272,7 +272,7 @@ class ModelContext:
 
     def _setup_step_operations_model(self) -> None:
         """Setup the steps operation model"""
-        self.step_operations_model = QSqlTableModel()
+        self.step_operations_model = RelationalModel()
         self.step_operations_model.setTable("step_operations")
         self.step_operations_model.setEditStrategy(
             QSqlTableModel.EditStrategy.OnManualSubmit

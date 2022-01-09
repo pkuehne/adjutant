@@ -20,20 +20,8 @@ from PyQt6.QtWidgets import (
 from adjutant.context.context import Context
 from adjutant.context.database_context import get_recipe_steps
 from adjutant.context.dataclasses import RecipeStep
+from adjutant.models.row_zero_filter_model import RowZeroFilterModel
 from adjutant.widgets.recipe_steps_widget import RecipeStepsWidget
-
-
-class NoNoneFilterModel(QSortFilterProxyModel):
-    """Proxy model to hide row 0"""
-
-    # pylint: disable=invalid-name
-    def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex) -> bool:
-        """Hides the 0 row"""
-        if source_row == 0:
-            return False
-        return super().filterAcceptsRow(source_row, source_parent)
-
-    # pylint: enable=invalid-name
 
 
 @dataclass
@@ -131,7 +119,7 @@ class RecipeEditDialog(QDialog):
         self.widgets.colour_combobox.setCompleter(completer)
         self.widgets.colour_combobox.setCurrentText("")
 
-        model = NoNoneFilterModel()
+        model = RowZeroFilterModel()
         model.setSourceModel(self.context.models.step_operations_model)
         self.widgets.operation_combobox.setModel(model)
         self.widgets.operation_combobox.setModelColumn(1)
