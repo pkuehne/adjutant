@@ -46,6 +46,9 @@ class RelationalModel(QSqlTableModel):
 
     def record_by_id(self, id_: int) -> QSqlRecord:
         """Get record by given ID"""
+        if id_ not in self.id_row_map:
+            print(f"invalid id {id_} in record lookup")
+            return self.record()
         return self.record(self.id_row_map[id_])
 
     def index_by_id(self, id_: int, field: str) -> QModelIndex:

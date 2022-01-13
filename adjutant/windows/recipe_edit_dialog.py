@@ -1,7 +1,7 @@
 """ Storage Edit/Add dialog"""
 
 from dataclasses import dataclass
-from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel, Qt
+from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtWidgets import (
     QComboBox,
     QCompleter,

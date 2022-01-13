@@ -3,9 +3,18 @@
 from PyQt6 import QtGui
 from PyQt6 import QtPrintSupport
 from PyQt6.QtCore import QMarginsF
+from PyQt6.QtSql import QSqlRecord
 from PyQt6.QtWidgets import QDialog
 
 from adjutant.context.context import Context
+
+
+def format_colour(colour: QSqlRecord) -> str:
+    """Formats a colour"""
+    colour_name = colour.value("name")
+    hexvalue = colour.value("hexvalue")
+    colour_box = f"<font color='{hexvalue}'>■</font>"
+    return f"{colour_box} {colour_name}"
 
 
 class BaseReport:

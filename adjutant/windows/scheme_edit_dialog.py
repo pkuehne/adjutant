@@ -152,6 +152,11 @@ class SchemeEditDialog(QDialog):
         self.ok_button.pressed.connect(self.accept)
         self.cancel_button.pressed.connect(self.reject)
         self.delete_button.pressed.connect(self.delete_button_pressed)
+        self.widgets.component_list.itemDoubleClicked.connect(
+            lambda item: self.widgets.component_list.takeItem(
+                self.widgets.component_list.row(item)
+            )
+        )
 
     def add_component_from_widgets(self):
         """Add a new step to the list"""

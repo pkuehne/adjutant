@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QApplication, QMenu, QMenuBar, QMessageBox
 from PyQt6.QtGui import QAction
 
 from adjutant.context import Context
+from adjutant.windows.base_report_dialog import BaseReportDialog
 from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
 from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
@@ -64,9 +65,14 @@ class MainWindowMenuBar(QMenuBar):
         colour_scheme_report_action.triggered.connect(
             lambda: ColourSchemeReportDialog.show(self.context, None)
         )
+        painting_guide_report_action = QAction("Painting Guide Report", self)
+        painting_guide_report_action.triggered.connect(
+            lambda: BaseReportDialog.show(self.context, None)
+        )
 
         reports_menu = self.addMenu("&Reports")
         reports_menu.addAction(colour_scheme_report_action)
+        reports_menu.addAction(painting_guide_report_action)
 
     def _setup_tools_menu(self):
         """Setup the Tools menu"""

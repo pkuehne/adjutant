@@ -458,6 +458,19 @@ def test_record_by_id(models: Models, context: Context):
     assert record.value("name") == "Foo"
 
 
+def test_record_by_id_invalid_id(models: Models, context: Context):
+    """Retrieving record with an invalid id, returns empty record"""
+    # Given
+    models.add_base(BasesRecord(name="Foo"))
+
+    # When
+    record = context.models.bases_model.record_by_id(1234)
+
+    # Then
+    assert record is not None
+    assert record.value("id") == 0
+
+
 def test_index_by_id(models: Models, context: Context):
     """Retrieving index by ID and field name"""
     # Given
