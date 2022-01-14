@@ -277,6 +277,16 @@ class Models:
         model.submitAll()
         assert model.lastError().text() == ""
 
+    def add_search(self, name: str):
+        """Fixture to add a record to the searches table"""
+        model = self.context.models.searches_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
 
 @pytest.fixture
 def models(context: Context):

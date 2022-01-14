@@ -1,7 +1,7 @@
 """ Bases Model"""
 
 from typing import Dict, List
-from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtSql import QSqlQuery, QSqlRecord, QSqlTableModel
 from adjutant.context.dataclasses import (
@@ -19,6 +19,8 @@ from adjutant.context.database_context import (
 
 class RelationalModel(QSqlTableModel):
     """Subclass QSqlTableModel"""
+
+    data_updated = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
@@ -59,6 +61,7 @@ class RelationalModel(QSqlTableModel):
         """Reload all data from the database"""
         retval = super().select()
         self.update_id_row_map()
+        self.data_updated.emit()
         return retval
 
     def flags(self, index: QModelIndex) -> Qt.ItemFlag:

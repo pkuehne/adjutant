@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
 )
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QToolButton
 
 from adjutant.context import Context
 
@@ -30,6 +30,7 @@ class BasesTable(QWidget):
         self.filter_edit = QLineEdit()
         self.clear_button = QPushButton(self.tr("Clear Filters"))
         self.save_button = QPushButton(self.tr("Save Search"))
+        self.load_button = QToolButton()
 
         self._setup_layout()
         self._setup_widgets()
@@ -43,6 +44,7 @@ class BasesTable(QWidget):
         filter_layout.addWidget(self.filter_edit)
         filter_layout.addWidget(self.clear_button)
         filter_layout.addWidget(self.save_button)
+        filter_layout.addWidget(self.load_button)
 
         central = QVBoxLayout()
         central.addLayout(filter_layout)
@@ -50,9 +52,26 @@ class BasesTable(QWidget):
 
         self.setLayout(central)
 
+    def create_load_menu(self):
+        """Re-create the load menu"""
+
+        self.load_button.setEnabled(self.context.models.searches_model.rowCount() > 0)
+        load_menu = QMenu(self)
+        for row in range(self.context.models.searches_model.rowCount()):
+            search = self.context.models.searches_model.record(row)
+            load_action = QAction(search.value("name"), self)
+            load_action.triggered.connect(
+                functools.partial(self.context.signals.load_search.emit, row)
+            )
+            load_menu.addAction(load_action)
+        self.load_button.setMenu(load_menu)
+
     def _setup_widgets(self):
         """Initialize and configure widgets"""
         self.table.setModel(self.context.models.bases_model)
+        self.load_button.setText(self.tr("Load Search"))
+        self.load_button.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
+        self.create_load_menu()
 
     def _setup_signals(self):
         self.filter_edit.textChanged.connect(
@@ -73,6 +92,9 @@ class BasesTable(QWidget):
         )
         self.context.signals.load_search.connect(self.load_search)
         self.context.signals.save_search.connect(self.save_search)
+
+        self.context.models.searches_model.data_updated.connect(self.create_load_menu)
+        self.load_button.pressed.connect(self.load_button.showMenu)
 
     def search_loaded(self):
         """Restore a saved search"""

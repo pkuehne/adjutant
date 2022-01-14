@@ -68,13 +68,14 @@ class ModelContext:
         self.base_tags_model.setTable("bases_tags")
         self.base_tags_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
-        self.searches_model = QSqlTableModel()
+        self.searches_model = RelationalModel()
         self.searches_model.setTable("searches")
         self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
         self.storage_model = self._setup_storage_model()
         self.statuses_model = self._setup_statuses_model()
 
+        self._setup_searches_model()
         self._setup_colours_model()
         self._setup_recipes_model()
         self._setup_recipe_steps_model()
@@ -169,6 +170,12 @@ class ModelContext:
         )
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         return model
+
+    def _setup_searches_model(self) -> RelationalModel:
+        """Setup the Searches Model"""
+        self.searches_model = RelationalModel()
+        self.searches_model.setTable("searches")
+        self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
     def _setup_storage_model(self) -> QSqlTableModel:
         """Setup the storage model"""
