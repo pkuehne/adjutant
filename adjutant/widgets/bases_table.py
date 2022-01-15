@@ -4,15 +4,11 @@ import functools
 from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtGui import QAction, QCursor
 from PyQt6.QtWidgets import (
-    QHBoxLayout,
     QInputDialog,
-    QLabel,
-    QLineEdit,
     QMenu,
-    QPushButton,
     QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtWidgets import QWidget, QToolButton
 
 from adjutant.context import Context
 
@@ -27,10 +23,6 @@ class BasesTable(QWidget):
         super().__init__()
         self.context = context
         self.table = SortFilterTable(self)
-        self.filter_edit = QLineEdit()
-        self.clear_button = QPushButton(self.tr("Clear Filters"))
-        self.save_button = QPushButton(self.tr("Save Search"))
-        self.load_button = QToolButton()
 
         self._setup_layout()
         self._setup_widgets()
@@ -38,47 +30,16 @@ class BasesTable(QWidget):
 
     def _setup_layout(self):
         """Setup the layout"""
-
-        filter_layout = QHBoxLayout()
-        filter_layout.addWidget(QLabel(self.tr("Filter: ")))
-        filter_layout.addWidget(self.filter_edit)
-        filter_layout.addWidget(self.clear_button)
-        filter_layout.addWidget(self.save_button)
-        filter_layout.addWidget(self.load_button)
-
         central = QVBoxLayout()
-        central.addLayout(filter_layout)
         central.addWidget(self.table)
 
         self.setLayout(central)
 
-    def create_load_menu(self):
-        """Re-create the load menu"""
-
-        self.load_button.setEnabled(self.context.models.searches_model.rowCount() > 0)
-        load_menu = QMenu(self)
-        for row in range(self.context.models.searches_model.rowCount()):
-            search = self.context.models.searches_model.record(row)
-            load_action = QAction(search.value("name"), self)
-            load_action.triggered.connect(
-                functools.partial(self.context.signals.load_search.emit, row)
-            )
-            load_menu.addAction(load_action)
-        self.load_button.setMenu(load_menu)
-
     def _setup_widgets(self):
         """Initialize and configure widgets"""
         self.table.setModel(self.context.models.bases_model)
-        self.load_button.setText(self.tr("Load Search"))
-        self.load_button.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
-        self.create_load_menu()
 
     def _setup_signals(self):
-        self.filter_edit.textChanged.connect(
-            self.table.filter_model.setFilterFixedString
-        )
-        self.clear_button.pressed.connect(self.clear_all_filters)
-        self.save_button.pressed.connect(self.save_search)
 
         self.table.item_edited.connect(self.context.signals.show_edit_base_dialog)
         self.table.item_deleted.connect(self.context.controller.delete_bases)
@@ -90,23 +51,9 @@ class BasesTable(QWidget):
         self.context.signals.show_edit_base_dialog.connect(
             lambda index: BaseEditDialog.edit_base(self.context, index, self)
         )
-        self.context.signals.load_search.connect(self.load_search)
-        self.context.signals.save_search.connect(self.save_search)
-
-        self.context.models.searches_model.data_updated.connect(self.create_load_menu)
-        self.load_button.pressed.connect(self.load_button.showMenu)
-
-    def search_loaded(self):
-        """Restore a saved search"""
-        self.filter_edit.blockSignals(True)
-        self.filter_edit.setText(
-            self.table.filter_model.filterRegularExpression().pattern()
-        )
-        self.filter_edit.blockSignals(False)
 
     def clear_all_filters(self):
         """Clear all filters applied to the table"""
-        self.filter_edit.setText("")
         self.table.filter_model.clear_all_column_filters()
 
     def context_menu(self, index: QModelIndex):  # pylint: disable=invalid-name
@@ -198,9 +145,7 @@ class BasesTable(QWidget):
 
         if row == -1:
             self.table.filter_model.setFilterFixedString("")
-            self.search_loaded()
             return
 
         record = self.context.models.searches_model.record(row)
         self.table.filter_model.decode_filters(record.value("encoded"))
-        self.search_loaded()
