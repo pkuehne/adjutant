@@ -31,14 +31,14 @@ class BasesScreen(QWidget):
     def _setup_signals(self):
         """Setup the signals"""
         self.search_bar.filter_edit.textChanged.connect(
-            self.bases_table.table.filter_model.setFilterFixedString
+            self.bases_table.filter_model.setFilterFixedString
         )
         self.search_bar.clear_button.pressed.connect(self.bases_table.clear_all_filters)
         self.search_bar.save_button.pressed.connect(self.bases_table.save_search)
 
-        self.bases_table.table.filter_model.filter_changed.connect(
+        self.bases_table.filter_model.filter_changed.connect(
             lambda: self.row_count_changed.emit(
-                self.bases_table.table.filter_model.rowCount()
+                self.bases_table.filter_model.rowCount()
             )
         )
         self.context.signals.load_search.connect(self.load_search)
@@ -52,5 +52,5 @@ class BasesScreen(QWidget):
         """Load the search and pass to the table and search bar"""
         self.bases_table.load_search(row)
         self.search_bar.load_search(
-            self.bases_table.table.filter_model.filterRegularExpression().pattern()
+            self.bases_table.filter_model.filterRegularExpression().pattern()
         )
