@@ -35,6 +35,7 @@ class RecipeScreen(QWidget):
         self.context.signals.show_add_recipe_dialog.connect(
             lambda: RecipeEditDialog.add(self.context, self)
         )
+        self.table.item_added.connect(self.context.signals.show_add_recipe_dialog.emit)
         self.context.signals.show_edit_recipe_dialog.connect(
             lambda idx: RecipeEditDialog.edit(self.context, idx, self)
         )

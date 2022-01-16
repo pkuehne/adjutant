@@ -2,15 +2,13 @@
 
 import functools
 from PyQt6.QtCore import QModelIndex, Qt
-from PyQt6.QtGui import QAction, QCursor
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QInputDialog,
     QMenu,
 )
 
 from adjutant.context import Context
-
-from adjutant.windows.base_edit_dialog import BaseEditDialog
 from adjutant.widgets.sort_filter_table import SortFilterTable
 
 
@@ -22,38 +20,12 @@ class BasesTable(SortFilterTable):
         self.context = context
         self.setModel(self.context.models.bases_model)
 
-        self._setup_signals()
-
-    def _setup_signals(self):
-
-        self.item_edited.connect(self.context.signals.show_edit_base_dialog)
-        self.item_deleted.connect(self.context.controller.delete_bases)
-        self.context_menu_launched.connect(self.context_menu)
-
-        self.context.signals.show_add_base_dialog.connect(
-            lambda: BaseEditDialog.add_base(self.context, self)
-        )
-        self.context.signals.show_edit_base_dialog.connect(
-            lambda index: BaseEditDialog.edit_base(self.context, index, self)
-        )
-
     def clear_all_filters(self):
         """Clear all filters applied to the table"""
         self.filter_model.clear_all_column_filters()
 
-    def context_menu(self, index: QModelIndex):  # pylint: disable=invalid-name
+    def additional_context_menu_items(self, index: QModelIndex, menu: QMenu):
         """When right-click context menu is requested"""
-        edit_action = QAction(self.tr("Edit Base"), self)
-        edit_action.triggered.connect(
-            lambda: self.context.signals.show_edit_base_dialog.emit(index)
-        )
-        add_action = QAction(self.tr("Add Base"), self)
-        add_action.triggered.connect(self.context.signals.show_add_base_dialog.emit)
-        delete_action = QAction(self.tr("Delete Bases"), self)
-        delete_action.triggered.connect(
-            lambda: self.context.controller.delete_bases(self.selected_indexes())
-        )
-
         duplicate_menu = QMenu(self.tr("Duplicate Base"), self)
         for dupes in range(1, 11):
             duplicate_action = QAction(str(dupes) + self.tr(" times"), duplicate_menu)
@@ -93,16 +65,10 @@ class BasesTable(SortFilterTable):
             )
             filter_menu.addAction(filter_action)
 
-        menu = QMenu(self)
-        menu.addAction(edit_action)
-        menu.addAction(delete_action)
         menu.addMenu(duplicate_menu)
         menu.addSeparator()
         menu.addMenu(apply_menu)
         menu.addMenu(filter_menu)
-        menu.addSeparator()
-        menu.addAction(add_action)
-        menu.popup(QCursor.pos())
 
     def apply_field_to_selection(self, row: int, column: int):
         """Apply the field at index(row, column) to all selected indexes"""

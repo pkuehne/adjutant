@@ -9,8 +9,8 @@ from PyQt6.QtCore import (
     Qt,
     pyqtSignal,
 )
-from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
-from PyQt6.QtWidgets import QTableView
+from PyQt6.QtGui import QContextMenuEvent, QKeyEvent, QCursor, QAction
+from PyQt6.QtWidgets import QTableView, QMenu
 
 from adjutant.widgets.sort_filter_header import SortFilterHeader
 from adjutant.models.sort_filter_model import SortFilterModel
@@ -21,7 +21,7 @@ class SortFilterTable(QTableView):
 
     item_edited = pyqtSignal(QModelIndex)
     item_deleted = pyqtSignal(list)
-    context_menu_launched = pyqtSignal(QModelIndex)
+    item_added = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
@@ -63,14 +63,37 @@ class SortFilterTable(QTableView):
         super().setModel(self.filter_model)
         self.resizeColumnsToContents()
 
+    def additional_context_menu_items(self, index: QModelIndex, menu: QMenu):
+        """Overridable for subclasses"""
+
     def contextMenuEvent(self, event: QContextMenuEvent):
         """When right-click context menu is requested"""
         row = self.rowAt(event.y())
         col = self.columnAt(event.x())
         if row == -1 or col == -1:
             return
-        index = self.model().index(row, 0)
-        self.context_menu_launched.emit(self._map_index(index))
+        index = self._map_index(self.model().index(row, 0))
+        name = "'" + index.siblingAtColumn(1).data() + "'"  # 1 is always the name
+
+        add_action = QAction(self.tr("Add New"), self)
+        add_action.triggered.connect(self.item_added.emit)
+        edit_action = QAction(self.tr(f"Edit {name}"), self)
+        edit_action.triggered.connect(lambda: self.item_edited.emit(index))
+        delete_action = QAction(self.tr(f"Delete {name}"), self)
+        delete_action.triggered.connect(
+            lambda: self.item_deleted.emit(self.selected_indexes())
+        )
+        menu = QMenu(self)
+        menu.addAction(edit_action)
+        menu.addAction(delete_action)
+        menu.addSeparator()
+
+        # Hand over to subclasses
+        self.additional_context_menu_items(index, menu)
+
+        menu.addSeparator()
+        menu.addAction(add_action)
+        menu.popup(QCursor.pos())
 
     def eventFilter(self, source: QObject, event: QEvent):
         """Capture delete/backspace key sent to table"""

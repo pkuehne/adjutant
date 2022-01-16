@@ -35,6 +35,7 @@ class ColoursScreen(QWidget):
         self.context.signals.show_add_colour_dialog.connect(
             lambda: ColourEditDialog.add(self.context, self)
         )
+        self.table.item_added.connect(self.context.signals.show_add_colour_dialog.emit)
         self.context.signals.show_edit_colour_dialog.connect(
             lambda idx: ColourEditDialog.edit(self.context, idx, self)
         )

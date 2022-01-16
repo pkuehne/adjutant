@@ -36,6 +36,7 @@ class SchemeScreen(QWidget):
         self.context.signals.show_add_scheme_dialog.connect(
             lambda: SchemeEditDialog.add(self.context, self)
         )
+        self.table.item_added.connect(self.context.signals.show_add_scheme_dialog.emit)
         self.context.signals.show_edit_scheme_dialog.connect(
             lambda idx: SchemeEditDialog.edit(self.context, idx, self)
         )

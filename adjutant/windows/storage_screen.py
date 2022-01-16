@@ -35,6 +35,7 @@ class StorageScreen(QWidget):
         self.context.signals.show_add_storage_dialog.connect(
             lambda: StorageEditDialog.add(self.context, self)
         )
+        self.table.item_added.connect(self.context.signals.show_add_storage_dialog.emit)
         self.context.signals.show_edit_storage_dialog.connect(
             lambda idx: StorageEditDialog.edit(self.context, idx, self)
         )

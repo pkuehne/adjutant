@@ -57,11 +57,11 @@ class RecipeEditDialog(QDialog):
         self.cancel_button = QPushButton(self.tr("Cancel"))
         self.delete_button = QPushButton(self.tr("Delete"))
 
-        self.setWindowTitle("Edit Colour")
+        self.setWindowTitle("Edit Colour Recipe")
         if self.add_mode:
             self.model.insertRow(self.model.rowCount())
             self.index = self.model.index(self.model.rowCount() - 1, 0)
-            self.setWindowTitle("Add Colour")
+            self.setWindowTitle("Add Colour Recipe")
 
         self._setup_layout()
         self._setup_widgets()

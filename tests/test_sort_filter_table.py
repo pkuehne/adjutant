@@ -1,13 +1,16 @@
 """ Tests for the SortFilterTable"""
 
+from pytestqt.qtbot import QtBot
+from unittest.mock import MagicMock
 from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
+from PyQt6.QtWidgets import QMenu
 from adjutant.widgets.sort_filter_table import SortFilterTable
 from adjutant.context import Context
 from tests.conftest import AddBaseFunc, AddEmptyBasesFunc, BasesRecord
 
 
-def test_set_model_sets_filter(qtbot, context: Context):
+def test_set_model_sets_filter(qtbot: QtBot, context: Context):
     """When the model is set, the filter model should be set too"""
     # Given
     table = SortFilterTable()
@@ -22,9 +25,13 @@ def test_set_model_sets_filter(qtbot, context: Context):
     assert table.model() == table.filter_model
 
 
-def test_context_menu_is_fired(qtbot, context: Context, add_base: AddBaseFunc):
+def test_context_menu_is_fired(
+    qtbot: QtBot, monkeypatch, context: Context, add_base: AddBaseFunc
+):
     """When the context menu event is fired, a signal is raised"""
     # Given
+    popup_mock = MagicMock()
+    monkeypatch.setattr(QMenu, "popup", popup_mock)
     table = SortFilterTable()
     qtbot.addWidget(table)
     add_base([BasesRecord()])
@@ -32,16 +39,19 @@ def test_context_menu_is_fired(qtbot, context: Context, add_base: AddBaseFunc):
     event = QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(5, 5))
 
     # When
-    with qtbot.waitSignal(table.context_menu_launched, timeout=10) as blocker:
-        table.contextMenuEvent(event)
+    table.contextMenuEvent(event)
 
     # Then
-    assert blocker.args == [context.models.bases_model.index(0, 0)]
+    popup_mock.assert_called()
 
 
-def test_context_menu_is_not_fired(qtbot, context: Context, add_base: AddBaseFunc):
+def test_context_menu_is_not_fired(
+    qtbot: QtBot, monkeypatch, context: Context, add_base: AddBaseFunc
+):
     """When the context menu event is fired, the signal is not raised if no item is selected"""
     # Given
+    popup_mock = MagicMock()
+    monkeypatch.setattr(QMenu, "popup", popup_mock)
     table = SortFilterTable()
     qtbot.addWidget(table)
     add_base([BasesRecord()])
@@ -49,14 +59,14 @@ def test_context_menu_is_not_fired(qtbot, context: Context, add_base: AddBaseFun
     event = QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(9999, 999))
 
     # When
-    with qtbot.assertNotEmitted(table.context_menu_launched):
-        table.contextMenuEvent(event)
+    table.contextMenuEvent(event)
 
     # Then
+    popup_mock.assert_not_called()
 
 
 def test_selected_returns_orig_model_index(
-    qtbot, context: Context, add_empty_bases: AddEmptyBasesFunc
+    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
 ):
     """Selected indexes returns the original model's index"""
     # Given
@@ -76,7 +86,7 @@ def test_selected_returns_orig_model_index(
 
 
 def test_backspace_deletes_item(
-    qtbot, context: Context, add_empty_bases: AddEmptyBasesFunc
+    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
 ):
     """backspace on selected item deletes the row"""
     # Given
@@ -108,7 +118,7 @@ def test_backspace_deletes_item(
 
 
 def test_delete_deletes_item(
-    qtbot, context: Context, add_empty_bases: AddEmptyBasesFunc
+    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
 ):
     """delete on selected item deletes the row"""
     # Given
@@ -139,7 +149,9 @@ def test_delete_deletes_item(
     assert indexes[0].model() == context.models.bases_model
 
 
-def test_return_edits_item(qtbot, context: Context, add_empty_bases: AddEmptyBasesFunc):
+def test_return_edits_item(
+    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
+):
     """return on selected item edits the row"""
     # Given
     table = SortFilterTable()
@@ -170,7 +182,7 @@ def test_return_edits_item(qtbot, context: Context, add_empty_bases: AddEmptyBas
 
 
 def test_other_keys_do_nothing(
-    qtbot, context: Context, add_empty_bases: AddEmptyBasesFunc
+    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
 ):
     """return on selected item edits the row"""
     # Given

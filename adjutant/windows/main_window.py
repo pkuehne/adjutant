@@ -58,6 +58,4 @@ class MainWindow(QMainWindow):
         self.setStatusBar(MainWindowStatusBar(self, self.context))
 
         self.bases.row_count_changed.connect(self.statusBar().update_row_count)
-        self.statusBar().update_row_count(
-            self.bases.bases_table.filter_model.rowCount()
-        )
+        self.statusBar().update_row_count(self.bases.table.filter_model.rowCount())
