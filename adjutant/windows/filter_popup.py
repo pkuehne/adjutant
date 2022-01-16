@@ -110,7 +110,7 @@ class FilterPopup(QDialog):
                 for tag in value:
                     items.append(FilterValue(tag.tag_name, tag.tag_id))
             else:
-                items.append(FilterValue(display, value))
+                items.append(FilterValue(str(display), value))
         unique = list(set(items))
 
         for filter_ in unique:

@@ -1,7 +1,7 @@
 """ Tests for the SortFilterTable"""
 
-from pytestqt.qtbot import QtBot
 from unittest.mock import MagicMock
+from pytestqt.qtbot import QtBot
 from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
 from PyQt6.QtWidgets import QMenu
