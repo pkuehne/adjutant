@@ -84,6 +84,9 @@ class MainWindowMenuBar(QMenuBar):
         tools_menu = self.addMenu("&Tools")
         manage_menu = tools_menu.addMenu("&Manage Data")
         self._setup_manage_menu(manage_menu)
+        import_menu = tools_menu.addMenu("&Import Data")
+        self._setup_import_menu(import_menu)
+
         tools_menu.addSeparator()
         tools_menu.addAction(preferences_action)
 
@@ -106,6 +109,13 @@ class MainWindowMenuBar(QMenuBar):
         manage_menu.addAction(searches_action)
         manage_menu.addAction(statuses_action)
         return manage_menu
+
+    def _setup_import_menu(self, menu: QMenu):
+        """Setup the import menu"""
+        colours_action = QAction("Colours", self)
+        colours_action.triggered.connect(self.context.controller.import_colours)
+
+        menu.addAction(colours_action)
 
     def _setup_help_menu(self):
         """Setup the help menu"""

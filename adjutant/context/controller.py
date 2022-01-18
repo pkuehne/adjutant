@@ -1,9 +1,13 @@
 """ Context for the controller """
 
 from typing import List
-from PyQt6.QtCore import QModelIndex, QObject, Qt
-from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
+import yaml
+from yaml.scanner import ScannerError
+from yaml.parser import ParserError
+from PyQt6.QtCore import QModelIndex, QObject, Qt, QUrl
+from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox, QFileDialog
 from PyQt6.QtSql import QSqlTableModel
+from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
@@ -31,6 +35,7 @@ class Controller(QObject):
         self.database = database
         self.signals = signals
         self.settings = settings
+        self.network = QNetworkAccessManager()
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
@@ -261,3 +266,49 @@ class Controller(QObject):
             record.setValue("recipes_id", component.recipe_id)
             model.insertRecord(-1, record)
         model.submitAll()
+
+    def import_colours(self):
+        """Ask for file and import it into the colours table"""
+        filename: QUrl = QFileDialog.getOpenFileUrl(caption="Colour File")[0]
+        if not filename.isValid():
+            return
+
+        if filename.isLocalFile():
+            with open(filename.toLocalFile()) as file:
+                self.load_colours_from_string(file.read())
+        else:
+            reply = self.network.get(QNetworkRequest(filename))
+            reply.finished.connect(
+                lambda: self.load_colours_from_string(str(reply.readAll(), "utf-8"))
+            )
+
+    def load_colours_from_string(self, file_contents):
+        """load the actual data into the colours table"""
+        yaml_data = None
+        try:
+            yaml_data = yaml.safe_load(file_contents)
+        except (ScannerError, ParserError) as exc:
+            QMessageBox.critical(
+                None,
+                "Invalid File Format",
+                f"Cannot parse the file:\n{exc.problem}\n{exc.problem_mark}",
+            )
+            return
+
+        # print(yaml_data)
+
+        colours = yaml_data.get("colours", [])
+        for colour in colours:
+            colour_name = colour.get("name", "")
+            if colour_name == "":
+                print("Invalid entry with no name")
+                continue
+            record = self.models.colours_model.record()
+            record.setNull("id")
+            record.setValue("name", colour.get("name", ""))
+            record.setValue("manufacturer", colour.get("manufacturer", ""))
+            record.setValue("range", colour.get("range", ""))
+            record.setValue("hexvalue", colour.get("hexvalue", ""))
+            record.setValue("notes", colour.get("notes", ""))
+            self.models.colours_model.insertRecord(-1, record)
+        self.models.colours_model.submitAll()
