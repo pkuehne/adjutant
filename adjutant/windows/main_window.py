@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         self.context = Context()
         self.context.settings.set_version("0.1.0-dev")
         self.context.settings.database_version = 1
-        self.context.load_database("data.db")
+        self.context.load_database("adjutant.db")
         # self.context.load_database(":memory:")
         self.context.models.refresh_models()
         if self.context.models.bases_model.rowCount() == 0:
