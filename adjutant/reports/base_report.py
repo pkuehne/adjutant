@@ -9,12 +9,12 @@ from PyQt6.QtWidgets import QDialog
 from adjutant.context.context import Context
 
 
-def format_colour(colour: QSqlRecord) -> str:
+def format_paint(paint: QSqlRecord) -> str:
     """Formats a colour"""
-    colour_name = colour.value("name")
-    hexvalue = colour.value("hexvalue")
+    paint_name = paint.value("name")
+    hexvalue = paint.value("hexvalue")
     colour_box = f"<font color='{hexvalue}'>■</font>"
-    return f"{colour_box} {colour_name}"
+    return f"{colour_box} {paint_name}"
 
 
 class BaseReport:

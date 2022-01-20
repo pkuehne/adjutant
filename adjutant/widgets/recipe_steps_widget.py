@@ -39,7 +39,7 @@ class RecipeStepsWidget(QWidget):
 
     def add_step(self, step: RecipeStep) -> None:
         """Add a new step"""
-        item = QListWidgetItem(f"{step.operation_name} - {step.colour_name}")
+        item = QListWidgetItem(f"{step.operation_name} - {step.paint_name}")
         item.setData(Qt.ItemDataRole.UserRole + 1, step)
         item.setData(Qt.ItemDataRole.DecorationRole, QColor(f"{step.hexvalue}"))
         self.step_list.addItem(item)

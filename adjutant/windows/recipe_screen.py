@@ -1,4 +1,4 @@
-""" Main screen for the Colours layout """
+""" Main screen for the Recipes layout """
 
 from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from adjutant.widgets.sort_filter_table import SortFilterTable

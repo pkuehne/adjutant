@@ -2,7 +2,7 @@
 
 from tests.conftest import (
     AddBaseFunc,
-    AddColourFunc,
+    AddPaintFunc,
     AddEmptyBasesFunc,
     AddStepFunc,
     AddTagFunc,
@@ -110,12 +110,12 @@ def test_add_tag_to_base_invalid_id(
 
 
 def test_recipe_steps_only_for_given_recipe(
-    context: Context, add_colour: AddColourFunc, add_step: AddStepFunc
+    context: Context, add_paint: AddPaintFunc, add_step: AddStepFunc
 ):
     """Steps are retrieved and converted"""
     # Given
-    add_colour("Foo")
-    add_colour("Bar")
+    add_paint("Foo")
+    add_paint("Bar")
     add_step(1, 1, 1)
     add_step(1, 2, 2)
     add_step(2, 2, 2)
@@ -126,18 +126,18 @@ def test_recipe_steps_only_for_given_recipe(
 
     # Then
     assert len(steps) == 2
-    assert steps[0].colour_id == 1
-    assert steps[0].colour_name == "Foo"
-    assert steps[1].colour_id == 2
+    assert steps[0].paint_id == 1
+    assert steps[0].paint_name == "Foo"
+    assert steps[1].paint_id == 2
 
 
 def test_recipe_steps_returns_empty_list_on_failure(
-    context: Context, add_colour: AddColourFunc, add_step: AddStepFunc, monkeypatch
+    context: Context, add_paint: AddPaintFunc, add_step: AddStepFunc, monkeypatch
 ):
     """Steps are retrieved and converted"""
     # Given
-    add_colour("Foo")
-    add_colour("Bar")
+    add_paint("Foo")
+    add_paint("Bar")
     add_step(1, 1, 1)
     add_step(1, 2, 2)
     add_step(2, 2, 2)
@@ -151,12 +151,12 @@ def test_recipe_steps_returns_empty_list_on_failure(
 
 
 def test_recipe_steps_remove(
-    context: Context, add_colour: AddColourFunc, add_step: AddStepFunc
+    context: Context, add_paint: AddPaintFunc, add_step: AddStepFunc
 ):
     """Steps are retrieved and converted"""
     # Given
-    add_colour("Foo")
-    add_colour("Bar")
+    add_paint("Foo")
+    add_paint("Bar")
     add_step(1, 1, 1)
     add_step(1, 2, 2)
     add_step(2, 2, 2)

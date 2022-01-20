@@ -207,7 +207,7 @@ class SchemeEditDialog(QDialog):
 
     @classmethod
     def add(cls, context, parent):
-        """Wraps the adding of a colour"""
+        """Wraps the adding of a scheme"""
         cls.dialog_reference = cls(context, QModelIndex(), parent)
         cls.dialog_reference.exec()
         cls.dialog_reference = None

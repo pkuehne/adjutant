@@ -1,13 +1,13 @@
-""" Tests for the Colours Screen """
+""" Tests for the Paints Screen """
 
-from adjutant.windows.colours_screen import ColoursScreen
+from adjutant.windows.paints_screen import PaintsScreen
 from tests.conftest import Context
 
 
-def test_colours_model_set(qtbot, context: Context):
-    """The colours model should be set"""
+def test_paints_model_set(qtbot, context: Context):
+    """The paints model should be set"""
     # Given
-    screen = ColoursScreen(context)
+    screen = PaintsScreen(context)
     qtbot.addWidget(screen)
 
     # When

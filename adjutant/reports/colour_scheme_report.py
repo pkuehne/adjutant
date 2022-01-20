@@ -29,16 +29,16 @@ class ColourSchemeReport(BaseReport):
             step = self.context.models.recipe_steps_model.record(row)
             if step.value("recipes_id") != recipe.value("id"):
                 continue
-            colour = self.context.models.colours_model.record_by_id(
-                step.value("colours_id")
+            paint = self.context.models.paints_model.record_by_id(
+                step.value("paints_id")
             )
-            colour_name = colour.value("name")
-            colour_box = f"<font color='{colour.value('hexvalue')}'>■</font>"
+            paint_name = paint.value("name")
+            colour_box = f"<font color='{paint.value('hexvalue')}'>■</font>"
             oper = self.context.models.step_operations_model.record_by_id(
                 step.value("operations_id")
             )
             oper_name = oper.value("name")
-            retval += f"<li>{colour_box} {colour_name} ({oper_name})</li>"
+            retval += f"<li>{colour_box} {paint_name} ({oper_name})</li>"
         retval += "</ol>"
         return retval
 

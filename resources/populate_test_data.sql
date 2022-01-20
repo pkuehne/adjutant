@@ -91,11 +91,11 @@ INSERT INTO step_operations VALUES (NULL, "Highlight");
 INSERT INTO step_operations VALUES (NULL, "Glaze");
 INSERT INTO step_operations VALUES (NULL, "Varnish");
 
-INSERT INTO colours VALUES (NULL, "Mournfang Brown", "Citadel", "Base", "#640909", "");
-INSERT INTO colours VALUES (NULL, "Gorthor Brown ", "Citadel", "Layer", "#654741", "");
-INSERT INTO colours VALUES (NULL, "Skrag Brown", "Citadel", "Layer", "#90490F", "");
-INSERT INTO colours VALUES (NULL, "Tallarn Sand", "Citadel", "Layer", "#A67610", "");
-INSERT INTO colours VALUES (NULL, "Agrax Earthshade", "Citadel", "Shade", "#5A573F", "");
+INSERT INTO paints VALUES (NULL, "Mournfang Brown", "Citadel", "Base", "#640909", "");
+INSERT INTO paints VALUES (NULL, "Gorthor Brown ", "Citadel", "Layer", "#654741", "");
+INSERT INTO paints VALUES (NULL, "Skrag Brown", "Citadel", "Layer", "#90490F", "");
+INSERT INTO paints VALUES (NULL, "Tallarn Sand", "Citadel", "Layer", "#A67610", "");
+INSERT INTO paints VALUES (NULL, "Agrax Earthshade", "Citadel", "Shade", "#5A573F", "");
 
 INSERT INTO recipes VALUES (NULL, "Light Leather", "Useful for belts, bags and any other straps");
 

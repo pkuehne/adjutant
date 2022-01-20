@@ -5,7 +5,7 @@ from tests.conftest import Context
 
 
 def test_model_is_set(qtbot, context: Context):
-    """The colours model should be set"""
+    """The model should be set"""
     # Given
     screen = RecipeScreen(context)
     qtbot.addWidget(screen)

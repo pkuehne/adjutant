@@ -43,7 +43,7 @@ class ModelContext:
         self.searches_model = None
         self.storage_model = None
         self.statuses_model = None
-        self.colours_model = None
+        self.paints_model = None
         self.recipes_model = None
         self.recipe_steps_model = None
         self.step_operations_model = None
@@ -76,7 +76,7 @@ class ModelContext:
         self.statuses_model = self._setup_statuses_model()
 
         self._setup_searches_model()
-        self._setup_colours_model()
+        self._setup_paints_model()
         self._setup_recipes_model()
         self._setup_recipe_steps_model()
         self._setup_step_operations_model()
@@ -94,7 +94,7 @@ class ModelContext:
         self.searches_model.select()
         self.storage_model.select()
         self.statuses_model.select()
-        self.colours_model.select()
+        self.paints_model.select()
         self.recipes_model.select()
         self.recipe_steps_model.select()
         self.step_operations_model.select()
@@ -206,28 +206,26 @@ class ModelContext:
         setup_header_data(model, [HeaderRoles("Name", "What this status represents")])
         return model
 
-    def _setup_colours_model(self) -> None:
-        """Setup the colours models"""
-        self.colours_model = RelationalModel()
-        self.colours_model.setTable("colours")
-        self.colours_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
-        self.colours_model.colour_fields.append(
-            self.colours_model.fieldIndex("hexvalue")
-        )
+    def _setup_paints_model(self) -> None:
+        """Setup the paints models"""
+        self.paints_model = RelationalModel()
+        self.paints_model.setTable("paints")
+        self.paints_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.paints_model.colour_fields.append(self.paints_model.fieldIndex("hexvalue"))
         setup_header_data(
-            self.colours_model,
+            self.paints_model,
             [
-                HeaderRoles("ID", "The internal ID of the colour"),
-                HeaderRoles("Name", "The name of this colour"),
+                HeaderRoles("ID", "The internal ID of the paint"),
+                HeaderRoles("Name", "The name of this paint"),
                 HeaderRoles(
                     "Manufacturer",
-                    "The manufacturer of this colour (Citadel, Vallejo, etc)",
+                    "The manufacturer of this paint (Citadel, Vallejo, etc)",
                 ),
                 HeaderRoles("Range", "What group this is (e.g. Layer, Model Air, etc)"),
                 HeaderRoles(
-                    "Hex Value", "The RGB values of this colour in hexadecimal notation"
+                    "Hex Value", "The RGB values of this paint in hexadecimal notation"
                 ),
-                HeaderRoles("Notes", "General notes about this colour"),
+                HeaderRoles("Notes", "General notes about this paint"),
             ],
         )
 
@@ -259,8 +257,8 @@ class ModelContext:
         )
 
         self.recipe_steps_model.set_one_to_many_relationship(
-            self.recipe_steps_model.fieldIndex("colours_id"),
-            OneToManyRelationship("colours", "id", "name"),
+            self.recipe_steps_model.fieldIndex("paints_id"),
+            OneToManyRelationship("paints", "id", "name"),
         )
         self.recipe_steps_model.set_one_to_many_relationship(
             self.recipe_steps_model.fieldIndex("operations_id"),
@@ -271,8 +269,8 @@ class ModelContext:
             [
                 HeaderRoles("ID", "The internal ID of this recipe step"),
                 HeaderRoles("Recipe", "The recipe this step belongs to"),
-                HeaderRoles("Colour", "The colour to apply at this step"),
-                HeaderRoles("Operation", "How to apply the colour"),
+                HeaderRoles("Paint", "The paint to apply at this step"),
+                HeaderRoles("Operation", "How to apply the paint"),
                 HeaderRoles("Number", "Which step number this step is"),
             ],
         )

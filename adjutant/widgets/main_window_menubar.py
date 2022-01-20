@@ -43,8 +43,8 @@ class MainWindowMenuBar(QMenuBar):
         tags_action.triggered.connect(lambda _: self.context.controller.create_tag())
         storage_action = QAction("&Storage", self)
         storage_action.triggered.connect(self.context.signals.show_add_storage_dialog)
-        colour_action = QAction("&Colour", self)
-        colour_action.triggered.connect(self.context.signals.show_add_colour_dialog)
+        paint_action = QAction("&Paint", self)
+        paint_action.triggered.connect(self.context.signals.show_add_paint_dialog)
         recipe_action = QAction("&Recipe", self)
         recipe_action.triggered.connect(self.context.signals.show_add_recipe_dialog)
         scheme_action = QAction("&Scheme", self)
@@ -54,7 +54,7 @@ class MainWindowMenuBar(QMenuBar):
         add_menu.addAction(bases_action)
         add_menu.addAction(tags_action)
         add_menu.addAction(storage_action)
-        add_menu.addAction(colour_action)
+        add_menu.addAction(paint_action)
         add_menu.addAction(recipe_action)
         add_menu.addAction(scheme_action)
 
@@ -112,10 +112,10 @@ class MainWindowMenuBar(QMenuBar):
 
     def _setup_import_menu(self, menu: QMenu):
         """Setup the import menu"""
-        colours_action = QAction("Colours", self)
-        colours_action.triggered.connect(self.context.controller.import_colours)
+        paints_action = QAction("Paints", self)
+        paints_action.triggered.connect(self.context.controller.import_paints)
 
-        menu.addAction(colours_action)
+        menu.addAction(paints_action)
 
     def _setup_help_menu(self):
         """Setup the help menu"""

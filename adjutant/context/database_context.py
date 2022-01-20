@@ -167,9 +167,9 @@ def get_tag_count(context: DatabaseContext, tag_id: int) -> int:
 def get_recipe_steps(context: DatabaseContext, recipe_id: int) -> List[RecipeStep]:
     """Retrieve all steps for a given recipe as RecipeStep objects"""
     query = """
-        SELECT colours.id, colours.name, colours.hexvalue, step_operations.id, step_operations.name
+        SELECT paints.id, paints.name, paints.hexvalue, step_operations.id, step_operations.name
         FROM recipe_steps
-        INNER JOIN colours ON recipe_steps.colours_id == colours.id
+        INNER JOIN paints ON recipe_steps.paints_id == paints.id
         INNER JOIN step_operations ON recipe_steps.operations_id == step_operations.id
         WHERE recipes_id = :recipes_id
     """
@@ -180,8 +180,8 @@ def get_recipe_steps(context: DatabaseContext, recipe_id: int) -> List[RecipeSte
     steps = []
     while result.next():
         step = RecipeStep(
-            result.value("colours.id"),
-            result.value("colours.name"),
+            result.value("paints.id"),
+            result.value("paints.name"),
             result.value("step_operations.id"),
             result.value("step_operations.name"),
             result.value("hexvalue"),

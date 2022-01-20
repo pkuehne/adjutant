@@ -32,8 +32,8 @@ class MappedWidgets:
         self.id_label = QLabel()
         self.name_edit = QLineEdit()
         self.notes_edit = QTextEdit()
-        self.operation_combobox = QComboBox()
-        self.colour_combobox = QComboBox()
+        self.operations_combobox = QComboBox()
+        self.paints_combobox = QComboBox()
         self.steps_widget = RecipeStepsWidget()
         self.add_button = QPushButton()
 
@@ -76,8 +76,8 @@ class RecipeEditDialog(QDialog):
         form_layout.addRow("Notes: ", self.widgets.notes_edit)
 
         combobox_layout = QHBoxLayout()
-        combobox_layout.addWidget(self.widgets.operation_combobox)
-        combobox_layout.addWidget(self.widgets.colour_combobox)
+        combobox_layout.addWidget(self.widgets.operations_combobox)
+        combobox_layout.addWidget(self.widgets.paints_combobox)
         combobox_layout.addWidget(self.widgets.add_button)
 
         steps_layout = QVBoxLayout()
@@ -105,24 +105,24 @@ class RecipeEditDialog(QDialog):
         for step in steps:
             self.widgets.steps_widget.add_step(step)
 
-        completer = QCompleter(self.context.models.colours_model)
+        completer = QCompleter(self.context.models.paints_model)
         completer.setCompletionColumn(1)
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         completer.setCompletionMode(completer.CompletionMode.InlineCompletion)
 
-        self.widgets.colour_combobox.setModel(self.context.models.colours_model)
-        self.widgets.colour_combobox.setModelColumn(1)
-        self.widgets.colour_combobox.setEditable(True)
-        self.widgets.colour_combobox.setInsertPolicy(
-            self.widgets.colour_combobox.InsertPolicy.NoInsert
+        self.widgets.paints_combobox.setModel(self.context.models.paints_model)
+        self.widgets.paints_combobox.setModelColumn(1)
+        self.widgets.paints_combobox.setEditable(True)
+        self.widgets.paints_combobox.setInsertPolicy(
+            self.widgets.paints_combobox.InsertPolicy.NoInsert
         )
-        self.widgets.colour_combobox.setCompleter(completer)
-        self.widgets.colour_combobox.setCurrentText("")
+        self.widgets.paints_combobox.setCompleter(completer)
+        self.widgets.paints_combobox.setCurrentText("")
 
         model = RowZeroFilterModel()
         model.setSourceModel(self.context.models.step_operations_model)
-        self.widgets.operation_combobox.setModel(model)
-        self.widgets.operation_combobox.setModelColumn(1)
+        self.widgets.operations_combobox.setModel(model)
+        self.widgets.operations_combobox.setModelColumn(1)
 
         self.widgets.add_button.setMinimumWidth(1)
         self.widgets.add_button.setSizePolicy(
@@ -147,7 +147,7 @@ class RecipeEditDialog(QDialog):
 
     def _setup_signals(self):
         """Setup signals on widgets"""
-        self.widgets.colour_combobox.activated.connect(
+        self.widgets.paints_combobox.activated.connect(
             lambda _: self.widgets.add_button.setFocus()
         )
         self.widgets.add_button.pressed.connect(self.add_step)
@@ -160,27 +160,25 @@ class RecipeEditDialog(QDialog):
 
     def add_step(self):
         """Add a new step to the list"""
-        colour_row = self.widgets.colour_combobox.currentIndex()
-        colour_index = self.context.models.colours_model.index(colour_row, 0)
-        operations_row = self.widgets.operation_combobox.currentIndex()
-        operations_index = self.widgets.operation_combobox.model().index(
+        paints_row = self.widgets.paints_combobox.currentIndex()
+        paints_index = self.context.models.paints_model.index(paints_row, 0)
+        operations_row = self.widgets.operations_combobox.currentIndex()
+        operations_index = self.widgets.operations_combobox.model().index(
             operations_row, 0
         )
 
-        colour_id = colour_index.siblingAtColumn(0).data()
-        colour_name = colour_index.siblingAtColumn(1).data()
-        hexvalue = colour_index.siblingAtColumn(
-            self.context.models.colours_model.fieldIndex("hexvalue")
+        paint_id = paints_index.siblingAtColumn(0).data()
+        paint_name = paints_index.siblingAtColumn(1).data()
+        hexvalue = paints_index.siblingAtColumn(
+            self.context.models.paints_model.fieldIndex("hexvalue")
         ).data()
         operation_id = operations_index.siblingAtColumn(0).data()
         operation_name = operations_index.siblingAtColumn(1).data()
 
-        step = RecipeStep(
-            colour_id, colour_name, operation_id, operation_name, hexvalue
-        )
+        step = RecipeStep(paint_id, paint_name, operation_id, operation_name, hexvalue)
         self.widgets.steps_widget.add_step(step)
-        self.widgets.colour_combobox.setCurrentText("")
-        self.widgets.colour_combobox.setFocus()
+        self.widgets.paints_combobox.setCurrentText("")
+        self.widgets.paints_combobox.setFocus()
 
     def submit_changes(self):
         """Submits all changes and updates the model"""

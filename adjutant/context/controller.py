@@ -218,9 +218,9 @@ class Controller(QObject):
             if index.data(Qt.ItemDataRole.EditRole) == old_status:
                 self.models.bases_model.setData(index, 0)
 
-    def delete_colours(self, indexes: List[QModelIndex]):
-        """Deletes a given colour"""
-        self.delete_records(self.models.colours_model, indexes, "colour")
+    def delete_paints(self, indexes: List[QModelIndex]):
+        """Deletes a given paint"""
+        self.delete_records(self.models.paints_model, indexes, "paint")
 
     def delete_recipes(self, indexes: List[QModelIndex]):
         """Deleted a given colour recipe"""
@@ -238,7 +238,7 @@ class Controller(QObject):
             record = model.record()
             record.setNull("id")
             record.setValue("recipes_id", recipe_id)
-            record.setValue("colours_id", step.colour_id)
+            record.setValue("paints_id", step.paint_id)
             record.setValue("operations_id", step.operation_id)
             record.setValue("step_num", 0)
             model.insertRecord(-1, record)
@@ -267,23 +267,23 @@ class Controller(QObject):
             model.insertRecord(-1, record)
         model.submitAll()
 
-    def import_colours(self):
-        """Ask for file and import it into the colours table"""
-        filename: QUrl = QFileDialog.getOpenFileUrl(caption="Colour File")[0]
+    def import_paints(self):
+        """Ask for file and import it into the paints table"""
+        filename: QUrl = QFileDialog.getOpenFileUrl(caption="Paints File")[0]
         if not filename.isValid():
             return
 
         if filename.isLocalFile():
             with open(filename.toLocalFile()) as file:
-                self.load_colours_from_string(file.read())
+                self.load_paints_from_string(file.read())
         else:
             reply = self.network.get(QNetworkRequest(filename))
             reply.finished.connect(
-                lambda: self.load_colours_from_string(str(reply.readAll(), "utf-8"))
+                lambda: self.load_paints_from_string(str(reply.readAll(), "utf-8"))
             )
 
-    def load_colours_from_string(self, file_contents):
-        """load the actual data into the colours table"""
+    def load_paints_from_string(self, file_contents):
+        """load the actual data into the paints table"""
         yaml_data = None
         try:
             yaml_data = yaml.safe_load(file_contents)
@@ -297,18 +297,18 @@ class Controller(QObject):
 
         # print(yaml_data)
 
-        colours = yaml_data.get("colours", [])
-        for colour in colours:
-            colour_name = colour.get("name", "")
-            if colour_name == "":
+        paints = yaml_data.get("paints", [])
+        for paint in paints:
+            paint_name = paint.get("name", "")
+            if paint_name == "":
                 print("Invalid entry with no name")
                 continue
-            record = self.models.colours_model.record()
+            record = self.models.paints_model.record()
             record.setNull("id")
-            record.setValue("name", colour.get("name", ""))
-            record.setValue("manufacturer", colour.get("manufacturer", ""))
-            record.setValue("range", colour.get("range", ""))
-            record.setValue("hexvalue", colour.get("hexvalue", ""))
-            record.setValue("notes", colour.get("notes", ""))
-            self.models.colours_model.insertRecord(-1, record)
-        self.models.colours_model.submitAll()
+            record.setValue("name", paint.get("name", ""))
+            record.setValue("manufacturer", paint.get("manufacturer", ""))
+            record.setValue("range", paint.get("range", ""))
+            record.setValue("hexvalue", paint.get("hexvalue", ""))
+            record.setValue("notes", paint.get("notes", ""))
+            self.models.paints_model.insertRecord(-1, record)
+        self.models.paints_model.submitAll()

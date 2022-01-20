@@ -32,8 +32,8 @@ class Tag:
 class RecipeStep:
     """Recipe Step"""
 
-    colour_id: int
-    colour_name: str
+    paint_id: int
+    paint_name: str
     operation_id: int
     operation_name: str
     hexvalue: str

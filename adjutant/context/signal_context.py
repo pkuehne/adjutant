@@ -17,8 +17,8 @@ class SignalContext(QObject):
     show_add_storage_dialog = pyqtSignal()
     show_edit_storage_dialog = pyqtSignal(QModelIndex)
 
-    show_add_colour_dialog = pyqtSignal()
-    show_edit_colour_dialog = pyqtSignal(QModelIndex)
+    show_add_paint_dialog = pyqtSignal()
+    show_edit_paint_dialog = pyqtSignal(QModelIndex)
 
     show_add_recipe_dialog = pyqtSignal()
     show_edit_recipe_dialog = pyqtSignal(QModelIndex)

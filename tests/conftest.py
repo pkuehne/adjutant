@@ -160,20 +160,20 @@ def add_storage(context: Context) -> AddStorageFunc:
     return internal_func
 
 
-AddColourFunc = Callable[[str], None]
+AddPaintFunc = Callable[[str], None]
 
 
 @pytest.fixture
-def add_colour(context: Context) -> AddColourFunc:
-    """Fixture to add a record to the colours table"""
+def add_paint(context: Context) -> AddPaintFunc:
+    """Fixture to add a record to the paints table"""
 
     def internal_func(name: str) -> None:
-        record = context.models.colours_model.record()
+        record = context.models.paints_model.record()
         record.setNull("id")
         record.setValue("name", name)
-        assert context.models.colours_model.insertRecord(-1, record)
-        context.models.colours_model.submitAll()
-        assert context.models.colours_model.lastError().text() == ""
+        assert context.models.paints_model.insertRecord(-1, record)
+        context.models.paints_model.submitAll()
+        assert context.models.paints_model.lastError().text() == ""
 
     return internal_func
 
@@ -203,10 +203,10 @@ AddStepFunc = Callable[[int, int, int], None]
 def add_step(context: Context) -> AddStepFunc:
     """Fixture to add a record to the recipe steps table"""
 
-    def internal_func(recipe_id: int, colour_id: int, num: int) -> None:
+    def internal_func(recipe_id: int, paint_id: int, num: int) -> None:
         record = context.models.recipe_steps_model.record()
         record.setNull("id")
-        record.setValue("colours_id", colour_id)
+        record.setValue("paints_id", paint_id)
         record.setValue("recipes_id", recipe_id)
         record.setValue("step_num", num)
 

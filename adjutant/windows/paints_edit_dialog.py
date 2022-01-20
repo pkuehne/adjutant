@@ -31,8 +31,8 @@ class MappedWidgets:
         self.notes_edit = QTextEdit()
 
 
-class ColourEditDialog(QDialog):
-    """Add/Edit Dialog for colours"""
+class PaintEditDialog(QDialog):
+    """Add/Edit Dialog for paints"""
 
     dialog_reference = None
 
@@ -41,7 +41,7 @@ class ColourEditDialog(QDialog):
         self.context = context
         self.index = index
         self.add_mode = index == QModelIndex()
-        self.model = context.models.colours_model
+        self.model = context.models.paints_model
 
         self.mapper = QDataWidgetMapper()
         self.widgets = MappedWidgets()
@@ -50,11 +50,11 @@ class ColourEditDialog(QDialog):
         self.cancel_button = QPushButton(self.tr("Cancel"))
         self.delete_button = QPushButton(self.tr("Delete"))
 
-        self.setWindowTitle("Edit Colour")
+        self.setWindowTitle("Edit Paint")
         if self.add_mode:
             self.model.insertRow(self.model.rowCount())
             self.index = self.model.index(self.model.rowCount() - 1, 0)
-            self.setWindowTitle("Add Colour")
+            self.setWindowTitle("Add Paint")
 
         self._setup_layout()
         self._setup_widgets()
@@ -128,7 +128,7 @@ class ColourEditDialog(QDialog):
 
     def delete_button_pressed(self):
         """Delete the current index"""
-        self.context.controller.delete_colours(self.index)
+        self.context.controller.delete_paints(self.index)
         self.reject()
 
     def field(self, name: str) -> int:

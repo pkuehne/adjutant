@@ -13,7 +13,7 @@ from tests.conftest import (
     AddStepFunc,
     AddStorageFunc,
     AddTagFunc,
-    AddColourFunc,
+    AddPaintFunc,
     BasesRecord,
     Models,
 )
@@ -598,24 +598,24 @@ def test_delete_status_reassigns_bases(
 
 
 ##############################
-# Colours
+# Paints
 ##############################
-def test_delete_colour(context: Context, add_colour: AddColourFunc, monkeypatch):
-    """Delete colour does just that"""
+def test_delete_paint(context: Context, add_paint: AddPaintFunc, monkeypatch):
+    """Delete paint does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_colour("Foo")
-    index = context.models.colours_model.index(0, 1)
+    add_paint("Foo")
+    index = context.models.paints_model.index(0, 1)
 
     # When
-    context.controller.delete_colours([index])
+    context.controller.delete_paints([index])
 
     # Then
-    assert context.models.colours_model.rowCount() == 0
-    assert context.models.colours_model.isDirty() is False
+    assert context.models.paints_model.rowCount() == 0
+    assert context.models.paints_model.isDirty() is False
     assert index.isValid()
 
 
@@ -784,15 +784,15 @@ def test_replace_scheme_components_removes_old(context: Context, models: Models)
 
 
 ################################################
-# import_colour
+# import_paint
 ################################################
 
 
-def test_load_colours_parser_error(monkeypatch, context: Context):
+def test_load_paints_parser_error(monkeypatch, context: Context):
     """ParserError in yaml loading warns and returns early"""
     # Given
     data = """
-    colours:
+    paints:
       - name: "foo"-
         range: "bar"
         hexvalue: "#123456"
@@ -801,44 +801,44 @@ def test_load_colours_parser_error(monkeypatch, context: Context):
     monkeypatch.setattr(QMessageBox, "critical", mock)
 
     # When
-    context.controller.load_colours_from_string(data)
+    context.controller.load_paints_from_string(data)
 
     # Then
     mock.assert_called_once()
-    assert context.models.colours_model.rowCount() == 0
+    assert context.models.paints_model.rowCount() == 0
 
 
-def test_load_colours_skip_empty_name(context: Context):
+def test_load_paints_skip_empty_name(context: Context):
     """Empty names are skipped"""
     # Given
     data = """
-    colours:
+    paints:
       - name: ""
         range: "bar"
         hexvalue: "#123456"
     """
 
     # When
-    context.controller.load_colours_from_string(data)
+    context.controller.load_paints_from_string(data)
 
     # Then
-    assert context.models.colours_model.rowCount() == 0
+    assert context.models.paints_model.rowCount() == 0
 
 
-def test_load_colours_adds(context: Context):
-    """Correct colours are added"""
+def test_load_paints_adds(context: Context):
+    """Correct paints are added"""
     # Given
     data = """
-    colours:
+    paints:
       - name: "Foo"
         range: "bar"
         hexvalue: "#123456"
     """
 
     # When
-    context.controller.load_colours_from_string(data)
+    context.controller.load_paints_from_string(data)
 
     # Then
-    assert context.models.colours_model.rowCount() == 1
-    record = context.models.colours_model.record(0)
+    assert context.models.paints_model.rowCount() == 1
+    record = context.models.paints_model.record(0)
     assert record.value("name") == "Foo"

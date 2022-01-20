@@ -1,7 +1,7 @@
 """ PDF report for a Colour Scheme"""
 
 from PyQt6.QtSql import QSqlRecord
-from adjutant.reports.base_report import BaseReport, format_colour
+from adjutant.reports.base_report import BaseReport, format_paint
 from adjutant.context import Context
 
 
@@ -27,7 +27,7 @@ class PaintingGuideReport(BaseReport):
                 continue
             operations_id = step.value("operations_id")
             listvalue = retval.get(operations_id, [])
-            listvalue.append(step.value("colours_id"))
+            listvalue.append(step.value("paints_id"))
             retval[operations_id] = listvalue
 
         return retval
@@ -70,21 +70,17 @@ class PaintingGuideReport(BaseReport):
             for key, value in self.steps.items():
                 if oper_id not in value:
                     continue
-                colour_list = value[oper_id]
-                if len(colour_list) > 1:
+                paint_list = value[oper_id]
+                if len(paint_list) > 1:
                     steps += f"<b>{key}</b><ol>"
-                    for colour_id in colour_list:
-                        colour = self.context.models.colours_model.record_by_id(
-                            colour_id
-                        )
-                        steps += f"<li>{format_colour(colour)}</li>"
+                    for paint_id in paint_list:
+                        paint = self.context.models.paints_model.record_by_id(paint_id)
+                        steps += f"<li>{format_paint(paint)}</li>"
 
                     steps += "</ol>"
                 else:
-                    colour = self.context.models.colours_model.record_by_id(
-                        colour_list[0]
-                    )
-                    steps += f"<b>{key}</b> -> {format_colour(colour)}<br>"
+                    paint = self.context.models.paints_model.record_by_id(paint_list[0])
+                    steps += f"<b>{key}</b> -> {format_paint(paint)}<br>"
 
         return steps
 
