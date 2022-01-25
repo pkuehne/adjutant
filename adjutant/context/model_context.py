@@ -177,11 +177,15 @@ class ModelContext:
         self.searches_model.setTable("searches")
         self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
 
-    def _setup_storage_model(self) -> QSqlTableModel:
+    def _setup_storage_model(self) -> RelationalModel:
         """Setup the storage model"""
-        model = QSqlTableModel()
+        model = RelationalModel()
         model.setTable("storage")
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
+
+        model.boolean_fields.append(model.fieldIndex("magnetized"))
+        model.boolean_fields.append(model.fieldIndex("full"))
+
         setup_header_data(
             model,
             [

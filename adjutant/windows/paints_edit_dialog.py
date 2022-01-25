@@ -1,9 +1,7 @@
-""" Storage Edit/Add dialog"""
+""" Paints Edit/Add dialog"""
 
 from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import QLineEdit, QTextEdit
-
-
 from adjutant.context.context import Context
 from adjutant.widgets.colour_pick import ColourPick
 from adjutant.windows.add_edit_dialog import AddEditDialog, MappedWidget
