@@ -309,7 +309,7 @@ def context():
 
 
 @pytest.fixture
-def relational_model(context: Context):
+def relational_model(context: Context) -> RelationalModel:
     """fixture to create a RelationalModel"""
     rmod = RelationalModel()
     rmod.setTable("bases")
