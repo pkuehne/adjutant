@@ -24,6 +24,7 @@ class BasesRecord:
     depth: int = 0
     figures: int = 0
     status: int = 0
+    storage: int = 0
     scheme_id: int = 0
 
 
@@ -238,6 +239,7 @@ class Models:
         record.setValue("depth", item.depth)
         record.setValue("figures", item.figures)
         record.setValue("status_id", item.status)
+        record.setValue("storage_id", item.storage)
         record.setValue("schemes_id", item.scheme_id)
 
         assert model.insertRecord(-1, record)

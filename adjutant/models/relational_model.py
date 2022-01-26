@@ -109,7 +109,11 @@ class RelationalModel(QSqlTableModel):
         if not success:
             print(f"Failed to get value. Query: {query}")
             return None
-        sql.next()
+        success = sql.next()
+        if not success:
+            if foreign_key != 0:
+                print(f"Failed to get value for {foreign_key}")
+            return foreign_key
         return sql.value(relationship.target_field)
 
     def _data_boolean(self, idx, role: int):

@@ -178,3 +178,36 @@ def test_custom_property_in_mapping(qtbot: QtBot, relational_model: RelationalMo
 
     # Then
     assert dialog.mapper.mappedPropertyName(widget) == mappings[1].property
+
+
+def test_hide_name_field(qtbot: QtBot, relational_model: RelationalModel):
+    """When hide name field is set, the name field doesn't get added"""
+    # Given
+    dialog = AddEditDialog(QModelIndex())
+    qtbot.addWidget(dialog)
+    dialog.hide_name_field()
+    dialog.set_widgets([])
+    dialog.model = relational_model
+
+    # When
+    dialog.setup()
+
+    # Then
+    assert dialog.widgets.get("Name", None) is None
+
+
+def test_revert_changes(qtbot: QtBot, relational_model: RelationalModel):
+    """reject should revert changes"""
+    # Given
+    dialog = AddEditDialog(QModelIndex())
+    qtbot.addWidget(dialog)
+    dialog.set_widgets([])
+    dialog.model = relational_model
+    dialog.setup()
+    dialog.model.insertRecord(-1, dialog.model.record())
+
+    # When
+    dialog.revert_changes()
+
+    # Then
+    assert not dialog.model.isDirty()

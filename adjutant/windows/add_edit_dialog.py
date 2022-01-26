@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QDataWidgetMapper,
     QDialog,
     QFormLayout,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -26,6 +27,7 @@ class MappedWidget:
     widget: QWidget
     field: str
     property: QByteArray = None
+    hidden: bool = False
 
 
 @dataclass
@@ -42,6 +44,14 @@ class Buttons:
         self.delete_button = delete_button
 
 
+@dataclass
+class Features:
+    """Holds feature toggles for the dialog"""
+
+    is_add_mode: bool = False
+    hide_name_field: bool = False
+
+
 class AddEditDialog(QDialog):
     """Base class for all add/edit dialogs"""
 
@@ -52,7 +62,8 @@ class AddEditDialog(QDialog):
         self.widgets: Dict[str, MappedWidget] = {}
         self.model: RelationalModel = None
         self.form_layout = QFormLayout()
-        self.is_add_mode = self.index == QModelIndex()
+        self.features = Features()
+        self.features.is_add_mode = self.index == QModelIndex()
 
         self.buttons = Buttons(
             QPushButton(self.tr("OK"), self),
@@ -64,23 +75,28 @@ class AddEditDialog(QDialog):
 
     def set_title(self, title: str) -> None:
         """Update the dialog title"""
-        if self.is_add_mode:
+        if self.features.is_add_mode:
             self.setWindowTitle(f"Add {title}")
         else:
             self.setWindowTitle(f"Edit {title}")
 
     def set_widgets(self, widgets: List[MappedWidget]):
         """Load and set the widgets"""
-        widgets.insert(0, MappedWidget("Name", QLineEdit(), "name"))
-        if not self.is_add_mode:
+        if not self.features.hide_name_field:
+            widgets.insert(0, MappedWidget("Name", QLineEdit(), "name"))
+        if not self.features.is_add_mode:
             widgets.insert(0, MappedWidget("ID", QLabel(), "id"))
 
         for widget in widgets:
             self.widgets[widget.title] = widget
 
+    def hide_name_field(self):
+        """Hide the name field"""
+        self.features.hide_name_field = True
+
     def setup(self):
         """Setup the dialog"""
-        if self.is_add_mode:
+        if self.features.is_add_mode:
             self.model.insertRow(self.model.rowCount())
             self.index = self.model.index(self.model.rowCount() - 1, 0)
 
@@ -99,19 +115,25 @@ class AddEditDialog(QDialog):
         edit_widget_layout = QHBoxLayout()
         edit_widget_layout.addLayout(self.form_layout)
 
+        frame = QFrame()
+        frame.setFrameShape(QFrame.Shape.HLine)
+        frame.setFrameShadow(QFrame.Shadow.Sunken)
+
         central = QVBoxLayout()
         central.addLayout(edit_widget_layout)
+        central.addWidget(frame)
         central.addLayout(action_button_layout)
         self.setLayout(central)
 
     def setup_form_layout(self):
         """Add the widgets to the form layout"""
         for widget in self.widgets.values():
-            self.form_layout.addRow(widget.title, widget.widget)
+            if not widget.hidden:
+                self.form_layout.addRow(widget.title, widget.widget)
 
     def setup_widgets(self):
         """Setup the mapper and buttons"""
-        if not self.is_add_mode:
+        if not self.features.is_add_mode:
             (self.widgets["ID"].widget).setText(
                 str(self.index.siblingAtColumn(0).data())
             )
@@ -129,13 +151,13 @@ class AddEditDialog(QDialog):
 
         # Buttons
         self.buttons.ok_button.setDefault(True)
-        if self.is_add_mode:
+        if self.features.is_add_mode:
             self.buttons.delete_button.setDisabled(True)
 
     def _setup_signals(self):
         """Setup signals on widgets"""
         self.accepted.connect(self.submit_changes)
-        self.rejected.connect(self.model.revertAll)
+        self.rejected.connect(self.revert_changes)
         self.buttons.ok_button.pressed.connect(self.accept)
         self.buttons.cancel_button.pressed.connect(self.reject)
         self.buttons.delete_button.pressed.connect(self.delete_button_pressed)
@@ -146,10 +168,15 @@ class AddEditDialog(QDialog):
         success = self.mapper.submit()
         if not success:
             print("Mapper Error: " + self.model.lastError().text())
+
         success = self.model.submitAll()
         if not success:
             print("Model Error: " + self.model.lastError().text())
         self.model.selectRow(self.index.row())
+
+    def revert_changes(self):
+        """Revert all changes and cancel"""
+        self.model.revertAll()
 
     def delete_function(self, indexes):
         """overridable delete function"""

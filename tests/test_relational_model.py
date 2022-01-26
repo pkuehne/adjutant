@@ -157,6 +157,26 @@ def test_relationship_returns_none_for_error(
     assert value is None
 
 
+def test_relationship_returns_zero_if_key_not_found(
+    relational_model: RelationalModel, models: Models
+):
+    """A relational column should return foreign key if key not found in target table"""
+    # Given
+    relationship = OneToManyRelationship("storage", "id", "name")
+    relational_model.set_one_to_many_relationship(
+        relational_model.fieldIndex("storage_id"), relationship
+    )
+    models.add_base(BasesRecord(storage=25))
+
+    # When
+    value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
+        Qt.ItemDataRole.DisplayRole
+    )
+
+    # Then
+    assert value == 25
+
+
 def test_adding_m2m_relationship_adds_one_to_column_count(
     relational_model: RelationalModel,
 ):

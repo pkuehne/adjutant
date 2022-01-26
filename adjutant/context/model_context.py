@@ -3,7 +3,6 @@
 from typing import List
 from dataclasses import dataclass
 
-from PyQt6.QtSql import QSqlQueryModel, QSqlTableModel
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
 from adjutant.models.bases_model import BasesModel
 from adjutant.context.dataclasses import ManyToManyRelationship, OneToManyRelationship
@@ -18,7 +17,7 @@ class HeaderRoles:
     tooltip: str
 
 
-def setup_header_data(model: QSqlQueryModel, roles: List[HeaderRoles]):
+def setup_header_data(model: RelationalModel, roles: List[HeaderRoles]):
     """Setup header data roles"""
     col = 0
     for role in roles:
@@ -64,13 +63,15 @@ class ModelContext:
             self.tags_model.fieldIndex("name"), Qt.SortOrder.AscendingOrder
         )
 
-        self.base_tags_model = QSqlTableModel()
+        self.base_tags_model = RelationalModel()
         self.base_tags_model.setTable("bases_tags")
-        self.base_tags_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.base_tags_model.setEditStrategy(
+            RelationalModel.EditStrategy.OnManualSubmit
+        )
 
         self.searches_model = RelationalModel()
         self.searches_model.setTable("searches")
-        self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.searches_model.setEditStrategy(RelationalModel.EditStrategy.OnManualSubmit)
 
         self.storage_model = self._setup_storage_model()
         self.statuses_model = self._setup_statuses_model()
@@ -103,9 +104,9 @@ class ModelContext:
 
     def _setup_settings_model(self) -> None:
         """Load settings model"""
-        self.settings_model = QSqlTableModel()
+        self.settings_model = RelationalModel()
         self.settings_model.setTable("settings")
-        self.settings_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.settings_model.setEditStrategy(RelationalModel.EditStrategy.OnManualSubmit)
 
     def __setup_bases_model(self) -> BasesModel:
         """Initialize and setup the bases model"""
@@ -157,9 +158,9 @@ class ModelContext:
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         return model
 
-    def __setup_tags_model(self) -> QSqlTableModel:
+    def __setup_tags_model(self) -> RelationalModel:
         """Set up the tags model"""
-        model = QSqlTableModel()
+        model = RelationalModel()
         model.setTable("tags")
         setup_header_data(
             model,
@@ -175,7 +176,7 @@ class ModelContext:
         """Setup the Searches Model"""
         self.searches_model = RelationalModel()
         self.searches_model.setTable("searches")
-        self.searches_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.searches_model.setEditStrategy(RelationalModel.EditStrategy.OnManualSubmit)
 
     def _setup_storage_model(self) -> RelationalModel:
         """Setup the storage model"""
@@ -202,9 +203,9 @@ class ModelContext:
         )
         return model
 
-    def _setup_statuses_model(self) -> QSqlTableModel:
+    def _setup_statuses_model(self) -> RelationalModel:
         """Setup the statuses model"""
-        model = QSqlTableModel()
+        model = RelationalModel()
         model.setTable("statuses")
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         setup_header_data(model, [HeaderRoles("Name", "What this status represents")])
@@ -214,7 +215,7 @@ class ModelContext:
         """Setup the paints models"""
         self.paints_model = RelationalModel()
         self.paints_model.setTable("paints")
-        self.paints_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.paints_model.setEditStrategy(RelationalModel.EditStrategy.OnManualSubmit)
         self.paints_model.colour_fields.append(self.paints_model.fieldIndex("hexvalue"))
         setup_header_data(
             self.paints_model,
@@ -237,7 +238,7 @@ class ModelContext:
         """Setup the recipes model"""
         self.recipes_model = RelationalModel()
         self.recipes_model.setTable("recipes")
-        self.recipes_model.setEditStrategy(QSqlTableModel.EditStrategy.OnManualSubmit)
+        self.recipes_model.setEditStrategy(RelationalModel.EditStrategy.OnManualSubmit)
         setup_header_data(
             self.recipes_model,
             [
@@ -252,7 +253,7 @@ class ModelContext:
         self.recipe_steps_model = RelationalModel()
         self.recipe_steps_model.setTable("recipe_steps")
         self.recipe_steps_model.setEditStrategy(
-            QSqlTableModel.EditStrategy.OnManualSubmit
+            RelationalModel.EditStrategy.OnManualSubmit
         )
 
         self.recipe_steps_model.set_one_to_many_relationship(
@@ -284,7 +285,7 @@ class ModelContext:
         self.step_operations_model = RelationalModel()
         self.step_operations_model.setTable("step_operations")
         self.step_operations_model.setEditStrategy(
-            QSqlTableModel.EditStrategy.OnManualSubmit
+            RelationalModel.EditStrategy.OnManualSubmit
         )
         setup_header_data(
             self.step_operations_model,
@@ -299,7 +300,7 @@ class ModelContext:
         self.colour_schemes_model = RelationalModel()
         self.colour_schemes_model.setTable("colour_schemes")
         self.colour_schemes_model.setEditStrategy(
-            QSqlTableModel.EditStrategy.OnManualSubmit
+            RelationalModel.EditStrategy.OnManualSubmit
         )
         setup_header_data(
             self.colour_schemes_model,
@@ -315,7 +316,7 @@ class ModelContext:
         self.scheme_components_model = RelationalModel()
         self.scheme_components_model.setTable("scheme_components")
         self.scheme_components_model.setEditStrategy(
-            QSqlTableModel.EditStrategy.OnManualSubmit
+            RelationalModel.EditStrategy.OnManualSubmit
         )
         self.scheme_components_model.set_one_to_many_relationship(
             self.scheme_components_model.fieldIndex("recipes_id"),

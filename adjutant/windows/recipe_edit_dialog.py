@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 from PyQt6.QtCore import QModelIndex, Qt
 from PyQt6.QtWidgets import (
-    QComboBox,
     QCompleter,
     QDataWidgetMapper,
     QDialog,
@@ -12,30 +11,28 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QSizePolicy,
     QTextEdit,
     QVBoxLayout,
+    QFrame,
 )
 
 from adjutant.context.context import Context
-from adjutant.context.database_context import get_recipe_steps
-from adjutant.context.dataclasses import RecipeStep
 from adjutant.models.row_zero_filter_model import RowZeroFilterModel
-from adjutant.widgets.recipe_steps_widget import RecipeStepsWidget
+from adjutant.widgets.recipe_steps_link import RecipeStepsLink
 
 
 @dataclass
 class MappedWidgets:
     """Holds the widgets that need to be data mapped"""
 
-    def __init__(self):
+    def __init__(self, context: Context, recipe_id: int):
         self.id_label = QLabel()
         self.name_edit = QLineEdit()
         self.notes_edit = QTextEdit()
-        self.operations_combobox = QComboBox()
-        self.paints_combobox = QComboBox()
-        self.steps_widget = RecipeStepsWidget()
-        self.add_button = QPushButton()
+        # self.operations_combobox = QComboBox()
+        # self.paints_combobox = QComboBox()
+        self.steps_widget = RecipeStepsLink(context, recipe_id)
+        # self.add_button = QPushButton()
 
 
 class RecipeEditDialog(QDialog):
@@ -46,12 +43,12 @@ class RecipeEditDialog(QDialog):
     def __init__(self, context: Context, index: QModelIndex, parent=None) -> None:
         super().__init__(parent=parent)
         self.context = context
+        self.widgets = MappedWidgets(self.context, index.data())
         self.index = index.siblingAtColumn(0)
         self.add_mode = index == QModelIndex()
         self.model = context.models.recipes_model
 
         self.mapper = QDataWidgetMapper()
-        self.widgets = MappedWidgets()
 
         self.ok_button = QPushButton(self.tr("OK"), self)
         self.cancel_button = QPushButton(self.tr("Cancel"))
@@ -76,9 +73,9 @@ class RecipeEditDialog(QDialog):
         form_layout.addRow("Notes: ", self.widgets.notes_edit)
 
         combobox_layout = QHBoxLayout()
-        combobox_layout.addWidget(self.widgets.operations_combobox)
-        combobox_layout.addWidget(self.widgets.paints_combobox)
-        combobox_layout.addWidget(self.widgets.add_button)
+        # combobox_layout.addWidget(self.widgets.operations_combobox)
+        # combobox_layout.addWidget(self.widgets.paints_combobox)
+        # combobox_layout.addWidget(self.widgets.add_button)
 
         steps_layout = QVBoxLayout()
         steps_layout.addLayout(combobox_layout)
@@ -94,41 +91,25 @@ class RecipeEditDialog(QDialog):
         action_button_layout.addWidget(self.cancel_button)
         action_button_layout.addWidget(self.ok_button)
 
+        frame = QFrame()
+        frame.setFrameShape(QFrame.Shape.HLine)
+        # frame.setFrameShadow(QFrame.Shadow.Sunken)
+
         central = QVBoxLayout()
         central.addLayout(edit_widget_layout)
+        central.addWidget(frame)
         central.addLayout(action_button_layout)
         self.setLayout(central)
 
     def _setup_widgets(self):
         """Sets up the widgets"""
-        steps = get_recipe_steps(self.context.database, self.index.data())
-        for step in steps:
-            self.widgets.steps_widget.add_step(step)
-
         completer = QCompleter(self.context.models.paints_model)
         completer.setCompletionColumn(1)
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         completer.setCompletionMode(completer.CompletionMode.InlineCompletion)
 
-        self.widgets.paints_combobox.setModel(self.context.models.paints_model)
-        self.widgets.paints_combobox.setModelColumn(1)
-        self.widgets.paints_combobox.setEditable(True)
-        self.widgets.paints_combobox.setInsertPolicy(
-            self.widgets.paints_combobox.InsertPolicy.NoInsert
-        )
-        self.widgets.paints_combobox.setCompleter(completer)
-        self.widgets.paints_combobox.setCurrentText("")
-
         model = RowZeroFilterModel()
         model.setSourceModel(self.context.models.step_operations_model)
-        self.widgets.operations_combobox.setModel(model)
-        self.widgets.operations_combobox.setModelColumn(1)
-
-        self.widgets.add_button.setMinimumWidth(1)
-        self.widgets.add_button.setSizePolicy(
-            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
-        )
-        self.widgets.add_button.setText("˅")
 
         self.widgets.id_label.setText(str(self.index.data()))
         self.mapper.setModel(self.model)
@@ -147,42 +128,14 @@ class RecipeEditDialog(QDialog):
 
     def _setup_signals(self):
         """Setup signals on widgets"""
-        self.widgets.paints_combobox.activated.connect(
-            lambda _: self.widgets.add_button.setFocus()
-        )
-        self.widgets.add_button.pressed.connect(self.add_step)
-
         self.accepted.connect(self.submit_changes)
-        self.rejected.connect(self.model.revertAll)
+        self.rejected.connect(self.revert_changes)
         self.ok_button.pressed.connect(self.accept)
         self.cancel_button.pressed.connect(self.reject)
         self.delete_button.pressed.connect(self.delete_button_pressed)
 
-    def add_step(self):
-        """Add a new step to the list"""
-        paints_row = self.widgets.paints_combobox.currentIndex()
-        paints_index = self.context.models.paints_model.index(paints_row, 0)
-        operations_row = self.widgets.operations_combobox.currentIndex()
-        operations_index = self.widgets.operations_combobox.model().index(
-            operations_row, 0
-        )
-
-        paint_id = paints_index.siblingAtColumn(0).data()
-        paint_name = paints_index.siblingAtColumn(1).data()
-        hexvalue = paints_index.siblingAtColumn(
-            self.context.models.paints_model.fieldIndex("hexvalue")
-        ).data()
-        operation_id = operations_index.siblingAtColumn(0).data()
-        operation_name = operations_index.siblingAtColumn(1).data()
-
-        step = RecipeStep(paint_id, paint_name, operation_id, operation_name, hexvalue)
-        self.widgets.steps_widget.add_step(step)
-        self.widgets.paints_combobox.setCurrentText("")
-        self.widgets.paints_combobox.setFocus()
-
     def submit_changes(self):
         """Submits all changes and updates the model"""
-        # Submit Bases table change
         success = self.mapper.submit()
         if not success:
             print("Mapper Error: " + self.model.lastError().text())
@@ -191,9 +144,12 @@ class RecipeEditDialog(QDialog):
             print("Model Error: " + self.model.lastError().text())
         self.model.selectRow(self.index.row())
         recipe_id = self.index.siblingAtColumn(0).data()
-        self.context.controller.replace_recipe_steps(
-            recipe_id, self.widgets.steps_widget.get_steps()
-        )
+        self.widgets.steps_widget.submit_changes(recipe_id)
+
+    def revert_changes(self):
+        """Revert"""
+        self.model.revertAll()
+        self.widgets.steps_widget.revert_changes()
 
     def delete_button_pressed(self):
         """Delete the current index"""
