@@ -13,7 +13,6 @@ from PyQt6.QtWidgets import (
 
 from adjutant.context import Context
 from adjutant.models.relational_model import RelationalModel
-from adjutant.windows.steps_edit_dialog import StepsEditDialog
 
 
 class RecipeStepsLinkModel(QSortFilterProxyModel):
@@ -107,13 +106,11 @@ class RecipeStepsLink(QWidget):
     def _setup_signals(self):
         """Connect signals to handlers"""
         self.step_list.doubleClicked.connect(
-            lambda index: StepsEditDialog.edit(
-                self.context, self.model.mapToSource(index), self.parent()
+            lambda index: self.context.signals.show_edit_steps_dialog.emit(
+                self.model.mapToSource(index)
             )
         )
-        self.add_button.pressed.connect(
-            lambda: StepsEditDialog.add(self.context, self.parent())
-        )
+        self.add_button.pressed.connect(self.context.signals.show_add_steps_dialog.emit)
 
     def save_current_steps(self):
         """Save the steps now, so they can be reverted to later"""

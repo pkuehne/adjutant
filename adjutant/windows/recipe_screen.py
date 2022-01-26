@@ -5,6 +5,7 @@ from adjutant.widgets.sort_filter_table import SortFilterTable
 from adjutant.context import Context
 
 from adjutant.windows.recipe_edit_dialog import RecipeEditDialog
+from adjutant.windows.steps_edit_dialog import StepsEditDialog
 
 
 class RecipeScreen(QWidget):
@@ -43,3 +44,10 @@ class RecipeScreen(QWidget):
             lambda idx: RecipeEditDialog.edit(self.context, idx, self)
         )
         self.table.item_deleted.connect(self.context.controller.delete_recipes)
+
+        self.context.signals.show_add_steps_dialog.connect(
+            lambda: StepsEditDialog.add(self.context, self)
+        )
+        self.context.signals.show_edit_steps_dialog.connect(
+            lambda idx: StepsEditDialog.edit(self.context, idx, self)
+        )

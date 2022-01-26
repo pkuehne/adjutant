@@ -17,6 +17,7 @@ from PyQt6.QtCore import QModelIndex, QByteArray
 
 from adjutant.context.context import Context
 from adjutant.models.relational_model import RelationalModel
+from adjutant.widgets.recipe_steps_link import RecipeStepsLink
 
 
 @dataclass
@@ -34,14 +35,26 @@ class MappedWidget:
 class Buttons:
     """Holds action buttons for the dialog"""
 
-    ok_button = QPushButton
-    cancel_button = QPushButton
-    delete_button = QPushButton
+    ok_button: QPushButton
+    cancel_button: QPushButton
+    delete_button: QPushButton
 
     def __init__(self, ok_button, cancel_button, delete_button):
         self.ok_button = ok_button
         self.cancel_button = cancel_button
         self.delete_button = delete_button
+
+
+@dataclass
+class Layouts:
+    """Holds the layouts for this dialog"""
+
+    form_layout: QFormLayout
+    link_layout: QHBoxLayout
+
+    def __init__(self):
+        self.form_layout = QFormLayout()
+        self.link_layout = QHBoxLayout()
 
 
 @dataclass
@@ -60,8 +73,9 @@ class AddEditDialog(QDialog):
         self.index = index
         self.mapper = QDataWidgetMapper()
         self.widgets: Dict[str, MappedWidget] = {}
+        self.link_widget = None
         self.model: RelationalModel = None
-        self.form_layout = QFormLayout()
+        self.layouts = Layouts()
         self.features = Features()
         self.features.is_add_mode = self.index == QModelIndex()
 
@@ -80,8 +94,12 @@ class AddEditDialog(QDialog):
         else:
             self.setWindowTitle(f"Edit {title}")
 
-    def set_widgets(self, widgets: List[MappedWidget]):
+    def set_widgets(
+        self, widgets: List[MappedWidget], link_widget: RecipeStepsLink = None
+    ):
         """Load and set the widgets"""
+        self.link_widget = link_widget
+
         if not self.features.hide_name_field:
             widgets.insert(0, MappedWidget("Name", QLineEdit(), "name"))
         if not self.features.is_add_mode:
@@ -100,7 +118,7 @@ class AddEditDialog(QDialog):
             self.model.insertRow(self.model.rowCount())
             self.index = self.model.index(self.model.rowCount() - 1, 0)
 
-        self.setup_form_layout()
+        self.layout_widgets()
         self.setup_widgets()
         self._setup_signals()
 
@@ -113,7 +131,8 @@ class AddEditDialog(QDialog):
         action_button_layout.addWidget(self.buttons.ok_button)
 
         edit_widget_layout = QHBoxLayout()
-        edit_widget_layout.addLayout(self.form_layout)
+        edit_widget_layout.addLayout(self.layouts.form_layout)
+        edit_widget_layout.addLayout(self.layouts.link_layout)
 
         frame = QFrame()
         frame.setFrameShape(QFrame.Shape.HLine)
@@ -125,11 +144,14 @@ class AddEditDialog(QDialog):
         central.addLayout(action_button_layout)
         self.setLayout(central)
 
-    def setup_form_layout(self):
+    def layout_widgets(self):
         """Add the widgets to the form layout"""
         for widget in self.widgets.values():
             if not widget.hidden:
-                self.form_layout.addRow(widget.title, widget.widget)
+                self.layouts.form_layout.addRow(widget.title, widget.widget)
+
+        if self.link_widget:
+            self.layouts.link_layout.addWidget(self.link_widget)
 
     def setup_widgets(self):
         """Setup the mapper and buttons"""
@@ -174,9 +196,15 @@ class AddEditDialog(QDialog):
             print("Model Error: " + self.model.lastError().text())
         self.model.selectRow(self.index.row())
 
+        if self.link_widget is not None:
+            link_id = self.index.siblingAtColumn(0).data()
+            self.link_widget.submit_changes(link_id)
+
     def revert_changes(self):
         """Revert all changes and cancel"""
         self.model.revertAll()
+        if self.link_widget is not None:
+            self.link_widget.revert_changes()
 
     def delete_function(self, indexes):
         """overridable delete function"""

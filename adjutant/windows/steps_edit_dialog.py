@@ -29,7 +29,6 @@ class StepsEditDialog(AddEditDialog):
         recipe_edit = QLineEdit()
         recipe_edit.setText("0")
         self.hide_name_field()
-        # self.do_not_submit()
         self.set_widgets(
             [
                 MappedWidget("Recipe", recipe_edit, "recipes_id", hidden=True),
