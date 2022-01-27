@@ -4,6 +4,7 @@ from typing import List
 from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import QLineEdit
 from adjutant.context.context import Context
+from adjutant.models.row_zero_filter_model import RowZeroFilterModel
 from adjutant.windows.add_edit_dialog import AddEditDialog, MappedWidget
 from adjutant.widgets.foreign_key_combobox import ForeignKeyCombobox
 
@@ -26,10 +27,12 @@ class StepsEditDialog(AddEditDialog):
         paint_box.setModel(self.context.models.paints_model)
         paint_box.setModelColumn(1)
         operation_box = ForeignKeyCombobox()
-        operation_box.setModel(self.context.models.step_operations_model)
+        model = RowZeroFilterModel()
+        model.setSourceModel(self.context.models.step_operations_model)
+        operation_box.setModel(model)
         operation_box.setModelColumn(1)
         recipe_edit = QLineEdit()
-        recipe_edit.setText("0")
+
         self.hide_name_field()
         self.set_widgets(
             [
@@ -40,6 +43,7 @@ class StepsEditDialog(AddEditDialog):
         )
 
         self.setup()
+        recipe_edit.setText(str(kwargs.get("link_id", 0)))
 
     def delete_function(self, indexes: List[QModelIndex]):
         """delete was called on this item"""

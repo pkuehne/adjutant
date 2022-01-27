@@ -32,12 +32,12 @@ class DialogManager(QWidget):
         self.context.signals.show_add_dialog.connect(self.show_add_dialog)
         self.context.signals.show_edit_dialog.connect(self.show_edit_dialog)
 
-    def show_add_dialog(self, name: str, **kwargs):
+    def show_add_dialog(self, name: str, kwargs):
         """Show the Add version of the Add/Edit Dialog"""
         dialog = get_dialog(name)
         dialog.add(self.context, self.parent(), **kwargs)
 
-    def show_edit_dialog(self, name: str, index: QModelIndex, **kwargs):
+    def show_edit_dialog(self, name: str, index: QModelIndex, kwargs):
         """Show the Edit version of the Add/Edit Dialog"""
         dialog = get_dialog(name)
         dialog.edit(self.context, index, self.parent(), **kwargs)

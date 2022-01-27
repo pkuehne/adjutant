@@ -43,7 +43,8 @@ class RecipeStepsLinkModel(QSortFilterProxyModel):
 
         model: RelationalModel = self.sourceModel()
         recipe_id = model.record(source_row).value("recipes_id")
-        if recipe_id not in (0, self.filter_id):
+        operation_id = model.record(source_row).value("operations_id")
+        if recipe_id != self.filter_id or operation_id == 0:
             return False
         return super().filterAcceptsRow(source_row, source_parent)
 
@@ -111,7 +112,9 @@ class RecipeStepsLink(QWidget):
             )
         )
         self.add_button.pressed.connect(
-            lambda: self.context.signals.show_add_dialog.emit("step", {})
+            lambda: self.context.signals.show_add_dialog.emit(
+                "step", {"link_id": self.link_id}
+            )
         )
 
     def save_current_steps(self):
