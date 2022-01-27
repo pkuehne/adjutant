@@ -42,13 +42,21 @@ class MainWindowMenuBar(QMenuBar):
         tags_action = QAction("&Tag", self)
         tags_action.triggered.connect(lambda _: self.context.controller.create_tag())
         storage_action = QAction("&Storage", self)
-        storage_action.triggered.connect(self.context.signals.show_add_storage_dialog)
+        storage_action.triggered.connect(
+            lambda: self.context.signals.show_add_dialog.emit("storage", {})
+        )
         paint_action = QAction("&Paint", self)
-        paint_action.triggered.connect(self.context.signals.show_add_paint_dialog)
+        paint_action.triggered.connect(
+            lambda: self.context.signals.show_add_dialog.emit("paint", {})
+        )
         recipe_action = QAction("&Recipe", self)
-        recipe_action.triggered.connect(self.context.signals.show_add_recipe_dialog)
+        recipe_action.triggered.connect(
+            lambda: self.context.signals.show_add_dialog.emit("recipe", {})
+        )
         scheme_action = QAction("&Scheme", self)
-        scheme_action.triggered.connect(self.context.signals.show_add_scheme_dialog)
+        scheme_action.triggered.connect(
+            lambda: self.context.signals.show_add_dialog.emit("scheme", {})
+        )
 
         add_menu = self.addMenu("&Add")
         add_menu.addAction(bases_action)

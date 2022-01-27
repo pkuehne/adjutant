@@ -4,9 +4,6 @@ from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from adjutant.widgets.sort_filter_table import SortFilterTable
 from adjutant.context import Context
 
-from adjutant.windows.recipe_edit_dialog import RecipeEditDialog
-from adjutant.windows.steps_edit_dialog import StepsEditDialog
-
 
 class RecipeScreen(QWidget):
     """Main widget for all colour recipes"""
@@ -33,21 +30,10 @@ class RecipeScreen(QWidget):
 
     def _setup_signals(self):
         """Setup the signals"""
-        self.context.signals.show_add_recipe_dialog.connect(
-            lambda: RecipeEditDialog.add(self.context, self)
-        )
-        self.table.item_added.connect(self.context.signals.show_add_recipe_dialog.emit)
-        self.context.signals.show_edit_recipe_dialog.connect(
-            lambda idx: RecipeEditDialog.edit(self.context, idx, self)
+        self.table.item_added.connect(
+            lambda: self.context.signals.show_add_dialog.emit("recipe", {})
         )
         self.table.item_edited.connect(
-            lambda idx: RecipeEditDialog.edit(self.context, idx, self)
+            lambda idx: self.context.signals.show_edit_dialog.emit("recipe", idx, {})
         )
         self.table.item_deleted.connect(self.context.controller.delete_recipes)
-
-        self.context.signals.show_add_steps_dialog.connect(
-            lambda: StepsEditDialog.add(self.context, self)
-        )
-        self.context.signals.show_edit_steps_dialog.connect(
-            lambda idx: StepsEditDialog.edit(self.context, idx, self)
-        )

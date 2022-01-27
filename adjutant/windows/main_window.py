@@ -4,6 +4,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
 from adjutant.context import Context
+from adjutant.widgets.dialog_manager import DialogManager
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
 from adjutant.widgets.main_window_status_bar import MainWindowStatusBar
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
         self.context.controller.set_font_size(
             self.context.models.settings_model.record(0).value("font_size")
         )
+        self.dialogs = DialogManager(self.context, self)
 
         self.bases = BasesScreen(self.context)
         self.storage = StorageScreen(self.context)

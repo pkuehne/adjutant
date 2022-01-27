@@ -106,11 +106,13 @@ class RecipeStepsLink(QWidget):
     def _setup_signals(self):
         """Connect signals to handlers"""
         self.step_list.doubleClicked.connect(
-            lambda index: self.context.signals.show_edit_steps_dialog.emit(
-                self.model.mapToSource(index)
+            lambda index: self.context.signals.show_edit_dialog.emit(
+                "step", self.model.mapToSource(index), {}
             )
         )
-        self.add_button.pressed.connect(self.context.signals.show_add_steps_dialog.emit)
+        self.add_button.pressed.connect(
+            lambda: self.context.signals.show_add_dialog.emit("step", {})
+        )
 
     def save_current_steps(self):
         """Save the steps now, so they can be reverted to later"""

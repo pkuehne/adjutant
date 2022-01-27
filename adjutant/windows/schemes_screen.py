@@ -4,8 +4,6 @@ from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from adjutant.widgets.sort_filter_table import SortFilterTable
 from adjutant.context import Context
 
-from adjutant.windows.scheme_edit_dialog import SchemeEditDialog
-
 
 class SchemeScreen(QWidget):
     """Main widget for all colour schemes"""
@@ -33,14 +31,10 @@ class SchemeScreen(QWidget):
 
     def _setup_signals(self):
         """Setup the signals"""
-        self.context.signals.show_add_scheme_dialog.connect(
-            lambda: SchemeEditDialog.add(self.context, self)
-        )
-        self.table.item_added.connect(self.context.signals.show_add_scheme_dialog.emit)
-        self.context.signals.show_edit_scheme_dialog.connect(
-            lambda idx: SchemeEditDialog.edit(self.context, idx, self)
+        self.table.item_added.connect(
+            lambda: self.context.signals.show_add_dialog.emit("scheme", {})
         )
         self.table.item_edited.connect(
-            lambda idx: SchemeEditDialog.edit(self.context, idx, self)
+            lambda idx: self.context.signals.show_edit_dialog.emit("scheme", idx, {})
         )
         self.table.item_deleted.connect(self.context.controller.delete_schemes)

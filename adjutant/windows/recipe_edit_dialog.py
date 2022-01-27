@@ -12,8 +12,10 @@ class RecipeEditDialog(AddEditDialog):
 
     dialog_reference = None
 
-    def __init__(self, context: Context, index: QModelIndex, parent=None) -> None:
-        super().__init__(index, parent)
+    def __init__(
+        self, context: Context, index: QModelIndex, parent=None, **kwargs
+    ) -> None:
+        super().__init__(index, parent, **kwargs)
         self.context = context
         self.model = context.models.recipes_model
 

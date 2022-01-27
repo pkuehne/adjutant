@@ -199,14 +199,14 @@ class SchemeEditDialog(QDialog):
         return self.model.fieldIndex(name)
 
     @classmethod
-    def edit(cls, context, index, parent):
+    def edit(cls, context, index, parent, **_):
         """Wraps the creation of the dialog, particularly for unit testing"""
         cls.dialog_reference = cls(context, index, parent)
         cls.dialog_reference.exec()
         cls.dialog_reference = None
 
     @classmethod
-    def add(cls, context, parent):
+    def add(cls, context, parent, **_):
         """Wraps the adding of a scheme"""
         cls.dialog_reference = cls(context, QModelIndex(), parent)
         cls.dialog_reference.exec()

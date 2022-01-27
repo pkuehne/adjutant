@@ -14,20 +14,8 @@ class SignalContext(QObject):
     load_search = pyqtSignal(int)
     save_search = pyqtSignal()
 
-    show_add_storage_dialog = pyqtSignal()
-    show_edit_storage_dialog = pyqtSignal(QModelIndex)
-
-    show_add_paint_dialog = pyqtSignal()
-    show_edit_paint_dialog = pyqtSignal(QModelIndex)
-
-    show_add_recipe_dialog = pyqtSignal()
-    show_edit_recipe_dialog = pyqtSignal(QModelIndex)
-
-    show_add_steps_dialog = pyqtSignal()
-    show_edit_steps_dialog = pyqtSignal(QModelIndex)
-
-    show_add_scheme_dialog = pyqtSignal()
-    show_edit_scheme_dialog = pyqtSignal(QModelIndex)
+    show_add_dialog = pyqtSignal(str, dict)
+    show_edit_dialog = pyqtSignal(str, QModelIndex, dict)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)

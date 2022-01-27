@@ -68,8 +68,8 @@ class Features:
 class AddEditDialog(QDialog):
     """Base class for all add/edit dialogs"""
 
-    def __init__(self, index: QModelIndex, parent=None) -> None:
-        super().__init__(parent=parent)
+    def __init__(self, index: QModelIndex, parent=None, **kwargs) -> None:
+        super().__init__(parent)
         self.index = index
         self.mapper = QDataWidgetMapper()
         self.widgets: Dict[str, MappedWidget] = {}
@@ -78,6 +78,7 @@ class AddEditDialog(QDialog):
         self.layouts = Layouts()
         self.features = Features()
         self.features.is_add_mode = self.index == QModelIndex()
+        self.features.hide_name_field = kwargs.get("hide_name_field", False)
 
         self.buttons = Buttons(
             QPushButton(self.tr("OK"), self),
@@ -216,15 +217,15 @@ class AddEditDialog(QDialog):
         self.reject()
 
     @classmethod
-    def edit(cls, context: Context, index, parent):
+    def edit(cls, context: Context, index, parent, **kwargs):
         """Wraps the creation of the dialog, particularly for unit testing"""
-        cls.dialog_reference = cls(context, index, parent)
+        cls.dialog_reference = cls(context, index, parent, **kwargs)
         cls.dialog_reference.exec()
         cls.dialog_reference = None
 
     @classmethod
-    def add(cls, context: Context, parent):
+    def add(cls, context: Context, parent, **kwargs):
         """Wraps the adding of a colour"""
-        cls.dialog_reference = cls(context, QModelIndex(), parent)
+        cls.dialog_reference = cls(context, QModelIndex(), parent, **kwargs)
         cls.dialog_reference.exec()
         cls.dialog_reference = None
