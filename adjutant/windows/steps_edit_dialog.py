@@ -37,8 +37,8 @@ class StepsEditDialog(AddEditDialog):
         self.hide_name_field()
         self.set_widgets(
             [
-                MappedWidget("Recipe", recipe_edit, "recipes_id", hidden=True),
-                MappedWidget("Step", step_edit, "step_num", hidden=True),
+                MappedWidget("Recipe", recipe_edit, "recipes_id", hidden=False),
+                MappedWidget("Priority", step_edit, "priority", hidden=False),
                 MappedWidget("Paint", paint_box, "paints_id"),
                 MappedWidget("Operation", operation_box, "operations_id"),
             ]
@@ -46,7 +46,7 @@ class StepsEditDialog(AddEditDialog):
 
         self.setup()
         recipe_edit.setText(str(kwargs.get("link_id", 0)))
-        step_edit.setText(str(kwargs.get("step_num", 0)))
+        step_edit.setText(str(kwargs.get("priority", 0)))
 
     def delete_function(self, indexes: List[QModelIndex]):
         """delete was called on this item"""

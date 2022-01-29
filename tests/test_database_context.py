@@ -2,7 +2,6 @@
 
 from tests.conftest import (
     AddBaseFunc,
-    AddPaintFunc,
     AddEmptyBasesFunc,
     AddTagFunc,
     AddTagUseFunc,
@@ -12,9 +11,7 @@ from tests.conftest import (
 from adjutant.context import Context
 from adjutant.context.database_context import (
     add_tag_to_base,
-    get_recipe_steps,
     get_tag_count,
-    remove_recipe_steps,
     remove_scheme_components,
 )
 
@@ -106,65 +103,6 @@ def test_add_tag_to_base_invalid_id(
     # Then
     context.models.base_tags_model.select()
     assert context.models.base_tags_model.rowCount() == 0
-
-
-def test_recipe_steps_only_for_given_recipe(
-    context: Context, add_paint: AddPaintFunc, models: Models
-):
-    """Steps are retrieved and converted"""
-    # Given
-    add_paint("Foo")
-    add_paint("Bar")
-    models.add_step(1, 1, 1)
-    models.add_step(2, 1, 2)
-    models.add_step(2, 2, 2)
-    # monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
-
-    # When
-    steps = get_recipe_steps(context.database, 1)
-
-    # Then
-    assert len(steps) == 2
-    assert steps[0].paint_id == 1
-    assert steps[0].paint_name == "Foo"
-    assert steps[1].paint_id == 2
-
-
-def test_recipe_steps_returns_empty_list_on_failure(
-    context: Context, add_paint: AddPaintFunc, models: Models, monkeypatch
-):
-    """Steps are retrieved and converted"""
-    # Given
-    add_paint("Foo")
-    add_paint("Bar")
-    models.add_step(1, 1, 1)
-    models.add_step(1, 2, 2)
-    models.add_step(2, 2, 2)
-    monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
-
-    # When
-    steps = get_recipe_steps(context.database, 1)
-
-    # Then
-    assert len(steps) == 0
-
-
-def test_recipe_steps_remove(context: Context, add_paint: AddPaintFunc, models: Models):
-    """Steps are retrieved and converted"""
-    # Given
-    add_paint("Foo")
-    add_paint("Bar")
-    models.add_step(1, 1, 1)
-    models.add_step(2, 1, 2)
-    models.add_step(2, 2, 2)
-
-    # When
-    success = remove_recipe_steps(context.database, 1)
-
-    # Then
-    assert success
-    context.models.recipe_steps_model.select()
-    assert context.models.recipe_steps_model.rowCount() == 1
 
 
 def test_scheme_components_remove(context: Context, models: Models):

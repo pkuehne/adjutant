@@ -276,7 +276,7 @@ class ModelContext:
                 HeaderRoles("Recipe", "The recipe this step belongs to"),
                 HeaderRoles("Paint", "The paint to apply at this step"),
                 HeaderRoles("Operation", "How to apply the paint"),
-                HeaderRoles("Number", "Which step number this step is"),
+                HeaderRoles("Priority", "Which order this step appears in"),
             ],
         )
 

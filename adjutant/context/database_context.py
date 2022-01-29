@@ -7,7 +7,7 @@ from PyQt6.QtCore import QFile, QTextStream, qWarning
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.settings_context import SettingsContext
-from adjutant.context.dataclasses import RecipeStep, Tag
+from adjutant.context.dataclasses import Tag
 
 
 @dataclass
@@ -162,43 +162,6 @@ def get_tag_count(context: DatabaseContext, tag_id: int) -> int:
         return 0
     result.next()
     return result.value("cnt")
-
-
-def get_recipe_steps(context: DatabaseContext, recipe_id: int) -> List[RecipeStep]:
-    """Retrieve all steps for a given recipe as RecipeStep objects"""
-    query = """
-        SELECT paints.id, paints.name, paints.hexvalue, step_operations.id, step_operations.name
-        FROM recipe_steps
-        INNER JOIN paints ON recipe_steps.paints_id == paints.id
-        INNER JOIN step_operations ON recipe_steps.operations_id == step_operations.id
-        WHERE recipes_id = :recipes_id
-    """
-    bindings = [QueryBinding(":recipes_id", recipe_id)]
-    result: QSqlQuery = context.execute_sql_command(query, bindings)
-    if not result:
-        return []
-    steps = []
-    while result.next():
-        step = RecipeStep(
-            result.value("paints.id"),
-            result.value("paints.name"),
-            result.value("step_operations.id"),
-            result.value("step_operations.name"),
-            result.value("hexvalue"),
-        )
-        steps.append(step)
-    return steps
-
-
-def remove_recipe_steps(context: DatabaseContext, recipe_id: int) -> bool:
-    """Remove all steps for the given recipe"""
-    query = """
-        DELETE FROM recipe_steps
-        WHERE recipes_id = :recipes_id
-    """
-    bindings = [QueryBinding(":recipes_id", recipe_id)]
-    result: QSqlQuery = context.execute_sql_command(query, bindings)
-    return bool(result)
 
 
 def remove_scheme_components(context: DatabaseContext, scheme_id: int) -> bool:

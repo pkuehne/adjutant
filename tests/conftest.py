@@ -275,7 +275,7 @@ class Models:
         record.setNull("id")
         record.setValue("paints_id", paint_id)
         record.setValue("recipes_id", recipe_id)
-        record.setValue("step_num", step)
+        record.setValue("priority", step)
         record.setValue("operations_id", 1)
 
         assert model.insertRecord(-1, record)

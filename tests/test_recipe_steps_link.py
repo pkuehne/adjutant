@@ -88,8 +88,8 @@ def test_set_selection_disbles_down(qtbot: QtBot, context: Context, models: Mode
     assert widget.buttons["down"].isEnabled() is False
 
 
-def test_show_add_dialog(qtbot: QtBot, context: Context, models: Models):
-    """If an index is the last, allow the down button"""
+def test_show_add_dialog_sets_priority(qtbot: QtBot, context: Context, models: Models):
+    """priority is priority of last item plus one"""
     # Given
     models.add_step(1, 1, 1)
     models.add_step(2, 1, 2)
@@ -106,9 +106,29 @@ def test_show_add_dialog(qtbot: QtBot, context: Context, models: Models):
     assert len(signal.args) == 2
     assert signal.args[0] == "step"
     assert "link_id" in signal.args[1]
+    assert "priority" in signal.args[1]
+    assert signal.args[1]["priority"] == 4
 
 
-def test_move_swaps_step_num(qtbot: QtBot, context: Context, models: Models):
+def test_show_add_dialog_sets_priority_when_empty(qtbot: QtBot, context: Context):
+    """priority is priority of last item plus one"""
+    # Given
+    widget = RecipeStepsLink(context, 1)
+    qtbot.addWidget(widget)
+
+    # When
+    with qtbot.wait_signal(context.signals.show_add_dialog) as signal:
+        widget.show_step_add_dialog()
+
+    # Then
+    assert len(signal.args) == 2
+    assert signal.args[0] == "step"
+    assert "link_id" in signal.args[1]
+    assert "priority" in signal.args[1]
+    assert signal.args[1]["priority"] == 1
+
+
+def test_move_swaps_priority(qtbot: QtBot, context: Context, models: Models):
     """If an index is the last, allow the down button"""
     # Given
     models.add_step(1, 1, 1)
@@ -127,8 +147,8 @@ def test_move_swaps_step_num(qtbot: QtBot, context: Context, models: Models):
     widget.move_step(1)
 
     # Then
-    assert context.models.recipe_steps_model.field_data(1, "step_num") == 3
-    assert context.models.recipe_steps_model.field_data(2, "step_num") == 2
+    assert context.models.recipe_steps_model.field_data(1, "priority") == 3
+    assert context.models.recipe_steps_model.field_data(2, "priority") == 2
 
 
 def test_revert_restores_recipe_steps(qtbot: QtBot, context: Context):

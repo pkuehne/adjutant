@@ -214,7 +214,7 @@ class AddEditDialog(QDialog):
     def delete_button_pressed(self):
         """Delete the current index"""
         self.delete_function([self.index])
-        self.reject()
+        self.close()
 
     @classmethod
     def edit(cls, context: Context, index, parent, **kwargs):

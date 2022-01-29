@@ -16,7 +16,7 @@ from tests.conftest import (
     BasesRecord,
     Models,
 )
-from adjutant.context.dataclasses import RecipeStep, SchemeComponent
+from adjutant.context.dataclasses import SchemeComponent
 from adjutant.context.context import Context
 
 
@@ -661,49 +661,20 @@ def test_delete_recipe_removes_steps(
     assert context.models.recipe_steps_model.rowCount() == 1
 
 
-def test_replace_recipe_steps_add_new_ones(context: Context):
-    """Adding a recipe step puts it into the model"""
-    # Given
-    recipe_id = 1
-    steps = [
-        RecipeStep(1, "Foo", 2, "Foo2", "Foo3"),
-        RecipeStep(3, "Bar", 5, "Bar2", "Bar3"),
-    ]
-
-    # When
-    context.controller.replace_recipe_steps(recipe_id, steps)
-
-    # Then
-    assert context.models.recipe_steps_model.rowCount() == 2
-    assert (
-        context.models.recipe_steps_model.index(0, 2).data(Qt.ItemDataRole.EditRole)
-        == 1
-    )
-    assert (
-        context.models.recipe_steps_model.index(1, 2).data(Qt.ItemDataRole.EditRole)
-        == 3
-    )
-
-
-def test_replace_recipe_steps_removes_old(context: Context, models: Models):
-    """Adding a recipe step puts it into the model"""
+def test_delete_recipe_steps_removes(context: Context, models: Models):
+    """Delete removes all steps for given recipe"""
     # Given
     recipe_id = 1
     models.add_step(9, recipe_id, 9)
     models.add_step(8, recipe_id, 8)
-    models.add_step(
-        7,
-        recipe_id,
-        7,
-    )
-
-    steps = []
+    models.add_step(7, recipe_id + 1, 7)
 
     # When
-    context.controller.replace_recipe_steps(recipe_id, steps)
+    context.controller.delete_recipe_steps(recipe_id)
 
     # Then
-    assert context.models.recipe_steps_model.rowCount() == 0
+    assert context.models.recipe_steps_model.rowCount() == 1
+    assert context.models.recipe_steps_model.isDirty() is False
 
 
 ##############################

@@ -157,7 +157,7 @@ def test_delete_button_does_nothing(qtbot: QtBot):
     qtbot.addWidget(dialog)
 
     # When
-    with qtbot.wait_signal(dialog.rejected):
+    with qtbot.assert_not_emitted(dialog.finished):
         dialog.delete_button_pressed()
 
     # Then

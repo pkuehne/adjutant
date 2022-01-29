@@ -91,7 +91,7 @@ CREATE TABLE recipe_steps (
     recipes_id INTEGER DEFAULT 0,
     paints_id INTEGER DEFAULT 0,
     operations_id INTEGER DEFAULT 0,
-    step_num INTEGER DEFAULT 0
+    priority INTEGER DEFAULT 0
 );
 
 CREATE TABLE step_operations (

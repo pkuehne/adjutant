@@ -62,10 +62,10 @@ class RecipeStepsLinkModel(QSortFilterProxyModel):
         return super().filterAcceptsRow(source_row, source_parent)
 
     def lessThan(self, left: QModelIndex, right: QModelIndex) -> bool:
-        """Used for sorting model by step_num"""
+        """Used for sorting model by priority"""
         model: RelationalModel = self.sourceModel()
-        left_num = model.record(left.row()).value("step_num")
-        right_num = model.record(right.row()).value("step_num")
+        left_num = model.record(left.row()).value("priority")
+        right_num = model.record(right.row()).value("priority")
 
         return left_num < right_num
 
@@ -150,10 +150,13 @@ class RecipeStepsLink(QWidget):
     def show_step_add_dialog(self):
         """Show the step add dialog"""
 
-        record = self.model.source_record(self.model.rowCount() - 1)
-        step_num = record.value("step_num") + 1
+        if self.model.rowCount() == 0:
+            priority = 1
+        else:
+            record = self.model.source_record(self.model.rowCount() - 1)
+            priority = record.value("priority") + 1
 
-        args = {"link_id": self.link_id, "step_num": step_num}
+        args = {"link_id": self.link_id, "priority": priority}
         self.context.signals.show_add_dialog.emit("step", args)
 
     def list_selection_changed(self, current: QModelIndex, __):
@@ -172,9 +175,9 @@ class RecipeStepsLink(QWidget):
         selected_record = self.model.source_record(selected_row)
         other_record = self.model.source_record(other_row)
 
-        temp_step = selected_record.value("step_num")
-        selected_record.setValue("step_num", other_record.value("step_num"))
-        other_record.setValue("step_num", temp_step)
+        temp_step = selected_record.value("priority")
+        selected_record.setValue("priority", other_record.value("priority"))
+        other_record.setValue("priority", temp_step)
 
         self.model.set_source_record(selected_row, selected_record)
         self.model.set_source_record(other_row, other_record)
@@ -194,7 +197,17 @@ class RecipeStepsLink(QWidget):
 
     def submit_changes(self, link_id: int):
         """Accept the changes"""
-        # Nothing needs to be done, all steps already have the right recipe_id
+        # Nothing needs to be done if all steps already have the right recipe_id
+        if self.link_id == link_id:
+            return
+        for row in range(self.source_model.rowCount()):
+            record = self.source_model.record(row)
+            if record.value("recipes_id") == self.link_id:
+                record.setValue("recipes_id", link_id)
+                self.source_model.setRecord(row, record)
+        success = self.source_model.submitAll()
+        if not success:
+            print("Model Error: " + self.source_model.lastError().text())
 
     def revert_changes(self):
         """Revert all changes"""
