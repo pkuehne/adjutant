@@ -4,7 +4,6 @@ from tests.conftest import (
     AddBaseFunc,
     AddPaintFunc,
     AddEmptyBasesFunc,
-    AddStepFunc,
     AddTagFunc,
     AddTagUseFunc,
     BasesRecord,
@@ -110,15 +109,15 @@ def test_add_tag_to_base_invalid_id(
 
 
 def test_recipe_steps_only_for_given_recipe(
-    context: Context, add_paint: AddPaintFunc, add_step: AddStepFunc
+    context: Context, add_paint: AddPaintFunc, models: Models
 ):
     """Steps are retrieved and converted"""
     # Given
     add_paint("Foo")
     add_paint("Bar")
-    add_step(1, 1, 1)
-    add_step(1, 2, 2)
-    add_step(2, 2, 2)
+    models.add_step(1, 1, 1)
+    models.add_step(2, 1, 2)
+    models.add_step(2, 2, 2)
     # monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
 
     # When
@@ -132,15 +131,15 @@ def test_recipe_steps_only_for_given_recipe(
 
 
 def test_recipe_steps_returns_empty_list_on_failure(
-    context: Context, add_paint: AddPaintFunc, add_step: AddStepFunc, monkeypatch
+    context: Context, add_paint: AddPaintFunc, models: Models, monkeypatch
 ):
     """Steps are retrieved and converted"""
     # Given
     add_paint("Foo")
     add_paint("Bar")
-    add_step(1, 1, 1)
-    add_step(1, 2, 2)
-    add_step(2, 2, 2)
+    models.add_step(1, 1, 1)
+    models.add_step(1, 2, 2)
+    models.add_step(2, 2, 2)
     monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
 
     # When
@@ -150,16 +149,14 @@ def test_recipe_steps_returns_empty_list_on_failure(
     assert len(steps) == 0
 
 
-def test_recipe_steps_remove(
-    context: Context, add_paint: AddPaintFunc, add_step: AddStepFunc
-):
+def test_recipe_steps_remove(context: Context, add_paint: AddPaintFunc, models: Models):
     """Steps are retrieved and converted"""
     # Given
     add_paint("Foo")
     add_paint("Bar")
-    add_step(1, 1, 1)
-    add_step(1, 2, 2)
-    add_step(2, 2, 2)
+    models.add_step(1, 1, 1)
+    models.add_step(2, 1, 2)
+    models.add_step(2, 2, 2)
 
     # When
     success = remove_recipe_steps(context.database, 1)

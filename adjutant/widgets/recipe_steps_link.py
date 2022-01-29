@@ -31,6 +31,19 @@ class RecipeStepsLinkModel(QSortFilterProxyModel):
         """Override the stringification function"""
         self.string_func = string_func
 
+    def source_record(self, row: int) -> QSqlRecord:
+        """Return the record from source model for given row"""
+        source_row = self.mapToSource(self.index(row, 0)).row()
+        source: RelationalModel = self.sourceModel()
+        return source.record(source_row)
+
+    def set_source_record(self, row: int, record: QSqlRecord) -> None:
+        """Update given record in the source model"""
+        source_row = self.mapToSource(self.index(row, 0)).row()
+        source: RelationalModel = self.sourceModel()
+        source.setRecord(source_row, record)
+        # source.submitAll()
+
     def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
         """Return same string for all fields"""
         if role != Qt.ItemDataRole.DisplayRole:
@@ -48,6 +61,14 @@ class RecipeStepsLinkModel(QSortFilterProxyModel):
             return False
         return super().filterAcceptsRow(source_row, source_parent)
 
+    def lessThan(self, left: QModelIndex, right: QModelIndex) -> bool:
+        """Used for sorting model by step_num"""
+        model: RelationalModel = self.sourceModel()
+        left_num = model.record(left.row()).value("step_num")
+        right_num = model.record(right.row()).value("step_num")
+
+        return left_num < right_num
+
     # pylint: enable=invalid-name
 
 
@@ -62,7 +83,11 @@ class RecipeStepsLink(QWidget):
         self.source_model = self.context.models.recipe_steps_model
         self.current_steps: List[QSqlRecord] = []
         self.step_list = QListView()
-        self.add_button = QPushButton(self.tr("Add"))
+        self.buttons = {
+            "add": QPushButton(self.tr("Add")),
+            "up": QPushButton(self.tr("Up")),
+            "down": QPushButton(self.tr("Down")),
+        }
 
         self._setup_widgets()
         self._setup_layout()
@@ -83,17 +108,21 @@ class RecipeStepsLink(QWidget):
         self.model.setSourceModel(self.source_model)
         self.model.set_filter_id(self.link_id)
         self.model.set_string_func(stringify_step)
+        self.model.sort(1)
         self.step_list.setModel(self.model)
         self.step_list.setModelColumn(1)
         self.step_list.setEditTriggers(QListView.EditTrigger.NoEditTriggers)
-        # todo: handle re-ordering
-        # self.step_list.setDragEnabled(True)
-        # self.step_list.setDragDropMode(self.step_list.DragDropMode.InternalMove)
+
+        self.buttons["up"].setEnabled(False)
+        self.buttons["down"].setEnabled(False)
 
     def _setup_layout(self):
         """Set up the layout"""
         buttons = QVBoxLayout()
-        buttons.addWidget(self.add_button)
+        buttons.addWidget(self.buttons["add"])
+        buttons.addStretch()
+        buttons.addWidget(self.buttons["up"])
+        buttons.addWidget(self.buttons["down"])
         buttons.addStretch()
 
         central = QHBoxLayout()
@@ -111,11 +140,50 @@ class RecipeStepsLink(QWidget):
                 "step", self.model.mapToSource(index), {}
             )
         )
-        self.add_button.pressed.connect(
-            lambda: self.context.signals.show_add_dialog.emit(
-                "step", {"link_id": self.link_id}
-            )
+        self.step_list.selectionModel().currentChanged.connect(
+            self.list_selection_changed
         )
+        self.buttons["add"].pressed.connect(self.show_step_add_dialog)
+        self.buttons["up"].pressed.connect(lambda: self.move_step(-1))
+        self.buttons["down"].pressed.connect(lambda: self.move_step(1))
+
+    def show_step_add_dialog(self):
+        """Show the step add dialog"""
+
+        record = self.model.source_record(self.model.rowCount() - 1)
+        step_num = record.value("step_num") + 1
+
+        args = {"link_id": self.link_id, "step_num": step_num}
+        self.context.signals.show_add_dialog.emit("step", args)
+
+    def list_selection_changed(self, current: QModelIndex, __):
+        """Selection has changed"""
+        is_not_first = current.row() != 0
+        is_not_last = current.row() != self.model.rowCount() - 1
+        self.buttons["up"].setEnabled(current.isValid() and is_not_first)
+        self.buttons["down"].setEnabled(current.isValid() and is_not_last)
+
+    def move_step(self, direction: int):
+        """Move step up or down"""
+        selected_row = self.step_list.selectionModel().currentIndex().row()
+        other_row = selected_row + direction
+
+        # Now swap
+        selected_record = self.model.source_record(selected_row)
+        other_record = self.model.source_record(other_row)
+
+        temp_step = selected_record.value("step_num")
+        selected_record.setValue("step_num", other_record.value("step_num"))
+        other_record.setValue("step_num", temp_step)
+
+        self.model.set_source_record(selected_row, selected_record)
+        self.model.set_source_record(other_row, other_record)
+
+        self.source_model.submitAll()
+        # self.step_list.selectionModel().setCurrentIndex(
+        #     self.model.index(other_row, 0),
+        #     self.step_list.selectionModel().SelectionFlag.ClearAndSelect,
+        # )
 
     def save_current_steps(self):
         """Save the steps now, so they can be reverted to later"""
@@ -126,21 +194,14 @@ class RecipeStepsLink(QWidget):
 
     def submit_changes(self, link_id: int):
         """Accept the changes"""
-        for row in range(self.source_model.rowCount()):
-            record = self.source_model.record(row)
-            if record.value("recipes_id") == 0:
-                record.setValue("recipes_id", link_id)
-                self.source_model.setRecord(row, record)
-        success = self.source_model.submitAll()
-        if not success:
-            print("Model Error: " + self.source_model.lastError().text())
+        # Nothing needs to be done, all steps already have the right recipe_id
 
     def revert_changes(self):
         """Revert all changes"""
         self.source_model.revertAll()
         for row in range(self.source_model.rowCount()):
             record = self.source_model.record(row)
-            if record.value("recipes_id") in (0, self.link_id):
+            if record.value("recipes_id") == self.link_id:
                 self.source_model.removeRow(row)
         for record in self.current_steps:
             self.source_model.insertRecord(-1, record)

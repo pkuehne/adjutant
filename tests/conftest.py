@@ -197,27 +197,6 @@ def add_recipe(context: Context) -> AddRecipeFunc:
     return internal_func
 
 
-AddStepFunc = Callable[[int, int, int], None]
-
-
-@pytest.fixture
-def add_step(context: Context) -> AddStepFunc:
-    """Fixture to add a record to the recipe steps table"""
-
-    def internal_func(recipe_id: int, paint_id: int, num: int) -> None:
-        record = context.models.recipe_steps_model.record()
-        record.setNull("id")
-        record.setValue("paints_id", paint_id)
-        record.setValue("recipes_id", recipe_id)
-        record.setValue("step_num", num)
-
-        assert context.models.recipe_steps_model.insertRecord(-1, record)
-        context.models.recipe_steps_model.submitAll()
-        assert context.models.recipe_steps_model.lastError().text() == ""
-
-    return internal_func
-
-
 class Models:
     """Utility class to connect add_* functions together"""
 
@@ -285,6 +264,20 @@ class Models:
         record = model.record()
         record.setNull("id")
         record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+    def add_step(self, paint_id: int, recipe_id: int, step: int):
+        """Fixture to add a record to the recipe steps table"""
+        model = self.context.models.recipe_steps_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("paints_id", paint_id)
+        record.setValue("recipes_id", recipe_id)
+        record.setValue("step_num", step)
+        record.setValue("operations_id", 1)
+
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""

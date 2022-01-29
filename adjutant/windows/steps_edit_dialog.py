@@ -32,11 +32,13 @@ class StepsEditDialog(AddEditDialog):
         operation_box.setModel(model)
         operation_box.setModelColumn(1)
         recipe_edit = QLineEdit()
+        step_edit = QLineEdit()
 
         self.hide_name_field()
         self.set_widgets(
             [
                 MappedWidget("Recipe", recipe_edit, "recipes_id", hidden=True),
+                MappedWidget("Step", step_edit, "step_num", hidden=True),
                 MappedWidget("Paint", paint_box, "paints_id"),
                 MappedWidget("Operation", operation_box, "operations_id"),
             ]
@@ -44,6 +46,7 @@ class StepsEditDialog(AddEditDialog):
 
         self.setup()
         recipe_edit.setText(str(kwargs.get("link_id", 0)))
+        step_edit.setText(str(kwargs.get("step_num", 0)))
 
     def delete_function(self, indexes: List[QModelIndex]):
         """delete was called on this item"""

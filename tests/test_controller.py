@@ -10,7 +10,6 @@ from tests.conftest import (
     AddRecipeFunc,
     AddSearchFunc,
     AddStatusFunc,
-    AddStepFunc,
     AddStorageFunc,
     AddTagFunc,
     AddPaintFunc,
@@ -642,7 +641,7 @@ def test_delete_recipe(context: Context, add_recipe: AddRecipeFunc, monkeypatch)
 
 
 def test_delete_recipe_removes_steps(
-    context: Context, add_recipe: AddRecipeFunc, add_step: AddStepFunc, monkeypatch
+    context: Context, add_recipe: AddRecipeFunc, models: Models, monkeypatch
 ):
     """Delete recipe does just that"""
     # Given
@@ -651,15 +650,15 @@ def test_delete_recipe_removes_steps(
     )
 
     add_recipe("Foo")
-    add_step(1, 0, 0)
-    add_step(1, 1, 1)
+    models.add_step(1, 0, 0)
+    models.add_step(1, 1, 1)
     index = context.models.recipes_model.index(0, 1)
 
     # When
     context.controller.delete_recipes([index])
 
     # Then
-    assert context.models.recipe_steps_model.rowCount() == 0
+    assert context.models.recipe_steps_model.rowCount() == 1
 
 
 def test_replace_recipe_steps_add_new_ones(context: Context):
@@ -686,13 +685,17 @@ def test_replace_recipe_steps_add_new_ones(context: Context):
     )
 
 
-def test_replace_recipe_steps_removes_old(context: Context, add_step: AddStepFunc):
+def test_replace_recipe_steps_removes_old(context: Context, models: Models):
     """Adding a recipe step puts it into the model"""
     # Given
     recipe_id = 1
-    add_step(recipe_id, 9, 0)
-    add_step(recipe_id, 8, 0)
-    add_step(recipe_id, 7, 0)
+    models.add_step(9, recipe_id, 9)
+    models.add_step(8, recipe_id, 8)
+    models.add_step(
+        7,
+        recipe_id,
+        7,
+    )
 
     steps = []
 
