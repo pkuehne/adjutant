@@ -37,8 +37,8 @@ class StepsEditDialog(AddEditDialog):
         self.hide_name_field()
         self.set_widgets(
             [
-                MappedWidget("Recipe", recipe_edit, "recipes_id", hidden=False),
-                MappedWidget("Priority", step_edit, "priority", hidden=False),
+                MappedWidget("Recipe", recipe_edit, "recipes_id", hidden=True),
+                MappedWidget("Priority", step_edit, "priority", hidden=True),
                 MappedWidget("Paint", paint_box, "paints_id"),
                 MappedWidget("Operation", operation_box, "operations_id"),
             ]

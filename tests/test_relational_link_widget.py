@@ -2,6 +2,7 @@
 
 from pytestqt.qtbot import QtBot
 from adjutant.widgets.recipe_steps_link import RecipeStepsLink
+from adjutant.widgets.scheme_components_link import SchemeComponentsLink
 from tests.conftest import Context, Models
 
 
@@ -15,6 +16,19 @@ def test_link_id_is_set_to_zero(qtbot: QtBot, context: Context):
 
     # Then
     assert widget.link_id == 0
+
+
+def test_without_reordering_no_move_buttons(qtbot: QtBot, context: Context):
+    """When re-ordering is not allowed, the up/down buttons are not visible"""
+    # Given
+    widget = SchemeComponentsLink(context, None)
+    qtbot.addWidget(widget)
+
+    # When
+
+    # Then
+    assert widget.buttons["up"].isVisible() is False
+    assert widget.buttons["down"].isVisible() is False
 
 
 def test_list_only_shows_relevant_steps(qtbot: QtBot, context: Context, models: Models):
@@ -31,7 +45,7 @@ def test_list_only_shows_relevant_steps(qtbot: QtBot, context: Context, models: 
     qtbot.addWidget(widget)
 
     # Then
-    assert widget.step_list.model().rowCount() == 3
+    assert widget.item_list.model().rowCount() == 3
 
 
 def test_set_selection_enables_up_down(qtbot: QtBot, context: Context, models: Models):
@@ -45,7 +59,7 @@ def test_set_selection_enables_up_down(qtbot: QtBot, context: Context, models: M
     qtbot.addWidget(widget)
 
     # When
-    widget.list_selection_changed(widget.step_list.model().index(1, 0), None)
+    widget.list_selection_changed(widget.item_list.model().index(1, 0), None)
 
     # Then
     assert widget.buttons["up"].isEnabled() is True
@@ -63,7 +77,7 @@ def test_set_selection_disbles_up(qtbot: QtBot, context: Context, models: Models
     qtbot.addWidget(widget)
 
     # When
-    widget.list_selection_changed(widget.step_list.model().index(0, 0), None)
+    widget.list_selection_changed(widget.item_list.model().index(0, 0), None)
 
     # Then
     assert widget.buttons["up"].isEnabled() is False
@@ -81,7 +95,7 @@ def test_set_selection_disbles_down(qtbot: QtBot, context: Context, models: Mode
     qtbot.addWidget(widget)
 
     # When
-    widget.list_selection_changed(widget.step_list.model().index(2, 0), None)
+    widget.list_selection_changed(widget.item_list.model().index(2, 0), None)
 
     # Then
     assert widget.buttons["up"].isEnabled() is True
@@ -100,7 +114,7 @@ def test_show_add_dialog_sets_priority(qtbot: QtBot, context: Context, models: M
 
     # When
     with qtbot.wait_signal(context.signals.show_add_dialog) as signal:
-        widget.show_step_add_dialog()
+        widget.show_add_dialog()
 
     # Then
     assert len(signal.args) == 2
@@ -118,7 +132,7 @@ def test_show_add_dialog_sets_priority_when_empty(qtbot: QtBot, context: Context
 
     # When
     with qtbot.wait_signal(context.signals.show_add_dialog) as signal:
-        widget.show_step_add_dialog()
+        widget.show_add_dialog()
 
     # Then
     assert len(signal.args) == 2
@@ -138,13 +152,13 @@ def test_move_swaps_priority(qtbot: QtBot, context: Context, models: Models):
     widget = RecipeStepsLink(context, 1)
     qtbot.addWidget(widget)
 
-    widget.step_list.selectionModel().setCurrentIndex(
-        widget.step_list.model().index(1, 0),
-        widget.step_list.selectionModel().SelectionFlag.ClearAndSelect,
+    widget.item_list.selectionModel().setCurrentIndex(
+        widget.item_list.model().index(1, 0),
+        widget.item_list.selectionModel().SelectionFlag.ClearAndSelect,
     )
 
     # When
-    widget.move_step(1)
+    widget.move_item(1)
 
     # Then
     assert context.models.recipe_steps_model.field_data(1, "priority") == 3

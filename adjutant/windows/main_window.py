@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
 
         self.tabbar = QTabWidget(self)
         self.tabbar.addTab(self.bases, self.tr("Bases"))
-        self.tabbar.addTab(self.storage, self.tr("Storage"))
+        self.tabbar.addTab(self.storage, self.tr("Storages"))
         # self.tabbar.addTab(QWidget(), self.tr("Units"))
         # self.tabbar.addTab(QWidget(), self.tr("Forces"))
         self.tabbar.addTab(self.paints, self.tr("Paints"))

@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import QModelIndex
 from adjutant.context import Context
 from adjutant.windows.add_edit_dialog import AddEditDialog
+from adjutant.windows.component_edit_dialog import ComponentEditDialog
 from adjutant.windows.paints_edit_dialog import PaintEditDialog
 from adjutant.windows.recipe_edit_dialog import RecipeEditDialog
 from adjutant.windows.scheme_edit_dialog import SchemeEditDialog
@@ -19,6 +20,7 @@ def get_dialog(name: str) -> AddEditDialog:
         "scheme": SchemeEditDialog,
         "step": StepsEditDialog,
         "storage": StorageEditDialog,
+        "component": ComponentEditDialog,
     }[name]
 
 
