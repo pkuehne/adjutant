@@ -17,6 +17,7 @@ CREATE TABLE bases (
     material TEXT DEFAULT "Plastic",
     sculptor TEXT DEFAULT "",
     manufacturer TEXT DEFAULT "",
+    pack_code TEXT DEFAULT "",
     retailer TEXT DEFAULT "",
     price FLOAT DEFAULT 0.0,
     date_added DATE DEFAULT CURRENT_DATE,

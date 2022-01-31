@@ -1,5 +1,6 @@
 """ Common base class for all Add/Edit dialogs """
 from dataclasses import dataclass
+from json import tool
 from typing import Dict, List
 from PyQt6.QtWidgets import (
     QDataWidgetMapper,
@@ -13,7 +14,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtCore import QModelIndex, QByteArray
+from PyQt6.QtCore import QModelIndex, QByteArray, Qt
 
 from adjutant.context.context import Context
 from adjutant.models.relational_model import RelationalModel
@@ -149,7 +150,13 @@ class AddEditDialog(QDialog):
         """Add the widgets to the form layout"""
         for widget in self.widgets.values():
             if not widget.hidden:
-                self.layouts.form_layout.addRow(widget.title, widget.widget)
+                column = self.model.fieldIndex(widget.field)
+                tooltip = self.model.headerData(
+                    column, Qt.Orientation.Horizontal, Qt.ItemDataRole.ToolTipRole
+                )
+                label = QLabel(widget.title)
+                label.setToolTip(tooltip)
+                self.layouts.form_layout.addRow(label, widget.widget)
 
         if self.link_widget:
             self.layouts.link_layout.addWidget(self.link_widget)

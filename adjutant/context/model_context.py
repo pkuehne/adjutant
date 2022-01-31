@@ -141,6 +141,7 @@ class ModelContext:
                 HeaderRoles("Material", "What the miniatures are made from"),
                 HeaderRoles("Sculptor", "Who designed the miniatures"),
                 HeaderRoles("Manufacturer", "The company who makes the miniatures"),
+                HeaderRoles("Pack Code", "The code used by the retailer/manufacturer"),
                 HeaderRoles("Retailer", "Where the miniatures were bought"),
                 HeaderRoles("Price", "How much this base cost"),
                 HeaderRoles("Added", "When this base was added to Adjutant"),

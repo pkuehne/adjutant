@@ -42,6 +42,7 @@ class MappedWidgets:
         self.material_combobox = QComboBox()
         self.sculptor_edit = QLineEdit()
         self.manufacturer_edit = QLineEdit()
+        self.pack_code_edit = QLineEdit()
         self.retailer_edit = QLineEdit()
         self.price_edit = QLineEdit()
         self.date_acquired = NullableDate()
@@ -102,6 +103,7 @@ class BaseEditDialog(QDialog):
         form_layout.addRow("Material", self.widgets.material_combobox)
         form_layout.addRow("Sculptor: ", self.widgets.sculptor_edit)
         form_layout.addRow("Manufacturer: ", self.widgets.manufacturer_edit)
+        form_layout.addRow("Pack Code: ", self.widgets.pack_code_edit)
         form_layout.addRow("Retailer: ", self.widgets.retailer_edit)
         form_layout.addRow("Price: ", self.widgets.price_edit)
         form_layout.addRow("Acquired: ", self.widgets.date_acquired)
@@ -176,6 +178,7 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(
             self.widgets.manufacturer_edit, self.field("manufacturer")
         )
+        self.mapper.addMapping(self.widgets.pack_code_edit, self.field("pack_code"))
         self.mapper.addMapping(self.widgets.retailer_edit, self.field("retailer"))
         self.mapper.addMapping(self.widgets.price_edit, self.field("price"))
         self.mapper.addMapping(self.widgets.date_acquired, self.field("date_acquired"))
