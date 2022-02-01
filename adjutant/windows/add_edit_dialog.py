@@ -1,6 +1,5 @@
 """ Common base class for all Add/Edit dialogs """
 from dataclasses import dataclass
-from json import tool
 from typing import Dict, List
 from PyQt6.QtWidgets import (
     QDataWidgetMapper,
