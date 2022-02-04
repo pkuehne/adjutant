@@ -25,6 +25,7 @@ def test_version_returns_zero_for_empty_file():
     """When there is no database, the version() function should return 0"""
     # Given
     database = DatabaseContext()
+    database.database.close()
 
     # When
     version = database.version()

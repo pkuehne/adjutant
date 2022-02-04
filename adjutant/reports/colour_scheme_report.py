@@ -1,5 +1,6 @@
 """ PDF report for a Colour Scheme"""
 
+from typing import List
 from PyQt6.QtSql import QSqlRecord
 from adjutant.reports.base_report import BaseReport
 from adjutant.context import Context
@@ -25,10 +26,15 @@ class ColourSchemeReport(BaseReport):
         retval = ""
         retval += recipe.value("notes")
         retval += "<ol>"
+        steps: List[QSqlRecord] = []
         for row in range(self.context.models.recipe_steps_model.rowCount()):
             step = self.context.models.recipe_steps_model.record(row)
             if step.value("recipes_id") != recipe.value("id"):
                 continue
+            steps.append(step)
+        steps.sort(key=lambda s: s.value("priority"))
+
+        for step in steps:
             paint = self.context.models.paints_model.record_by_id(
                 step.value("paints_id")
             )
