@@ -153,14 +153,15 @@ class BaseEditDialog(QDialog):
         self.widgets.material_combobox.setModel(
             QStringListModel(["Plastic", "Resin", "Metal"])
         )
-        self.widgets.storage_combobox.setModel(self.context.models.storage_model)
-        self.widgets.storage_combobox.setModelColumn(1)
-        self.widgets.status_combobox.setModel(self.context.models.statuses_model)
-        self.widgets.status_combobox.setModelColumn(1)
-        self.widgets.colour_scheme_combobox.setModel(
-            self.context.models.colour_schemes_model
+        self.widgets.storage_combobox.set_model(
+            self.context.models.storage_model,
+            lambda: self.context.signals.show_add_dialog.emit("storage", {}),
         )
-        self.widgets.colour_scheme_combobox.setModelColumn(1)
+        self.widgets.status_combobox.set_model(self.context.models.statuses_model)
+        self.widgets.colour_scheme_combobox.set_model(
+            self.context.models.colour_schemes_model,
+            lambda: self.context.signals.show_add_dialog.emit("scheme", {}),
+        )
 
         self.mapper.setModel(self.model)
         self.mapper.setSubmitPolicy(self.mapper.SubmitPolicy.ManualSubmit)

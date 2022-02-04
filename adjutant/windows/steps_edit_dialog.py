@@ -24,13 +24,17 @@ class StepsEditDialog(AddEditDialog):
         self.set_title("Recipe Step")
 
         paint_box = ForeignKeyCombobox()
-        paint_box.setModel(self.context.models.paints_model)
-        paint_box.setModelColumn(1)
+        paint_box.set_model(
+            self.context.models.paints_model,
+            lambda: self.context.signals.show_add_dialog.emit("paint", {}),
+        )
         operation_box = ForeignKeyCombobox()
         model = RowZeroFilterModel()
         model.setSourceModel(self.context.models.step_operations_model)
-        operation_box.setModel(model)
-        operation_box.setModelColumn(1)
+        operation_box.set_model(
+            model
+            # , lambda: self.context.signals.show_add_dialog.emit("operation", {}),
+        )
         recipe_edit = QLineEdit()
         step_edit = QLineEdit()
 

@@ -18,7 +18,7 @@ class SchemeEditDialog(AddEditDialog):
         self.context = context
         self.model = context.models.colour_schemes_model
 
-        self.set_title("Recipe")
+        self.set_title("Colour Scheme")
         self.set_widgets(
             [
                 MappedWidget("Notes", QTextEdit(), "notes", b"plainText"),

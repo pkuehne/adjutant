@@ -23,8 +23,10 @@ class ComponentEditDialog(AddEditDialog):
         self.set_title("Scheme Component")
 
         recipe_box = ForeignKeyCombobox()
-        recipe_box.setModel(self.context.models.recipes_model)
-        recipe_box.setModelColumn(1)
+        recipe_box.set_model(
+            self.context.models.recipes_model,
+            lambda: self.context.signals.show_add_dialog.emit("recipe", {}),
+        )
         name_edit = QLineEdit()
         scheme_edit = QLineEdit()
 
