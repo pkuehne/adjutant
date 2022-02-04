@@ -1,5 +1,8 @@
 """ Tests for the database context"""
 
+from unittest.mock import MagicMock
+from _pytest.monkeypatch import MonkeyPatch
+import pytest
 from tests.conftest import (
     AddBaseFunc,
     AddEmptyBasesFunc,
@@ -10,10 +13,61 @@ from tests.conftest import (
 )
 from adjutant.context import Context
 from adjutant.context.database_context import (
+    DatabaseContext,
     add_tag_to_base,
     get_tag_count,
     remove_scheme_components,
 )
+import adjutant.context.database_migrations
+
+
+def test_version_returns_zero_for_empty_file():
+    """When there is no database, the version() function should return 0"""
+    # Given
+    database = DatabaseContext()
+
+    # When
+    version = database.version()
+
+    # Then
+    assert version == 0
+
+
+def test_migrate_equal_version(monkeypatch: MonkeyPatch):
+    """Migrate does nothing if the current and database version match"""
+    # Given
+    database = DatabaseContext()
+    command_mock = MagicMock()
+    monkeypatch.setattr(database, "version", lambda: 1)
+    monkeypatch.setattr(database, "execute_sql_command", command_mock)
+    monkeypatch.setattr(
+        adjutant.context.database_migrations, "LATEST_DATABASE_VERSION", 1
+    )
+
+    # When
+    database.migrate()
+
+    # Then
+    command_mock.assert_not_called()
+
+
+def test_migrate_higher_db_version(monkeypatch: MonkeyPatch):
+    """Migrate does nothing if the current and database version match"""
+    # Given
+    database = DatabaseContext()
+    command_mock = MagicMock()
+    monkeypatch.setattr(database, "version", lambda: 2)
+    monkeypatch.setattr(database, "execute_sql_command", command_mock)
+    monkeypatch.setattr(
+        adjutant.context.database_migrations, "LATEST_DATABASE_VERSION", 1
+    )
+
+    # When
+    with pytest.raises(RuntimeError) as exc:
+        database.migrate()
+
+    # Then
+    assert len(exc.value.args[0]) > 0
 
 
 def test_tag_count_is_zero_no_usage(context: Context, add_tag: AddTagFunc):
@@ -29,7 +83,7 @@ def test_tag_count_is_zero_no_usage(context: Context, add_tag: AddTagFunc):
     assert count == 0
 
 
-def test_tag_count_returns_zero_on_error(context: Context, monkeypatch):
+def test_tag_count_returns_zero_on_error(context: Context, monkeypatch: MonkeyPatch):
     """When there is an error in the sql, the return value should be zero"""
     # Given
     monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
@@ -87,7 +141,7 @@ def test_add_tag_to_base_invalid_id(
     context: Context,
     add_tag: AddTagFunc,
     add_empty_bases: AddEmptyBasesFunc,
-    monkeypatch,
+    monkeypatch: MonkeyPatch,
 ):
     """add_tag_to_base adds entry to the bases_tags table"""
     # Given

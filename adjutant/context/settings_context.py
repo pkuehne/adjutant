@@ -11,7 +11,7 @@ class SettingsContext:
         self.version_minor = 0
         self.version_patch = 0
         self.version_stage = ""
-        self.database_version = 0
+        # self.database_version = 0
 
     def set_version(self, version_string: str) -> None:
         """parse version string into major/minor/patch"""

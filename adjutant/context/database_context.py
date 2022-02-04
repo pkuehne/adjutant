@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from PyQt6.QtCore import QFile, QTextStream, qWarning
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
-from adjutant.context.settings_context import SettingsContext
 from adjutant.context.dataclasses import Tag
+from adjutant.context.database_migrations import LATEST_DATABASE_VERSION, VERSION_1
 
 
 @dataclass
@@ -46,10 +46,34 @@ class DatabaseContext:
         version = result.value("version")
         return version
 
-    def migrate(self, settings: SettingsContext) -> None:
+    def migrate(self) -> None:
         """Applies any outstanding migrations to the database"""
-        if settings.database_version > self.version():
-            self.execute_sql_file("migrations/initial.sql")
+        if LATEST_DATABASE_VERSION == self.version():
+            # Nothing to be done
+            return
+        if LATEST_DATABASE_VERSION < self.version():
+            # Newer database than application
+            raise RuntimeError(
+                f"Incompatible database version: {self.version()}! "
+                + f"Adjutant can only handle: {LATEST_DATABASE_VERSION}."
+            )
+
+        if self.version() < 1:
+            # Migrate from version 0 to 1
+            self.execute_sql_string(VERSION_1)
+            self.execute_sql_command(
+                "INSERT into settings(version, font_size) VALUES(0, 9);"
+            )
+            for table in ["storage", "statuses", "step_operations", "colour_schemes"]:
+                self.execute_sql_command(
+                    f"INSERT INTO {table}(id, name) VALUES (0, '<None>');"
+                )
+
+        # Database migrated to latest version
+        self.execute_sql_command(
+            f"UPDATE settings SET version = {LATEST_DATABASE_VERSION}"
+        )
+        print("Database migration complete")
 
     def execute_sql_command(
         self, command: str, bindings: List[QueryBinding] = None, errors: bool = True
@@ -73,6 +97,14 @@ class DatabaseContext:
             return None
         return query
 
+    def execute_sql_string(self, commands: str) -> None:
+        """Execute a list of commands separated by semi-colons"""
+        for query in commands.split(";"):
+            if not query.strip():
+                # ignore empty lines
+                continue
+            self.execute_sql_command(query)
+
     def execute_sql_file(self, filename: str) -> None:
         """Execute SQL statements in given file"""
         # qWarning(f"Executing {filename}")
@@ -82,11 +114,7 @@ class DatabaseContext:
         sql_file = QFile(resources_path + "/" + filename)
         sql_file.open(QFile.OpenModeFlag.ReadOnly)
 
-        for query in QTextStream(sql_file).readAll().split(";"):
-            if not query.strip():
-                # Ignore empty lines
-                continue
-            self.execute_sql_command(query)
+        self.execute_sql_string(QTextStream(sql_file).readAll())
 
 
 def remove_all_tags_for_base(context: DatabaseContext, base_id: int):

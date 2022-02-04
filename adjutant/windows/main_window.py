@@ -1,7 +1,8 @@
 """ The Main Window """
 
+import sys
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow, QTabWidget
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QMessageBox
 
 from adjutant.context import Context
 from adjutant.widgets.dialog_manager import DialogManager
@@ -22,9 +23,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.context = Context()
         self.context.settings.set_version("0.1.0-dev")
-        self.context.settings.database_version = 1
-        self.context.load_database("adjutant.db")
-        # self.context.load_database(":memory:")
+        try:
+            self.context.load_database("adjutant.db")
+        except RuntimeError as err:
+            QMessageBox.critical(self, "Database Error", err.args[0])
+            sys.exit(1)
         self.context.models.refresh_models()
         if self.context.models.bases_model.rowCount() == 0:
             self.context.database.execute_sql_file("populate_test_data.sql")

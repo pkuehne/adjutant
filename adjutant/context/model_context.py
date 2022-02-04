@@ -152,7 +152,7 @@ class ModelContext:
         model.setEditStrategy(model.EditStrategy.OnManualSubmit)
         model.select()
         self.bases_model = model
-
+        self.models["bases"] = model
         return model
 
     def _setup_tags_model(self) -> None:

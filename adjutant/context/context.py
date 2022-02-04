@@ -23,5 +23,5 @@ class Context:
     def load_database(self, filename: str) -> None:
         """Load a database file"""
         self.database.open_database(filename)
-        self.database.migrate(self.settings)
+        self.database.migrate()
         self.models.load()

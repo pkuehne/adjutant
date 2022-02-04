@@ -1,10 +1,13 @@
+""" Definitions for the database tables """
 
+LATEST_DATABASE_VERSION = 1
+
+VERSION_1 = """
 CREATE TABLE settings (
     id INTEGER PRIMARY KEY,
     version INTEGER,
     font_size INTEGER
 );
-INSERT into settings(version, font_size) VALUES(1, 9);
 
 CREATE TABLE bases ( 
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,13 +67,11 @@ CREATE TABLE storage (
     full BOOLEAN DEFAULT 0,
     notes TEXT DEFAULT ""
 );
-INSERT INTO storage(id, name) VALUES (0, "<None>");
 
 CREATE TABLE statuses (
     id INTEGER PRIMARY KEY,
     name TEXT DEFAULT ""
 );
-INSERT INTO statuses(id, name) VALUES (0, "<None>");
 
 CREATE TABLE paints (
     id INTEGER PRIMARY KEY,
@@ -99,16 +100,12 @@ CREATE TABLE step_operations (
     id INTEGER PRIMARY KEY,
     name TEXT DEFAULT ""
 );
-INSERT INTO step_operations(id, name) VALUES (0, "<None>");
-
 
 CREATE TABLE colour_schemes (
     id INTEGER PRIMARY KEY,
     name TEXT DEFAULT "",
     notes TEXT DEFAULT ""
 );
-INSERT INTO colour_schemes(id, name) VALUES (0, "<None>");
-
 
 CREATE TABLE scheme_components (
     id INTEGER PRIMARY KEY,
@@ -116,3 +113,4 @@ CREATE TABLE scheme_components (
     name TEXT DEFAULT "",
     recipes_id INTEGER DEFAULT 0
 );
+"""
