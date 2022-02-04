@@ -1,11 +1,15 @@
 """ Tests for the SortFilterHeader widget"""
 
+from _pytest.monkeypatch import MonkeyPatch
+from pytestqt.qtbot import QtBot
 from adjutant.widgets.sort_filter_header import SortFilterHeader
 from adjutant.context import Context
 from adjutant.windows.filter_popup import FilterPopup
 
 
-def test_set_model_sets_filter(qtbot, context: Context, monkeypatch):
+def test_set_model_sets_filter(
+    qtbot: QtBot, context: Context, monkeypatch: MonkeyPatch
+):
     """When a section is clicked the relevant Filter Popup is shown"""
     # Given
     model = None

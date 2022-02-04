@@ -23,6 +23,9 @@ class FilterValue:
     text: str
     value: Any
 
+    def __lt__(self, other):
+        return self.text < other.text
+
 
 def from_check_state(value: Qt.CheckState) -> bool:
     """Convert CheckState -> Boolean"""
@@ -112,6 +115,7 @@ class FilterPopup(QDialog):
             else:
                 items.append(FilterValue(str(display), value))
         unique = list(set(items))
+        unique.sort()
 
         for filter_ in unique:
             item = QStandardItem(filter_.text)
