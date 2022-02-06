@@ -5,7 +5,7 @@ LATEST_DATABASE_VERSION = 1
 VERSION_1 = """
 CREATE TABLE settings (
     id INTEGER PRIMARY KEY,
-    version INTEGER,
+    version INTEGER
 );
 
 CREATE TABLE bases ( 

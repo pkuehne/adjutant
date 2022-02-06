@@ -67,9 +67,7 @@ class DatabaseContext:
         if self.version() < 1:
             # Migrate from version 0 to 1
             self.execute_sql_string(VERSION_1)
-            self.execute_sql_command(
-                "INSERT into settings(version, font_size) VALUES(0, 9);"
-            )
+            self.execute_sql_command("INSERT into settings(version) VALUES(0);")
             for table in ["storage", "statuses", "step_operations", "colour_schemes"]:
                 self.execute_sql_command(
                     f"INSERT INTO {table}(id, name) VALUES (0, '<None>');"
