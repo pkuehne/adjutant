@@ -1,5 +1,6 @@
 """ Fixtures """
 
+from pathlib import Path
 from typing import Callable, List
 
 
@@ -8,6 +9,7 @@ import pytest
 
 from adjutant.context.context import Context
 from adjutant.models.relational_model import RelationalModel
+import adjutant.context
 
 # pylint: disable=redefined-outer-name
 
@@ -291,10 +293,14 @@ def models(context: Context):
 
 
 @pytest.fixture
-def context():
+def context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Sets up and tears down the database"""
 
     context = Context()
+    monkeypatch.setattr(
+        adjutant.context.settings_context, "SETTINGS_FILE", tmp_path / "settings.yaml"
+    )
+
     context.database.database.close()
     try:
         context.database.open_database(":memory:")

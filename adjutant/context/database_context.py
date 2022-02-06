@@ -52,7 +52,6 @@ class DatabaseContext:
             raise DatabaseNeedsMigration()
 
         # Versions match
-        print(f"Versions match: {LATEST_DATABASE_VERSION} == {self.version()}")
 
     def version(self) -> int:
         """The version of the database"""
