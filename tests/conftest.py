@@ -295,9 +295,13 @@ def context():
     """Sets up and tears down the database"""
 
     context = Context()
-    context.settings.database_version = 1
-    context.load_database(":memory:")
+    context.database.database.close()
+    try:
+        context.database.open_database(":memory:")
+    except RuntimeError:
+        context.database.migrate()
     # context.database.execute_sql_file(":/populate_test_data.sql")
+    context.models.load()
     context.models.refresh_models()
 
     return context

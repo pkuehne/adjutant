@@ -1,27 +1,50 @@
 """ Application Settings in Context """
 
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict
+import yaml
 
+from adjutant.context.exceptions import NoSettingsFileFound, SettingsFileCorrupt
+
+V_MAJOR = 0
+V_MINOR = 0
+V_PATCH = 1
+V_STAGE = "dev"
+
+SETTINGS_FILE = Path(".") / "adjutant.yaml"
+
+
+@dataclass
 class SettingsContext:
     """Quick access to applicaiton settings"""
 
-    def __init__(self) -> None:
-        self.version_string = ""
-        self.version_number = ""
-        self.version_major = 0
-        self.version_minor = 0
-        self.version_patch = 0
-        self.version_stage = ""
-        # self.database_version = 0
+    version_string: str = ""
+    font_size: int = 9
 
-    def set_version(self, version_string: str) -> None:
-        """parse version string into major/minor/patch"""
-        self.version_string = version_string
-        parts = self.version_string.split("-")
-        self.version_number = parts[0]
-        if len(parts) > 1:
-            self.version_stage = parts[1]
+    def load(self) -> None:
+        """Load from settings file"""
+        settings: Dict[str, Any] = {}
+        try:
+            with SETTINGS_FILE.open("r") as stream:
+                try:
+                    settings = yaml.safe_load(stream)
+                except yaml.YAMLError as exc:
+                    print(exc)
+                    raise SettingsFileCorrupt(
+                        "The settings file is corrupted. Please take a copy and delete it."
+                    ) from exc
+        except IOError as exc:
+            # File does not exist
+            raise NoSettingsFileFound from exc
 
-        (major, minor, patch) = self.version_number.split(".")
-        self.version_major = int(major)
-        self.version_minor = int(minor)
-        self.version_patch = int(patch)
+        self.font_size = settings.get("font_size", self.font_size)
+        self.version_string = f"{V_MAJOR}.{V_MINOR}.{V_PATCH}-{V_STAGE}"
+
+    def save(self) -> None:
+        """Save the settings to file"""
+        settings: Dict[str, Any] = {}
+        settings["font_size"] = self.font_size
+
+        with SETTINGS_FILE.open("w") as outfile:
+            yaml.dump(settings, outfile)

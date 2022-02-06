@@ -100,9 +100,8 @@ class Controller(QObject):
         font.setPointSize(font_size)
         app.setFont(font)
 
-        record = self.models.settings_model.record(0)
-        record.setValue("font_size", font_size)
-        self.models.settings_model.setRecord(0, record)
+        self.settings.font_size = font_size
+        self.settings.save()
 
     def delete_bases(self, indexes: List[QModelIndex]):
         """Delete all currently selected rows"""

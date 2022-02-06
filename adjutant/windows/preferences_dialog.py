@@ -46,9 +46,7 @@ class PreferencesDialog(QDialog):
 
     def _setup_widgets(self):
         """Setup the widgets"""
-        current_font_size = self.context.models.settings_model.record(0).value(
-            "font_size"
-        )
+        current_font_size = self.context.settings.font_size
         for size in range(5, 48):
             self.font_size.addItem(str(size), size)
             if size == current_font_size:

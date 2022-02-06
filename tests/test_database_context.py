@@ -1,8 +1,8 @@
 """ Tests for the database context"""
 
 from unittest.mock import MagicMock
-from _pytest.monkeypatch import MonkeyPatch
 import pytest
+from pytest import MonkeyPatch
 from tests.conftest import (
     AddBaseFunc,
     AddEmptyBasesFunc,
@@ -17,6 +17,11 @@ from adjutant.context.database_context import (
     add_tag_to_base,
     get_tag_count,
     remove_scheme_components,
+)
+from adjutant.context.exceptions import (
+    DatabaseIsNewer,
+    DatabaseNeedsMigration,
+    NoDatabaseFileFound,
 )
 import adjutant.context.database_migrations
 
@@ -34,41 +39,52 @@ def test_version_returns_zero_for_empty_file():
     assert version == 0
 
 
-def test_migrate_equal_version(monkeypatch: MonkeyPatch):
-    """Migrate does nothing if the current and database version match"""
-    # Given
-    database = DatabaseContext()
-    command_mock = MagicMock()
-    monkeypatch.setattr(database, "version", lambda: 1)
-    monkeypatch.setattr(database, "execute_sql_command", command_mock)
-    monkeypatch.setattr(
-        adjutant.context.database_migrations, "LATEST_DATABASE_VERSION", 1
-    )
-
-    # When
-    database.migrate()
-
-    # Then
-    command_mock.assert_not_called()
-
-
-def test_migrate_higher_db_version(monkeypatch: MonkeyPatch):
-    """Migrate does nothing if the current and database version match"""
+def test_open_raises_if_database_version_higher(monkeypatch: MonkeyPatch):
+    """open database raises exception if database version higher than app version"""
     # Given
     database = DatabaseContext()
     command_mock = MagicMock()
     monkeypatch.setattr(database, "version", lambda: 2)
     monkeypatch.setattr(database, "execute_sql_command", command_mock)
-    monkeypatch.setattr(
-        adjutant.context.database_migrations, "LATEST_DATABASE_VERSION", 1
-    )
+    monkeypatch.setattr(adjutant.context.database_context, "LATEST_DATABASE_VERSION", 1)
 
     # When
-    with pytest.raises(RuntimeError) as exc:
-        database.migrate()
+    with pytest.raises(DatabaseIsNewer):
+        database.open_database(":memory:")
 
     # Then
-    assert len(exc.value.args[0]) > 0
+
+
+def test_open_raises_if_database_needs_migration(monkeypatch: MonkeyPatch):
+    """open database raises exception if database version lower than app version"""
+    # Given
+    database = DatabaseContext()
+    command_mock = MagicMock()
+    monkeypatch.setattr(database, "version", lambda: 1)
+    monkeypatch.setattr(database, "execute_sql_command", command_mock)
+    monkeypatch.setattr(adjutant.context.database_context, "LATEST_DATABASE_VERSION", 2)
+
+    # When
+    with pytest.raises(DatabaseNeedsMigration):
+        database.open_database(":memory:")
+
+    # Then
+
+
+def test_open_raises_if_database_doesnt_exist(monkeypatch: MonkeyPatch):
+    """open database raises exception if database doesn't exist"""
+    # Given
+    database = DatabaseContext()
+    command_mock = MagicMock()
+    monkeypatch.setattr(database, "version", lambda: 0)
+    monkeypatch.setattr(database, "execute_sql_command", command_mock)
+    monkeypatch.setattr(adjutant.context.database_context, "LATEST_DATABASE_VERSION", 1)
+
+    # When
+    with pytest.raises(NoDatabaseFileFound):
+        database.open_database(":memory:")
+
+    # Then
 
 
 def test_tag_count_is_zero_no_usage(context: Context, add_tag: AddTagFunc):

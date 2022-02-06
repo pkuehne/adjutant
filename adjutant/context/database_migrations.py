@@ -6,7 +6,6 @@ VERSION_1 = """
 CREATE TABLE settings (
     id INTEGER PRIMARY KEY,
     version INTEGER,
-    font_size INTEGER
 );
 
 CREATE TABLE bases ( 

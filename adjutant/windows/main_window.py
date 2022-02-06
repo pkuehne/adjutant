@@ -5,6 +5,12 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QMessageBox
 
 from adjutant.context import Context
+from adjutant.context.exceptions import (
+    DatabaseNeedsMigration,
+    NoDatabaseFileFound,
+    NoSettingsFileFound,
+    SettingsFileCorrupt,
+)
 from adjutant.widgets.dialog_manager import DialogManager
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
@@ -22,22 +28,15 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.context = Context()
-        self.context.settings.set_version("0.1.0-dev")
-        try:
-            self.context.load_database("adjutant.db")
-        except RuntimeError as err:
-            QMessageBox.critical(self, "Database Error", err.args[0])
-            sys.exit(1)
-        self.context.models.refresh_models()
+        self.load_context()
+
         if self.context.models.bases_model.rowCount() == 0:
             self.context.database.execute_sql_file("populate_test_data.sql")
         self.context.models.refresh_models()
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)
         self.setWindowIcon(QIcon("icons:adjutant.png"))
-        self.context.controller.set_font_size(
-            self.context.models.settings_model.record(0).value("font_size")
-        )
+        self.context.controller.set_font_size(self.context.settings.font_size)
         self.dialogs = DialogManager(self.context, self)
 
         self.bases = BasesScreen(self.context)
@@ -64,3 +63,30 @@ class MainWindow(QMainWindow):
 
         self.bases.row_count_changed.connect(self.statusBar().update_row_count)
         self.statusBar().update_row_count(self.bases.table.filter_model.rowCount())
+
+    def load_context(self):
+        """Load the context from files/etc"""
+        try:
+            self.context.settings.load()
+        except NoSettingsFileFound:
+            self.context.settings.save()
+        except SettingsFileCorrupt as exc:
+            QMessageBox.critical(self, "Settings File Error", exc.args[0])
+            sys.exit(1)
+
+        try:
+            self.context.database.open_database("adjutant.db")
+        except NoDatabaseFileFound:
+            self.context.database.migrate()
+        except DatabaseNeedsMigration:
+            # Check with user first?
+            self.context.database.migrate()
+        except RuntimeError as exc:
+            QMessageBox.critical(self, "Database Error", exc.args[0])
+            sys.exit(1)
+
+        try:
+            self.context.models.load()
+        except RuntimeError as exc:
+            QMessageBox.critical(self, "Model Error", exc.args[0])
+            sys.exit(1)

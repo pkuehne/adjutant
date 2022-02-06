@@ -8,6 +8,11 @@ from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.dataclasses import Tag
 from adjutant.context.database_migrations import LATEST_DATABASE_VERSION, VERSION_1
+from adjutant.context.exceptions import (
+    DatabaseIsNewer,
+    DatabaseNeedsMigration,
+    NoDatabaseFileFound,
+)
 
 
 @dataclass
@@ -34,8 +39,20 @@ class DatabaseContext:
 
         self.database.setDatabaseName(filename)
         if not self.database.open():
-            qWarning("Failed to open the database")
-            return
+            raise RuntimeError("Failed to open the database")
+        if self.version() == 0:
+            raise NoDatabaseFileFound()
+        if LATEST_DATABASE_VERSION < self.version():
+            # Newer database than application
+            raise DatabaseIsNewer(
+                f"Incompatible database version: {self.version()}! "
+                + f"Adjutant can only handle: {LATEST_DATABASE_VERSION}."
+            )
+        if LATEST_DATABASE_VERSION > self.version():
+            raise DatabaseNeedsMigration()
+
+        # Versions match
+        print(f"Versions match: {LATEST_DATABASE_VERSION} == {self.version()}")
 
     def version(self) -> int:
         """The version of the database"""
@@ -48,16 +65,6 @@ class DatabaseContext:
 
     def migrate(self) -> None:
         """Applies any outstanding migrations to the database"""
-        if LATEST_DATABASE_VERSION == self.version():
-            # Nothing to be done
-            return
-        if LATEST_DATABASE_VERSION < self.version():
-            # Newer database than application
-            raise RuntimeError(
-                f"Incompatible database version: {self.version()}! "
-                + f"Adjutant can only handle: {LATEST_DATABASE_VERSION}."
-            )
-
         if self.version() < 1:
             # Migrate from version 0 to 1
             self.execute_sql_string(VERSION_1)

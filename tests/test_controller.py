@@ -1,6 +1,7 @@
 """ Tests for the Controller class"""
 
 from unittest.mock import MagicMock
+from pytest import MonkeyPatch
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 
@@ -262,11 +263,13 @@ def test_font_size_not_less_than_5(context: Context):
     context.controller.set_font_size(font_size)
 
     # Then
-    assert context.models.settings_model.index(0, 1).data() != font_size
+    assert context.settings.font_size != font_size
 
 
-def test_font_size_sets_value_in_db(context: Context, qapp: QApplication, monkeypatch):
-    """Setting the font size should update the database"""
+def test_font_size_sets_value_in_db(
+    context: Context, qapp: QApplication, monkeypatch: MonkeyPatch
+):
+    """Setting the font size should update the settings"""
     # Given
     font_size = 12
     monkeypatch.setattr(QApplication, "instance", lambda: qapp)
@@ -275,7 +278,7 @@ def test_font_size_sets_value_in_db(context: Context, qapp: QApplication, monkey
     context.controller.set_font_size(font_size)
 
     # Then
-    assert context.models.settings_model.record(0).value("font_size") == font_size
+    assert context.settings.font_size == font_size
     assert qapp.font().pointSize() == font_size
 
 
