@@ -304,3 +304,13 @@ class Controller(QObject):
             record.setValue("notes", paint.get("notes", ""))
             self.models.paints_model.insertRecord(-1, record)
         self.models.paints_model.submitAll()
+
+    def load_latest_version(self, callback):
+        """Load version from github repo"""
+        url = QUrl(
+            "https://raw.githubusercontent.com/pkuehne/adjutant/main/adjutant/context/version.py"
+        )
+        reply = self.network.get(QNetworkRequest(url))
+        reply.finished.connect(
+            lambda: callback(str(reply.readAll(), "utf-8").split("\n"))
+        )

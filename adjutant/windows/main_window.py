@@ -1,6 +1,7 @@
 """ The Main Window """
 
 import sys
+from typing import List
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QMessageBox
 
@@ -11,6 +12,7 @@ from adjutant.context.exceptions import (
     NoSettingsFileFound,
     SettingsFileCorrupt,
 )
+from adjutant.context.version import V_MAJOR, V_MINOR, V_PATCH
 from adjutant.widgets.dialog_manager import DialogManager
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
@@ -63,6 +65,7 @@ class MainWindow(QMainWindow):
 
         self.bases.row_count_changed.connect(self.statusBar().update_row_count)
         self.statusBar().update_row_count(self.bases.table.filter_model.rowCount())
+        self.check_version()
 
     def load_context(self):
         """Load the context from files/etc"""
@@ -90,3 +93,20 @@ class MainWindow(QMainWindow):
         except RuntimeError as exc:
             QMessageBox.critical(self, "Model Error", exc.args[0])
             sys.exit(1)
+
+    def check_version(self):
+        """Check version against latest online"""
+
+        def compare_and_alert(lines: List[str]):
+            major = int(lines[0].split("=")[1])
+            minor = int(lines[1].split("=")[1])
+            patch = int(lines[2].split("=")[1])
+
+            if major > V_MAJOR or minor > V_MINOR or patch > V_PATCH:
+                QMessageBox.information(
+                    self, "New version", "A new version of ajdutant has just released!"
+                )
+                return
+            print("No new version")
+
+        self.context.controller.load_latest_version(compare_and_alert)
