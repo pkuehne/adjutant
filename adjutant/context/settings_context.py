@@ -6,11 +6,7 @@ from typing import Any, Dict
 import yaml
 
 from adjutant.context.exceptions import NoSettingsFileFound, SettingsFileCorrupt
-
-V_MAJOR = 0
-V_MINOR = 0
-V_PATCH = 1
-V_STAGE = "dev"
+from adjutant.context.version import V_MAJOR, V_MINOR, V_PATCH, V_STAGE
 
 SETTINGS_FILE = Path(".") / "adjutant.yaml"
 

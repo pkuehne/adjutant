@@ -1,0 +1,4 @@
+V_MAJOR = 0
+V_MINOR = 0
+V_PATCH = 1
+V_STAGE = "dev"
