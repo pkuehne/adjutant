@@ -46,7 +46,7 @@ class MappedWidgets:
         self.retailer_edit = QLineEdit()
         self.price_edit = QLineEdit()
         self.date_acquired = NullableDate()
-        self.completed = QCheckBox()
+        self.date_completed = NullableDate()
         self.damaged = QCheckBox()
         self.notes_edit = QTextEdit()
         self.custom_id_edit = QLineEdit()
@@ -107,7 +107,7 @@ class BaseEditDialog(QDialog):
         form_layout.addRow("Retailer: ", self.widgets.retailer_edit)
         form_layout.addRow("Price: ", self.widgets.price_edit)
         form_layout.addRow("Acquired: ", self.widgets.date_acquired)
-        form_layout.addRow("Completed: ", self.widgets.completed)
+        form_layout.addRow("Completed: ", self.widgets.date_completed)
         form_layout.addRow("Status", self.widgets.status_combobox)
         form_layout.addRow("Damaged", self.widgets.damaged)
         form_layout.addRow("Storage", self.widgets.storage_combobox)
@@ -183,7 +183,9 @@ class BaseEditDialog(QDialog):
         self.mapper.addMapping(self.widgets.retailer_edit, self.field("retailer"))
         self.mapper.addMapping(self.widgets.price_edit, self.field("price"))
         self.mapper.addMapping(self.widgets.date_acquired, self.field("date_acquired"))
-        self.mapper.addMapping(self.widgets.completed, self.field("completed"))
+        self.mapper.addMapping(
+            self.widgets.date_completed, self.field("date_completed")
+        )
         self.mapper.addMapping(self.widgets.damaged, self.field("damaged"))
         self.mapper.addMapping(self.widgets.storage_combobox, self.field("storage_id"))
         self.mapper.addMapping(

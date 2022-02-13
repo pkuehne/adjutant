@@ -32,10 +32,12 @@ class NullableDate(QWidget):
         self.checkbox = QCheckBox()
         self.dateedit = QDateEdit()
 
+        # Set the setter
+        self.date = None
+        self.dateedit.setDate(date.today())
+
         self._setup_layout()
         self._setup_signals()
-
-        self.date = None
 
     def _setup_layout(self):
         """Lays out the checkbox and dateedit"""
@@ -43,9 +45,12 @@ class NullableDate(QWidget):
         self.checkbox.setSizePolicy(
             QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred
         )
-        self.dateedit.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
-        )
+        size_policy = self.dateedit.sizePolicy()
+        size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
+        size_policy.setVerticalPolicy(QSizePolicy.Policy.Preferred)
+        size_policy.setRetainSizeWhenHidden(True)
+        self.dateedit.setSizePolicy(size_policy)
+
         central = QHBoxLayout()
         central.addWidget(self.checkbox)
         central.addWidget(self.dateedit)

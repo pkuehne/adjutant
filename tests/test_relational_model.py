@@ -37,21 +37,16 @@ def test_boolean_column_returns_text_value(
     """A column marked as boolean should return Yes/No instead of 1/0"""
 
     # Given
-    relational_model.boolean_fields.append(relational_model.fieldIndex("completed"))
+    relational_model.boolean_fields.append(relational_model.fieldIndex("damaged"))
     add_empty_bases(1)
 
     # When
-    completed = relational_model.index(
-        0, relational_model.fieldIndex("completed")
-    ).data(Qt.ItemDataRole.DisplayRole)
-
     damaged = relational_model.index(0, relational_model.fieldIndex("damaged")).data(
         Qt.ItemDataRole.DisplayRole
     )
 
     # Then
-    assert completed == "No"
-    assert damaged == 0
+    assert damaged == "No"
 
 
 def test_boolean_column_returns_boolean_for_edit_role(
@@ -60,13 +55,13 @@ def test_boolean_column_returns_boolean_for_edit_role(
     """A column marked as boolean should return 1/0 for edit role"""
 
     # Given
-    relational_model.boolean_fields.append(relational_model.fieldIndex("completed"))
+    relational_model.boolean_fields.append(relational_model.fieldIndex("damaged"))
     add_empty_bases(1)
 
     # When
-    completed = relational_model.index(
-        0, relational_model.fieldIndex("completed")
-    ).data(Qt.ItemDataRole.EditRole)
+    completed = relational_model.index(0, relational_model.fieldIndex("damaged")).data(
+        Qt.ItemDataRole.EditRole
+    )
 
     # Then
     assert completed == 0
