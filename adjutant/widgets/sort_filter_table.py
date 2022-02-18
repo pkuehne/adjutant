@@ -165,3 +165,7 @@ class SortFilterTable(QTableView):
         else:
             super().keyPressEvent(event)
         return True
+
+    def clear_all_filters(self):
+        """Clear all filters applied to the table"""
+        self.filter_model.clear_all_column_filters()

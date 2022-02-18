@@ -20,10 +20,6 @@ class BasesTable(SortFilterTable):
         self.context = context
         self.setModel(self.context.models.bases_model)
 
-    def clear_all_filters(self):
-        """Clear all filters applied to the table"""
-        self.filter_model.clear_all_column_filters()
-
     def additional_context_menu_items(self, index: QModelIndex, menu: QMenu):
         """When right-click context menu is requested"""
         duplicate_menu = QMenu(self.tr("Duplicate Base"), self)
@@ -35,12 +31,6 @@ class BasesTable(SortFilterTable):
             duplicate_menu.addAction(duplicate_action)
 
         menu.addMenu(duplicate_menu)
-
-    def apply_field_to_selection(self, row: int, column: int):
-        """Apply the field at index(row, column) to all selected indexes"""
-        source = self.model().index(row, column)
-        selection = self.selected_indexes()
-        self.context.controller.apply_field_to_bases(source, selection)
 
     def save_search(self):
         """Save the current search"""
@@ -58,7 +48,7 @@ class BasesTable(SortFilterTable):
 
     def load_search(self, row: int):
         """Restore a saved search"""
-        self.filter_model.clear_all_column_filters()
+        self.clear_all_filters()
 
         if row == -1:
             self.filter_model.setFilterFixedString("")

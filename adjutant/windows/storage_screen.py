@@ -27,7 +27,6 @@ class StorageScreen(QWidget):
     def _setup_widgets(self):
         """Set up the widgets"""
         self.table.setModel(self.context.models.storage_model)
-        self.table.hideRow(0)
 
     def _setup_signals(self):
         """Setup the signals"""

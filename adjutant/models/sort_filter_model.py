@@ -24,6 +24,7 @@ class SortFilterModel(QSortFilterProxyModel):
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.column_filters: Dict[int, List[str]] = {}
+        self.hide_zero_id = True
 
     def set_column_filter(self, column: int, values: List[Any]) -> None:
         """Set the filter for a given column"""
@@ -74,6 +75,9 @@ class SortFilterModel(QSortFilterProxyModel):
 
     def filterAcceptsRow(self, source_row: int, parent: QModelIndex = None) -> bool:
         """returns True if the row should be shown"""
+        id_num = self.sourceModel().index(source_row, 0).data()
+        if id_num == 0 and self.hide_zero_id:
+            return False
         for column in range(self.sourceModel().columnCount()):
             filter_list = self.column_filters.get(column, None)
             value = (

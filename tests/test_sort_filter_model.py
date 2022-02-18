@@ -113,3 +113,24 @@ def test_clear_filters_does_that(context: Context):
     # Then
     for col in range(context.models.bases_model.rowCount()):
         assert filter_model.column_filters[col] is None
+
+
+def test_zero_id_hidden_by_default(context: Context):
+    """When a zero id is encountered, it's filtered out by default"""
+    # Given
+    filter_model = SortFilterModel()
+    filter_model.setSourceModel(context.models.storage_model)
+
+    # Then
+    assert filter_model.rowCount() == 0
+
+
+def test_zero_id_can_be_shown(context: Context):
+    """When a zero id is encountered, it's filtered out by default"""
+    # Given
+    filter_model = SortFilterModel()
+    filter_model.hide_zero_id = False
+    filter_model.setSourceModel(context.models.storage_model)
+
+    # Then
+    assert filter_model.rowCount() == 1
