@@ -1,5 +1,6 @@
 """ Bases Model"""
 
+import logging
 from typing import Dict, List
 from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal
 from PyQt6.QtGui import QColor
@@ -49,7 +50,7 @@ class RelationalModel(QSqlTableModel):
     def record_by_id(self, id_: int) -> QSqlRecord:
         """Get record by given ID"""
         if id_ not in self.id_row_map:
-            print(f"invalid id {id_} in record lookup")
+            logging.error("invalid id %s in record lookup", id_)
             return self.record()
         return self.record(self.id_row_map[id_])
 
@@ -107,12 +108,12 @@ class RelationalModel(QSqlTableModel):
         sql.prepare(query)
         success = sql.exec()
         if not success:
-            print(f"Failed to get value. Query: {query}")
+            logging.error("_data_o2m: Failed to get value. Query: %s", query)
             return None
         success = sql.next()
         if not success:
             if foreign_key != 0:
-                print(f"Failed to get value for {foreign_key}")
+                logging.error("Failed to get value for fk: %s", foreign_key)
             return foreign_key
         return sql.value(relationship.target_field)
 
@@ -151,7 +152,9 @@ class RelationalModel(QSqlTableModel):
         """Retrieves the edit/display role for the given field name and row"""
         index = self.index(row, self.fieldIndex(field))
         if not index.isValid():
-            print(f"Failed to retrieve index for {row}-{field} on {self.tableName()}")
+            logging.error(
+                "Failed to retrieve index for %s-%s on %s", row, field, self.tableName
+            )
             return None
         role = Qt.ItemDataRole.EditRole if edit else Qt.ItemDataRole.DisplayRole
         return self.data(index, role)
@@ -167,7 +170,7 @@ class RelationalModel(QSqlTableModel):
     def _set_data_m2m(self, index: QModelIndex, value, role: Qt.ItemDataRole) -> bool:
         """Many to many relationship column"""
         if role != Qt.ItemDataRole.EditRole:
-            print("Don't set anything other than EditRole")
+            logging.warning("Incorrect role when setting m2m data: %s", role)
             return False
 
         source_id = index.siblingAtColumn(0).data()

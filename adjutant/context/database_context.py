@@ -1,9 +1,10 @@
 """ Classes to manage database operations """
 
+import logging
 from os import path
 from typing import Any, List
 from dataclasses import dataclass
-from PyQt6.QtCore import QFile, QTextStream, qWarning
+from PyQt6.QtCore import QFile, QTextStream
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.dataclasses import Tag
@@ -39,8 +40,10 @@ class DatabaseContext:
 
         self.database.setDatabaseName(filename)
         if not self.database.open():
+            logging.error("Failed to open database: %s", filename)
             raise RuntimeError("Failed to open the database")
         if self.version() == 0:
+            logging.info("Database version is 0")
             raise NoDatabaseFileFound()
         if LATEST_DATABASE_VERSION < self.version():
             # Newer database than application
@@ -49,6 +52,11 @@ class DatabaseContext:
                 + f"Adjutant can only handle: {LATEST_DATABASE_VERSION}."
             )
         if LATEST_DATABASE_VERSION > self.version():
+            logging.info(
+                "Database needs migration from %s to %s",
+                self.version(),
+                LATEST_DATABASE_VERSION,
+            )
             raise DatabaseNeedsMigration()
 
         # Versions match
@@ -64,6 +72,7 @@ class DatabaseContext:
 
     def migrate(self) -> None:
         """Applies any outstanding migrations to the database"""
+        logging.info("Starting database migration")
         if self.version() < 1:
             # Migrate from version 0 to 1
             self.execute_sql_string(VERSION_1)
@@ -77,7 +86,7 @@ class DatabaseContext:
         self.execute_sql_command(
             f"UPDATE settings SET version = {LATEST_DATABASE_VERSION}"
         )
-        print("Database migration complete")
+        logging.info("Database migration complete")
 
     def execute_sql_command(
         self, command: str, bindings: List[QueryBinding] = None, errors: bool = True
@@ -90,13 +99,11 @@ class DatabaseContext:
             query.bindValue(binding.placeholder, binding.value)
         if not query.exec():
             if errors:
-                qWarning(
-                    "Failed to execute query. Error: "
-                    + query.lastError().text()
-                    + " Command: "
-                    + command
-                    + " Bindings: "
-                    + str(bindings)
+                logging.warning(
+                    "Failed to execute query. Error: %s Command: %s Bindings %s",
+                    query.lastError().text(),
+                    command,
+                    str(bindings),
                 )
             return None
         return query
@@ -127,7 +134,7 @@ def remove_all_tags_for_base(context: DatabaseContext, base_id: int):
     bindings = [QueryBinding(":base_id", base_id)]
     result = context.execute_sql_command(query, bindings)
     if not result:
-        print("Failed to remove old tags")
+        logging.error("Failed to remove old tags for %s", base_id)
 
 
 def add_tag_to_base(context: DatabaseContext, base_id: int, tag_id: int):
@@ -136,7 +143,7 @@ def add_tag_to_base(context: DatabaseContext, base_id: int, tag_id: int):
     bindings = [QueryBinding(":base_id", base_id), QueryBinding(":tag_id", tag_id)]
     result = context.execute_sql_command(query, bindings)
     if not result:
-        print("Failed to associate tag to base")
+        logging.error("Failed to associate tag %s to base %s", tag_id, base_id)
 
 
 def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[Tag]:
@@ -151,7 +158,9 @@ def get_tags_for_base(context: DatabaseContext, base_id: int) -> List[Tag]:
     bindings = [QueryBinding(":base_id", base_id)]
     result: QSqlQuery = context.execute_sql_command(query, bindings)
     if not result:
-        print("Failed to retrieve the tags from the database")
+        logging.error(
+            "Failed to retrieve the tags from the database for base: %s", base_id
+        )
         return []
 
     tags = []

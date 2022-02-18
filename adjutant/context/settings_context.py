@@ -1,5 +1,6 @@
 """ Application Settings in Context """
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict
@@ -26,12 +27,13 @@ class SettingsContext:
                 try:
                     settings = yaml.safe_load(stream)
                 except yaml.YAMLError as exc:
-                    print(exc)
+                    logging.error(exc)
                     raise SettingsFileCorrupt(
                         "The settings file is corrupted. Please take a copy and delete it."
                     ) from exc
         except IOError as exc:
             # File does not exist
+            logging.info("Settings file '%s' not found", SETTINGS_FILE)
             raise NoSettingsFileFound from exc
 
         self.font_size = settings.get("font_size", self.font_size)

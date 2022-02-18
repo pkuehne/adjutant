@@ -21,7 +21,6 @@ def test_id_filtering(context: Context, add_empty_bases: AddEmptyBasesFunc):
     assert filter_model.rowCount() > 0
     assert filter_model.rowCount() != context.models.bases_model.rowCount()
     for row in range(filter_model.rowCount()):
-        print(filter_model.index(row, 0).data())
         assert filter_model.index(row, 0).data() in filter_list
 
 

@@ -1,6 +1,7 @@
 """ Edit Window for a Base """
 
 from dataclasses import dataclass
+import logging
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -278,10 +279,10 @@ class BaseEditDialog(QDialog):
         # Submit Bases table change
         success = self.mapper.submit()
         if not success:
-            print("Mapper Error: " + self.model.lastError().text())
+            logging.error("Base Edit Mapper Error: %s", self.model.lastError().text())
         success = self.model.submitAll()
         if not success:
-            print("Model Error: " + self.model.lastError().text())
+            logging.error("Base Edit Model Error: %s", self.model.lastError().text())
         self.model.selectRow(self.index.row())
 
         if self.add_mode and self.duplicate_edit.value() > 0:

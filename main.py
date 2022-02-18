@@ -1,6 +1,7 @@
 """
 Program entry
 """
+import logging
 import sys
 from os import path
 from PyQt6.QtWidgets import QApplication
@@ -10,6 +11,14 @@ from adjutant.windows.main_window import MainWindow
 
 def main(argv):
     """The main"""
+    logging.basicConfig(
+        filename="adjutant.log",
+        filemode="w",
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.INFO,
+    )
+
     QApplication.setStyle("windows")
 
     icons_path = path.abspath(path.join(path.dirname(__file__), "resources/icons"))

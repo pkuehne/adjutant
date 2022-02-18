@@ -1,4 +1,6 @@
 """ Common base class for all Add/Edit dialogs """
+
+import logging
 from dataclasses import dataclass
 from typing import Dict, List
 from PyQt6.QtWidgets import (
@@ -196,11 +198,15 @@ class AddEditDialog(QDialog):
         # Submit Bases table change
         success = self.mapper.submit()
         if not success:
-            print("Mapper Error: " + self.model.lastError().text())
+            logging.error(
+                "Add/Edit Submit Mapper Error: %s", self.model.lastError().text()
+            )
 
         success = self.model.submitAll()
         if not success:
-            print("Model Error: " + self.model.lastError().text())
+            logging.error(
+                "Add/Edit Submit Model Error: %s", self.model.lastError().text()
+            )
         self.model.selectRow(self.index.row())
 
         if self.link_widget is not None:
@@ -215,7 +221,7 @@ class AddEditDialog(QDialog):
 
     def delete_function(self, indexes):
         """overridable delete function"""
-        print(f"No delete function defined for {indexes} - {self.index}")
+        logging.warning("No delete function defined for %s - %s", indexes, self.index)
 
     def delete_button_pressed(self):
         """Delete the current index"""

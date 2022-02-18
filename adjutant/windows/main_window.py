@@ -1,5 +1,6 @@
 """ The Main Window """
 
+import logging
 import sys
 from typing import List
 from PyQt6.QtGui import QIcon
@@ -29,8 +30,10 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        logging.info("Adjutant v%s.%s.%s", V_MAJOR, V_MINOR, V_PATCH)
         self.context = Context()
         self.load_context()
+        logging.info("Context loaded")
 
         if self.context.models.bases_model.rowCount() == 0:
             self.context.database.execute_sql_file("populate_test_data.sql")
@@ -69,14 +72,17 @@ class MainWindow(QMainWindow):
 
     def load_context(self):
         """Load the context from files/etc"""
+        logging.debug("Loading settings context")
         try:
             self.context.settings.load()
         except NoSettingsFileFound:
             self.context.settings.save()
         except SettingsFileCorrupt as exc:
+            logging.fatal("Settings file is corrupt: %s", exc)
             QMessageBox.critical(self, "Settings File Error", exc.args[0])
             sys.exit(1)
 
+        logging.debug("Loading database")
         try:
             self.context.database.open_database("adjutant.db")
         except NoDatabaseFileFound:
@@ -85,34 +91,38 @@ class MainWindow(QMainWindow):
             # Check with user first?
             self.context.database.migrate()
         except RuntimeError as exc:
+            logging.fatal("Database error encountered: %s", exc)
             QMessageBox.critical(self, "Database Error", exc.args[0])
             sys.exit(1)
 
+        logging.debug("Loading models")
         try:
             self.context.models.load()
         except RuntimeError as exc:
+            logging.fatal("Failed to load models: %s", exc)
             QMessageBox.critical(self, "Model Error", exc.args[0])
             sys.exit(1)
 
     def check_version(self):
         """Check version against latest online"""
+        logging.debug("Checking for newer version")
 
         def compare_and_alert(lines: List[str]):
             if lines == [""]:
-                print("Failed to get version")
+                logging.warning("Failed to get latest version")
                 return
             try:
                 major = int(lines[0].split("=")[1])
                 minor = int(lines[1].split("=")[1])
                 patch = int(lines[2].split("=")[1])
-            except IndexError:
-                print("Failed to parse version")
+            except IndexError as exc:
+                logging.warning("Failed to parse version: %s", exc)
                 return
             if major > V_MAJOR or minor > V_MINOR or patch > V_PATCH:
                 QMessageBox.information(
                     self, "New version", "A new version of ajdutant has just released!"
                 )
                 return
-            # print("No new version")
+            logging.debug("No new version")
 
         self.context.controller.load_latest_version(compare_and_alert)

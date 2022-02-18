@@ -2,6 +2,7 @@
 
 from typing import List
 import yaml
+import logging
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
 from PyQt6.QtCore import QModelIndex, QObject, Qt, QUrl
@@ -92,7 +93,7 @@ class Controller(QObject):
     def set_font_size(self, font_size: int):
         """Set the applications font size"""
         if font_size < 5:
-            print(f"Invalid font size: {font_size}")
+            logging.error("Invalid font size: %s", font_size)
             return
 
         app: QApplication = QApplication.instance()
@@ -293,7 +294,7 @@ class Controller(QObject):
         for paint in paints:
             paint_name = paint.get("name", "")
             if paint_name == "":
-                print("Invalid entry with no name")
+                logging.warning("Invalid paint entry with no name")
                 continue
             record = self.models.paints_model.record()
             record.setNull("id")

@@ -1,5 +1,6 @@
 """ Widget to manage a relational link with another model"""
 
+import logging
 from typing import List
 from PyQt6.QtCore import Qt, QSortFilterProxyModel, QModelIndex
 from PyQt6.QtSql import QSqlRecord
@@ -209,7 +210,9 @@ class RelationalLink(QWidget):
                 self.source_model.setRecord(row, record)
         success = self.source_model.submitAll()
         if not success:
-            print("Model Error: " + self.source_model.lastError().text())
+            logging.error(
+                "Submit Model Error: %s", self.source_model.lastError().text()
+            )
 
     def revert_changes(self):
         """Revert all changes"""
@@ -222,4 +225,6 @@ class RelationalLink(QWidget):
             self.source_model.insertRecord(-1, record)
         success = self.source_model.submitAll()
         if not success:
-            print("Model Error: " + self.source_model.lastError().text())
+            logging.error(
+                "Revert Model Error: %s", self.source_model.lastError().text()
+            )
