@@ -98,10 +98,16 @@ class MainWindow(QMainWindow):
         """Check version against latest online"""
 
         def compare_and_alert(lines: List[str]):
-            major = int(lines[0].split("=")[1])
-            minor = int(lines[1].split("=")[1])
-            patch = int(lines[2].split("=")[1])
-
+            if lines == [""]:
+                print("Failed to get version")
+                return
+            try:
+                major = int(lines[0].split("=")[1])
+                minor = int(lines[1].split("=")[1])
+                patch = int(lines[2].split("=")[1])
+            except IndexError:
+                print("Failed to parse version")
+                return
             if major > V_MAJOR or minor > V_MINOR or patch > V_PATCH:
                 QMessageBox.information(
                     self, "New version", "A new version of ajdutant has just released!"

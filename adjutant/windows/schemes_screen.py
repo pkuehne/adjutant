@@ -11,7 +11,7 @@ class SchemeScreen(QWidget):
     def __init__(self, context: Context, parent=None) -> None:
         super().__init__(parent=parent)
         self.context = context
-        self.table = SortFilterTable(self)
+        self.table = SortFilterTable(context, self)
 
         self._setup_layout()
         self._setup_widgets()

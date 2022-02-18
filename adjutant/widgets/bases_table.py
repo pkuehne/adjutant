@@ -1,7 +1,7 @@
 """ Wrapper for the Bases Table """
 
 import functools
-from PyQt6.QtCore import QModelIndex, Qt
+from PyQt6.QtCore import QModelIndex
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QInputDialog,
@@ -16,7 +16,7 @@ class BasesTable(SortFilterTable):
     """Special functionality for Bases Table"""
 
     def __init__(self, context: Context):
-        super().__init__()
+        super().__init__(context)
         self.context = context
         self.setModel(self.context.models.bases_model)
 
@@ -34,41 +34,7 @@ class BasesTable(SortFilterTable):
             )
             duplicate_menu.addAction(duplicate_action)
 
-        def generate_title(column: int):
-            title_idx = index.siblingAtColumn(column)
-            header = index.model().headerData(
-                column, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole
-            )
-            return f"{header} → {title_idx.data()}"
-
-        apply_menu = QMenu(self.tr("Apply to Selection"), self)
-        for column in range(1, self.model().columnCount()):
-            apply_action = QAction(generate_title(column), apply_menu)
-            apply_action.triggered.connect(
-                functools.partial(
-                    self.context.controller.apply_field_to_bases,
-                    index.siblingAtColumn(column),
-                    self.selected_indexes(),
-                )
-            )
-            apply_menu.addAction(apply_action)
-
-        filter_menu = QMenu(self.tr("Filter to Selection"), self)
-        for column in range(1, self.model().columnCount()):
-            filter_action = QAction(generate_title(column), filter_menu)
-            filter_action.triggered.connect(
-                functools.partial(
-                    self.filter_model.set_column_filter,
-                    column,
-                    [index.siblingAtColumn(column).data()],
-                )
-            )
-            filter_menu.addAction(filter_action)
-
         menu.addMenu(duplicate_menu)
-        menu.addSeparator()
-        menu.addMenu(apply_menu)
-        menu.addMenu(filter_menu)
 
     def apply_field_to_selection(self, row: int, column: int):
         """Apply the field at index(row, column) to all selected indexes"""

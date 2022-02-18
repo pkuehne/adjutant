@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock
 from pytestqt.qtbot import QtBot
+from pytest import MonkeyPatch
 from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
 from PyQt6.QtWidgets import QMenu
@@ -13,7 +14,7 @@ from tests.conftest import AddBaseFunc, AddEmptyBasesFunc, BasesRecord
 def test_set_model_sets_filter(qtbot: QtBot, context: Context):
     """When the model is set, the filter model should be set too"""
     # Given
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
 
     # When
@@ -26,13 +27,13 @@ def test_set_model_sets_filter(qtbot: QtBot, context: Context):
 
 
 def test_context_menu_is_fired(
-    qtbot: QtBot, monkeypatch, context: Context, add_base: AddBaseFunc
+    qtbot: QtBot, monkeypatch: MonkeyPatch, context: Context, add_base: AddBaseFunc
 ):
     """When the context menu event is fired, a signal is raised"""
     # Given
     popup_mock = MagicMock()
     monkeypatch.setattr(QMenu, "popup", popup_mock)
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_base([BasesRecord()])
     table.setModel(context.models.bases_model)
@@ -46,13 +47,13 @@ def test_context_menu_is_fired(
 
 
 def test_context_menu_is_not_fired(
-    qtbot: QtBot, monkeypatch, context: Context, add_base: AddBaseFunc
+    qtbot: QtBot, monkeypatch: MonkeyPatch, context: Context, add_base: AddBaseFunc
 ):
     """When the context menu event is fired, the signal is not raised if no item is selected"""
     # Given
     popup_mock = MagicMock()
     monkeypatch.setattr(QMenu, "popup", popup_mock)
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_base([BasesRecord()])
     table.setModel(context.models.bases_model)
@@ -70,7 +71,7 @@ def test_selected_returns_orig_model_index(
 ):
     """Selected indexes returns the original model's index"""
     # Given
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_empty_bases(2)
     table.setModel(context.models.bases_model)
@@ -90,7 +91,7 @@ def test_backspace_deletes_item(
 ):
     """backspace on selected item deletes the row"""
     # Given
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_empty_bases(10)
     table.setModel(context.models.bases_model)
@@ -122,7 +123,7 @@ def test_delete_deletes_item(
 ):
     """delete on selected item deletes the row"""
     # Given
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_empty_bases(10)
     table.setModel(context.models.bases_model)
@@ -154,7 +155,7 @@ def test_return_edits_item(
 ):
     """return on selected item edits the row"""
     # Given
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_empty_bases(10)
     table.setModel(context.models.bases_model)
@@ -186,7 +187,7 @@ def test_other_keys_do_nothing(
 ):
     """return on selected item edits the row"""
     # Given
-    table = SortFilterTable()
+    table = SortFilterTable(context)
     qtbot.addWidget(table)
     add_empty_bases(10)
     table.setModel(context.models.bases_model)
