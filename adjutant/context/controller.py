@@ -310,6 +310,6 @@ class Controller(QObject):
         """Load version from github repo"""
         url = "https://raw.githubusercontent.com/pkuehne/adjutant/main/adjutant/context/version.py"
         thread = UrlLoader(self, url)
-        thread.content_loaded.connect(lambda text: callback(text.split("\n")))
+        thread.content_loaded.connect(callback)
         thread.finished.connect(thread.deleteLater)
         thread.start()

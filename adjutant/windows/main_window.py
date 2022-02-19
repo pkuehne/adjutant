@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from typing import List
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QMessageBox
 
@@ -14,6 +14,7 @@ from adjutant.context.exceptions import (
     SettingsFileCorrupt,
 )
 from adjutant.context.version import V_MAJOR, V_MINOR, V_PATCH
+from adjutant.context.database_migrations import SAMPLE_DATA
 from adjutant.widgets.dialog_manager import DialogManager
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
@@ -30,14 +31,14 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.first_time = False
         logging.info("Adjutant v%s.%s.%s", V_MAJOR, V_MINOR, V_PATCH)
         self.context = Context()
         self.load_context()
         logging.info("Context loaded")
 
-        if self.context.models.bases_model.rowCount() == 0:
-            self.context.database.execute_sql_file("populate_test_data.sql")
-        self.context.models.refresh_models()
+        if self.first_time:
+            QTimer.singleShot(0, self.load_sample_data)
 
         self.setWindowTitle("Adjutant - " + self.context.settings.version_string)
         self.setWindowIcon(QIcon("icons:adjutant.png"))
@@ -70,6 +71,19 @@ class MainWindow(QMainWindow):
         self.statusBar().update_row_count(self.bases.table.filter_model.rowCount())
         self.check_version()
 
+    def load_sample_data(self):
+        """Load sample data after migration"""
+        result = QMessageBox.question(
+            self,
+            "Load samples?",
+            "Welcome to Adjutant!\n"
+            "Would you like to load some sample data to see suggestions on how to use Adjutant?",
+        )
+        if result == QMessageBox.StandardButton.No:
+            return
+        self.context.database.execute_sql_string(SAMPLE_DATA)
+        self.context.models.refresh_models()
+
     def load_context(self):
         """Load the context from files/etc"""
         logging.debug("Loading settings context")
@@ -84,8 +98,9 @@ class MainWindow(QMainWindow):
 
         logging.debug("Loading database")
         try:
-            self.context.database.open_database("adjutant.db")
+            self.context.database.open_database()
         except NoDatabaseFileFound:
+            self.first_time = True
             self.context.database.migrate()
         except DatabaseNeedsMigration:
             # Check with user first?
@@ -107,10 +122,11 @@ class MainWindow(QMainWindow):
         """Check version against latest online"""
         logging.debug("Checking for newer version")
 
-        def compare_and_alert(lines: List[str]):
-            if lines == [""]:
+        def compare_and_alert(html: str):
+            if html == "" or html is None:
                 logging.warning("Failed to get latest version")
                 return
+            lines = html.split("\n")
             try:
                 major = int(lines[0].split("=")[1])
                 minor = int(lines[1].split("=")[1])

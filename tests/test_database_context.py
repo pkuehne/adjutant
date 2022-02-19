@@ -50,7 +50,7 @@ def test_open_raises_if_database_version_higher(monkeypatch: MonkeyPatch):
 
     # When
     with pytest.raises(DatabaseIsNewer):
-        database.open_database(":memory:")
+        database.open_database()
 
     # Then
 
@@ -66,7 +66,7 @@ def test_open_raises_if_database_needs_migration(monkeypatch: MonkeyPatch):
 
     # When
     with pytest.raises(DatabaseNeedsMigration):
-        database.open_database(":memory:")
+        database.open_database()
 
     # Then
 
@@ -82,7 +82,7 @@ def test_open_raises_if_database_doesnt_exist(monkeypatch: MonkeyPatch):
 
     # When
     with pytest.raises(NoDatabaseFileFound):
-        database.open_database(":memory:")
+        database.open_database()
 
     # Then
 

@@ -1,10 +1,9 @@
 """ Classes to manage database operations """
 
 import logging
-from os import path
+from pathlib import Path
 from typing import Any, List
 from dataclasses import dataclass
-from PyQt6.QtCore import QFile, QTextStream
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from adjutant.context.dataclasses import Tag
@@ -14,6 +13,8 @@ from adjutant.context.exceptions import (
     DatabaseNeedsMigration,
     NoDatabaseFileFound,
 )
+
+DATABASE_FILE = Path(".") / "adjutant.db"
 
 
 @dataclass
@@ -33,14 +34,14 @@ class DatabaseContext:
             # Create the global database connection if one doesn't exist already
             self.database = QSqlDatabase.addDatabase("QSQLITE")
 
-    def open_database(self, filename) -> None:
+    def open_database(self) -> None:
         """Open the database for operations"""
         if self.database.isOpen():
             self.database.close()
 
-        self.database.setDatabaseName(filename)
+        self.database.setDatabaseName(str(DATABASE_FILE))
         if not self.database.open():
-            logging.error("Failed to open database: %s", filename)
+            logging.error("Failed to open database: %s", DATABASE_FILE)
             raise RuntimeError("Failed to open the database")
         if self.version() == 0:
             logging.info("Database version is 0")
@@ -115,17 +116,6 @@ class DatabaseContext:
                 # ignore empty lines
                 continue
             self.execute_sql_command(query)
-
-    def execute_sql_file(self, filename: str) -> None:
-        """Execute SQL statements in given file"""
-        # qWarning(f"Executing {filename}")
-        resources_path = path.abspath(
-            path.join(path.dirname(__file__), "../../resources/")
-        )
-        sql_file = QFile(resources_path + "/" + filename)
-        sql_file.open(QFile.OpenModeFlag.ReadOnly)
-
-        self.execute_sql_string(QTextStream(sql_file).readAll())
 
 
 def remove_all_tags_for_base(context: DatabaseContext, base_id: int):

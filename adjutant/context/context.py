@@ -19,9 +19,3 @@ class Context:
         self.controller = Controller(
             self.models, self.database, self.signals, self.settings
         )
-
-    def load_database(self, filename: str) -> None:
-        """Load a database file"""
-        self.database.open_database(filename)
-        self.database.migrate()
-        self.models.load()

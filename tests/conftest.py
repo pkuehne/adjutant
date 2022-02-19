@@ -300,10 +300,11 @@ def context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         adjutant.context.settings_context, "SETTINGS_FILE", tmp_path / "settings.yaml"
     )
+    monkeypatch.setattr(adjutant.context.database_context, "DATABASE_FILE", ":memory:")
 
     context.database.database.close()
     try:
-        context.database.open_database(":memory:")
+        context.database.open_database()
     except RuntimeError:
         context.database.migrate()
     # context.database.execute_sql_file(":/populate_test_data.sql")
@@ -321,3 +322,12 @@ def relational_model(context: Context) -> RelationalModel:
     rmod.setEditStrategy(rmod.EditStrategy.OnManualSubmit)
     context.models.bases_model = rmod
     return rmod
+
+
+@pytest.fixture(autouse=True)
+def override_external_files(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """Overrides external files"""
+    monkeypatch.setattr(
+        adjutant.context.settings_context, "SETTINGS_FILE", tmp_path / "settings.yaml"
+    )
+    monkeypatch.setattr(adjutant.context.database_context, "DATABASE_FILE", ":memory:")
