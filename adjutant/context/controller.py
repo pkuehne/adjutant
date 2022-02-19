@@ -1,14 +1,14 @@
 """ Context for the controller """
 
 from typing import List
-import yaml
 import logging
+import yaml
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
 from PyQt6.QtCore import QModelIndex, QObject, Qt, QUrl
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox, QFileDialog
 from PyQt6.QtSql import QSqlTableModel
-from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest
+from adjutant.context.url_loader import UrlLoader
 from adjutant.context.settings_context import SettingsContext
 from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
@@ -35,7 +35,6 @@ class Controller(QObject):
         self.database = database
         self.signals = signals
         self.settings = settings
-        self.network = QNetworkAccessManager()
 
     def convert_index(self, index: QModelIndex) -> QModelIndex:
         """Converts index reference to bases_table index"""
@@ -270,10 +269,10 @@ class Controller(QObject):
             with open(filename.toLocalFile()) as file:
                 self.load_paints_from_string(file.read())
         else:
-            reply = self.network.get(QNetworkRequest(filename))
-            reply.finished.connect(
-                lambda: self.load_paints_from_string(str(reply.readAll(), "utf-8"))
-            )
+            thread = UrlLoader(self, filename.toString())
+            thread.content_loaded.connect(self.load_paints_from_string)
+            thread.finished.connect(thread.deleteLater)
+            thread.start()
 
     def load_paints_from_string(self, file_contents):
         """load the actual data into the paints table"""
@@ -305,13 +304,12 @@ class Controller(QObject):
             record.setValue("notes", paint.get("notes", ""))
             self.models.paints_model.insertRecord(-1, record)
         self.models.paints_model.submitAll()
+        logging.info("Loaded %s paints", len(paints))
 
     def load_latest_version(self, callback):
         """Load version from github repo"""
-        url = QUrl(
-            "https://raw.githubusercontent.com/pkuehne/adjutant/main/adjutant/context/version.py"
-        )
-        reply = self.network.get(QNetworkRequest(url))
-        reply.finished.connect(
-            lambda: callback(str(reply.readAll(), "utf-8").split("\n"))
-        )
+        url = "https://raw.githubusercontent.com/pkuehne/adjutant/main/adjutant/context/version.py"
+        thread = UrlLoader(self, url)
+        thread.content_loaded.connect(lambda text: callback(text.split("\n")))
+        thread.finished.connect(thread.deleteLater)
+        thread.start()

@@ -123,6 +123,6 @@ class MainWindow(QMainWindow):
                     self, "New version", "A new version of ajdutant has just released!"
                 )
                 return
-            logging.debug("No new version")
+            logging.info("No new version")
 
         self.context.controller.load_latest_version(compare_and_alert)
