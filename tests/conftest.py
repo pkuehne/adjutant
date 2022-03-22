@@ -28,6 +28,7 @@ class BasesRecord:
     status: int = 0
     storage: int = 0
     scheme_id: int = 0
+    completed: str = None
 
 
 AddBaseFunc = Callable[[List[BasesRecord]], None]
@@ -222,6 +223,7 @@ class Models:
         record.setValue("status_id", item.status)
         record.setValue("storage_id", item.storage)
         record.setValue("schemes_id", item.scheme_id)
+        record.setValue("date_completed", item.completed)
 
         assert model.insertRecord(-1, record)
         model.submitAll()
@@ -286,7 +288,7 @@ class Models:
 
 
 @pytest.fixture
-def models(context: Context):
+def models(context: Context) -> Models:
     """Fixture for model access"""
     models = Models(context)
     return models

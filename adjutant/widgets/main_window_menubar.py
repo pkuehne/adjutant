@@ -6,6 +6,7 @@ from PyQt6.QtGui import QAction
 from adjutant.context import Context
 from adjutant.windows.base_report_dialog import BaseReportDialog
 from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
+from adjutant.windows.completion_chart_window import CompletionChartWindow
 from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
 from adjutant.windows.manage_searches_dialog import ManageSearchesDialog
@@ -77,10 +78,15 @@ class MainWindowMenuBar(QMenuBar):
         painting_guide_report_action.triggered.connect(
             lambda: BaseReportDialog.show(self.context, None)
         )
+        completion_chart_action = QAction("Completion Chart", self)
+        completion_chart_action.triggered.connect(
+            lambda: CompletionChartWindow.show(self.context, None)
+        )
 
         reports_menu = self.addMenu("&Reports")
         reports_menu.addAction(colour_scheme_report_action)
         reports_menu.addAction(painting_guide_report_action)
+        reports_menu.addAction(completion_chart_action)
 
     def _setup_tools_menu(self):
         """Setup the Tools menu"""
