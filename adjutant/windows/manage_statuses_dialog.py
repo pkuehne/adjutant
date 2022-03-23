@@ -1,23 +1,11 @@
 """ Dialog to manage tags"""
 
 from typing import List
-from PyQt6.QtCore import QModelIndex, QSortFilterProxyModel
+from PyQt6.QtCore import QModelIndex
 from PyQt6.QtWidgets import QDialog, QHBoxLayout, QListView, QPushButton, QVBoxLayout
 
 from adjutant.context import Context
-
-
-class SortFilterModel(QSortFilterProxyModel):
-    """Proxy model to hide row 0"""
-
-    # pylint: disable=invalid-name
-    def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex) -> bool:
-        """Hides the 0 row"""
-        if source_row == 0:
-            return False
-        return super().filterAcceptsRow(source_row, source_parent)
-
-    # pylint: enable=invalid-name
+from adjutant.models.row_zero_filter_model import RowZeroFilterModel
 
 
 class ManageStatusesDialog(QDialog):
@@ -30,6 +18,7 @@ class ManageStatusesDialog(QDialog):
         self.context = context
         self.setWindowTitle("Manage statuses")
 
+        self.model = RowZeroFilterModel(self)
         self.item_list = QListView()
         self.create_button = QPushButton(self.tr("Create Status"))
         self.rename_button = QPushButton(self.tr("Rename Status"))
@@ -60,9 +49,8 @@ class ManageStatusesDialog(QDialog):
         self.rename_button.setDisabled(True)
         self.delete_button.setDisabled(True)
 
-        model = SortFilterModel(self)
-        model.setSourceModel(self.context.models.statuses_model)
-        self.item_list.setModel(model)
+        self.model.setSourceModel(self.context.models.statuses_model)
+        self.item_list.setModel(self.model)
         self.item_list.setModelColumn(self.context.models.tags_model.fieldIndex("name"))
         self.item_list.setSelectionMode(self.item_list.SelectionMode.SingleSelection)
         self.item_list.setEditTriggers(self.item_list.EditTrigger.NoEditTriggers)
@@ -73,12 +61,16 @@ class ManageStatusesDialog(QDialog):
         self.create_button.pressed.connect(self.context.controller.create_status)
         self.rename_button.pressed.connect(
             lambda: self.context.controller.rename_status(
-                self.item_list.selectionModel().selectedIndexes()[0]
+                self.model.mapToSource(
+                    self.item_list.selectionModel().selectedIndexes()[0]
+                )
             )
         )
         self.delete_button.pressed.connect(
             lambda: self.context.controller.delete_status(
-                self.item_list.selectionModel().selectedIndexes()[0]
+                self.model.mapToSource(
+                    self.item_list.selectionModel().selectedIndexes()[0]
+                )
             )
         )
         self.item_list.selectionModel().selectionChanged.connect(

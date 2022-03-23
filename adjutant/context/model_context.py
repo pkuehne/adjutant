@@ -198,7 +198,11 @@ class ModelContext:
     def _setup_statuses_model(self) -> None:
         """Setup the statuses model"""
         self.statuses_model = self.setup_model(
-            "statuses", [HeaderData("Name", "What this status represents")]
+            "statuses",
+            [
+                HeaderData("ID", "Internal ID of the storage container"),
+                HeaderData("Name", "What this status represents"),
+            ],
         )
 
     def _setup_paints_model(self) -> None:

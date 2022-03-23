@@ -59,11 +59,11 @@ class Controller(QObject):
         model.insertRecord(-1, record)
         model.submitAll()
 
-    def rename_record(self, model: QSqlTableModel, index: QModelIndex):
+    def rename_record(self, model: QSqlTableModel, index: QModelIndex, desc="record"):
         """Rename the given record"""
         previous = index.data()
         name, success = QInputDialog.getText(
-            None, "New tag", f"Rename tag '{previous}' to:", text=previous
+            None, f"Rename {desc}", f"Rename {desc} '{previous}' to:", text=previous
         )
 
         if name == "" or not success:
@@ -126,7 +126,7 @@ class Controller(QObject):
     def rename_tag(self, index: QModelIndex):
         """Rename the given tag"""
         index = self.convert_index(index)
-        self.rename_record(self.models.tags_model, index.siblingAtColumn(1))
+        self.rename_record(self.models.tags_model, index.siblingAtColumn(1), desc="tag")
 
     def delete_tag(self, index: QModelIndex):
         """Delete the given tag"""
@@ -202,7 +202,9 @@ class Controller(QObject):
 
     def rename_status(self, index: QModelIndex):
         """Rename a status"""
-        self.rename_record(self.models.statuses_model, index)
+        self.rename_record(
+            self.models.statuses_model, index.siblingAtColumn(1), desc="status"
+        )
 
     def delete_status(self, index: QModelIndex):
         """Delete a status"""
