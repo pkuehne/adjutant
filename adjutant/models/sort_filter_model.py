@@ -75,6 +75,9 @@ class SortFilterModel(QSortFilterProxyModel):
 
     def filterAcceptsRow(self, source_row: int, parent: QModelIndex = None) -> bool:
         """returns True if the row should be shown"""
+        if parent is None:
+            parent = QModelIndex()
+
         id_num = self.sourceModel().index(source_row, 0).data()
         if id_num == 0 and self.hide_zero_id:
             return False

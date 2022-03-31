@@ -65,10 +65,35 @@ class MainWindow(QMainWindow):
         self.toolbar = MainWindowToolbar(self.context, self)
         self.addToolBar(self.toolbar)
         self.setMenuBar(MainWindowMenuBar(self.context, self))
-        self.setStatusBar(MainWindowStatusBar(self, self.context))
+        status_bar = MainWindowStatusBar(self, self.context)
+        self.setStatusBar(status_bar)
 
-        self.bases.row_count_changed.connect(self.statusBar().update_row_count)
-        self.statusBar().update_row_count(self.bases.table.filter_model.rowCount())
+        def status_bar_subscription(screen: BasesScreen):
+            screen.table.filter_model.filter_changed.connect(
+                lambda: status_bar.update_row_count(
+                    screen.table.filter_model.rowCount()
+                )
+            )
+            screen.table.selectionModel().selectionChanged.connect(
+                lambda _, __: status_bar.update_select_count(
+                    len(screen.table.selected_indexes())
+                )
+            )
+
+        status_bar_subscription(self.bases)
+        status_bar_subscription(self.storage)
+        status_bar_subscription(self.paints)
+        status_bar_subscription(self.recipes)
+        status_bar_subscription(self.schemes)
+
+        def update_from_current_widget(_):
+            screen: BasesScreen = self.tabbar.currentWidget()
+            status_bar.update_row_count(screen.table.filter_model.rowCount())
+            status_bar.update_select_count(len(screen.table.selected_indexes()))
+
+        self.tabbar.currentChanged.connect(update_from_current_widget)
+        update_from_current_widget(None)
+
         self.check_version()
 
     def load_sample_data(self):

@@ -1,6 +1,7 @@
 """Window to show the completion charts"""
 
 from dataclasses import dataclass
+from typing import Dict, List
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog,
@@ -50,8 +51,12 @@ NUMERIC_MONTHS = [
 class Data:
     """Processed data to show"""
 
-    completion = {}
-    years = []
+    completion: Dict[str, Dict[str, str]]
+    years: List[str]
+
+    def __init__(self):
+        self.completion = {}
+        self.years = []
 
 
 @dataclass
@@ -120,7 +125,6 @@ class CompletionChartWindow(QDialog):
             if completed == "":
                 continue
             (year, month, _) = completed.split("-")
-
             if not year in self.data.completion:
                 self.data.years.insert(0, year)
                 self.data.completion[year] = {}
@@ -139,6 +143,8 @@ class CompletionChartWindow(QDialog):
 
         line = QLineSeries()
         year = self.widgets.year_select.currentText()
+        if self.widgets.year_select.model().rowCount() == 0:
+            return
 
         maximum = 0
         for month in reversed(NUMERIC_MONTHS):
