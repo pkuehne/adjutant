@@ -3,8 +3,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
 from tests.conftest import (
-    AddBaseFunc,
-    AddEmptyBasesFunc,
     AddTagFunc,
     AddTagUseFunc,
     BasesRecord,
@@ -16,11 +14,11 @@ from adjutant.context.context import Context
 
 
 def test_setting_id_column_does_nothing(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """Trying to update the ID column should succeed but do nothing"""
     # Given
-    add_empty_bases(5)
+    models.add_empty_bases(5)
     index = relational_model.index(2, 0)
 
     # When
@@ -32,13 +30,13 @@ def test_setting_id_column_does_nothing(
 
 
 def test_boolean_column_returns_text_value(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """A column marked as boolean should return Yes/No instead of 1/0"""
 
     # Given
     relational_model.boolean_fields.append(relational_model.fieldIndex("damaged"))
-    add_empty_bases(1)
+    models.add_empty_bases(1)
 
     # When
     damaged = relational_model.index(0, relational_model.fieldIndex("damaged")).data(
@@ -50,13 +48,13 @@ def test_boolean_column_returns_text_value(
 
 
 def test_boolean_column_returns_boolean_for_edit_role(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """A column marked as boolean should return 1/0 for edit role"""
 
     # Given
     relational_model.boolean_fields.append(relational_model.fieldIndex("damaged"))
-    add_empty_bases(1)
+    models.add_empty_bases(1)
 
     # When
     completed = relational_model.index(0, relational_model.fieldIndex("damaged")).data(
@@ -68,14 +66,14 @@ def test_boolean_column_returns_boolean_for_edit_role(
 
 
 def test_colour_column_returns_qcolor_for_decoration_role(
-    relational_model: RelationalModel, add_base: AddBaseFunc
+    relational_model: RelationalModel, models: Models
 ):
     """A column marked as a colour column should return a QColor for its decoration role"""
 
     # Given
     expected = "#ff00aa"
     relational_model.colour_fields.append(relational_model.fieldIndex("name"))
-    add_base([BasesRecord(name=expected)])
+    models.add_base(BasesRecord(name=expected))
 
     # When
     color = relational_model.index(0, relational_model.fieldIndex("name")).data(
@@ -87,7 +85,7 @@ def test_colour_column_returns_qcolor_for_decoration_role(
 
 
 def test_relationship_returns_own_value_for_edit(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """A relational column should return it's actual value when requesting via edit role"""
 
@@ -96,7 +94,7 @@ def test_relationship_returns_own_value_for_edit(
     relational_model.set_one_to_many_relationship(
         relational_model.fieldIndex("storage_id"), relationship
     )
-    add_empty_bases(1)
+    models.add_empty_bases(1)
 
     # When
     value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
@@ -108,7 +106,7 @@ def test_relationship_returns_own_value_for_edit(
 
 
 def test_relationship_returns_foreign_value_for_display(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """
     A relational column should return it's foreign table value when requesting via display role
@@ -119,7 +117,7 @@ def test_relationship_returns_foreign_value_for_display(
     relational_model.set_one_to_many_relationship(
         relational_model.fieldIndex("storage_id"), relationship
     )
-    add_empty_bases(1)
+    models.add_empty_bases(1)
 
     # When
     value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
@@ -132,7 +130,7 @@ def test_relationship_returns_foreign_value_for_display(
 
 
 def test_relationship_returns_none_for_error(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """A relational column should return None if it set up incorrectly"""
 
@@ -141,7 +139,7 @@ def test_relationship_returns_none_for_error(
     relational_model.set_one_to_many_relationship(
         relational_model.fieldIndex("storage_id"), relationship
     )
-    add_empty_bases(1)
+    models.add_empty_bases(1)
 
     # When
     value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
@@ -188,13 +186,13 @@ def test_adding_m2m_relationship_adds_one_to_column_count(
 
 
 def test_m2m_relationship_returns_none_for_unsupported_role(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """When requesting an unsupported role for m2m relational data field, return None"""
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    add_empty_bases(1)
+    models.add_empty_bases(1)
 
     # When
     value = relational_model.index(0, relational_model.columnCount() - 1).data(
@@ -207,7 +205,7 @@ def test_m2m_relationship_returns_none_for_unsupported_role(
 
 def test_m2m_relationship_returns_stringified_tags_for_display_data(
     relational_model: RelationalModel,
-    add_empty_bases: AddEmptyBasesFunc,
+    models: Models,
     add_tag: AddTagFunc,
     add_tag_use: AddTagUseFunc,
 ):
@@ -216,7 +214,7 @@ def test_m2m_relationship_returns_stringified_tags_for_display_data(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     add_tag("Foo")
     add_tag("Bar")
     add_tag_use(1, 1)
@@ -233,7 +231,7 @@ def test_m2m_relationship_returns_stringified_tags_for_display_data(
 
 def test_m2m_relationship_returns_lists_tags_for_edit_data(
     relational_model: RelationalModel,
-    add_empty_bases: AddEmptyBasesFunc,
+    models: Models,
     add_tag: AddTagFunc,
     add_tag_use: AddTagUseFunc,
 ):
@@ -242,7 +240,7 @@ def test_m2m_relationship_returns_lists_tags_for_edit_data(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     add_tag("Foo")
     add_tag("Bar")
     add_tag_use(1, 1)
@@ -259,13 +257,13 @@ def test_m2m_relationship_returns_lists_tags_for_edit_data(
 
 
 def test_m2m_set_other_than_edit_does_nothing(
-    relational_model: RelationalModel, add_empty_bases: AddEmptyBasesFunc
+    relational_model: RelationalModel, models: Models
 ):
     """Trying to set a DisplayRole on a m2m column does nothing"""
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     index = relational_model.index(0, relational_model.columnCount() - 1)
 
     # When
@@ -277,7 +275,7 @@ def test_m2m_set_other_than_edit_does_nothing(
 
 def test_m2m_set_tags_adds_them(
     relational_model: RelationalModel,
-    add_empty_bases: AddEmptyBasesFunc,
+    models: Models,
     add_tag: AddTagFunc,
     context: Context,
 ):
@@ -285,7 +283,7 @@ def test_m2m_set_tags_adds_them(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     add_tag("Foo")
     add_tag("Bar")
 
@@ -306,7 +304,7 @@ def test_m2m_set_tags_adds_them(
 
 def test_m2m_set_tags_removes_old(
     relational_model: RelationalModel,
-    add_empty_bases: AddEmptyBasesFunc,
+    models: Models,
     add_tag: AddTagFunc,
     add_tag_use: AddTagUseFunc,
     context: Context,
@@ -315,7 +313,7 @@ def test_m2m_set_tags_removes_old(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     add_tag("Foo")
     add_tag("Bar")
     add_tag_use(1, 1)

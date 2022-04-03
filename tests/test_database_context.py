@@ -4,8 +4,6 @@ from unittest.mock import MagicMock
 import pytest
 from pytest import MonkeyPatch
 from tests.conftest import (
-    AddBaseFunc,
-    AddEmptyBasesFunc,
     AddTagFunc,
     AddTagUseFunc,
     BasesRecord,
@@ -114,15 +112,15 @@ def test_tag_count_returns_zero_on_error(context: Context, monkeypatch: MonkeyPa
 
 def test_tag_count_when_used(
     context: Context,
+    models: Models,
     add_tag: AddTagFunc,
-    add_base: AddBaseFunc,
     add_tag_use: AddTagUseFunc,
 ):
     """When there is a tag, and it is used by a base, the tag count should be one"""
     # Given
     add_tag("Foo")
     tag_index = context.models.tags_model.index(0, 0)
-    add_base([BasesRecord(name="Foobar")])
+    models.add_base(BasesRecord(name="Foobar"))
     base_index = context.models.bases_model.index(0, 0)
 
     add_tag_use(base_index.data(), tag_index.data())
@@ -137,11 +135,11 @@ def test_tag_count_when_used(
 def test_add_tag_to_base(
     context: Context,
     add_tag: AddTagFunc,
-    add_empty_bases: AddEmptyBasesFunc,
+    models: Models,
 ):
     """add_tag_to_base adds entry to the bases_tags table"""
     # Given
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     base_id = context.models.bases_model.index(0, 0).data()
     add_tag("Foo")
     tag_id = context.models.tags_model.index(0, 0).data()
@@ -157,12 +155,12 @@ def test_add_tag_to_base(
 def test_add_tag_to_base_invalid_id(
     context: Context,
     add_tag: AddTagFunc,
-    add_empty_bases: AddEmptyBasesFunc,
+    models: Models,
     monkeypatch: MonkeyPatch,
 ):
     """add_tag_to_base adds entry to the bases_tags table"""
     # Given
-    add_empty_bases(1)
+    models.add_empty_bases(1)
     base_id = context.models.bases_model.index(0, 0).data()
     add_tag("Foo")
     tag_id = context.models.tags_model.index(0, 0).data()

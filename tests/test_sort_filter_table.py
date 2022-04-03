@@ -8,7 +8,7 @@ from PyQt6.QtGui import QContextMenuEvent, QKeyEvent
 from PyQt6.QtWidgets import QMenu
 from adjutant.widgets.sort_filter_table import SortFilterTable
 from adjutant.context import Context
-from tests.conftest import AddBaseFunc, AddEmptyBasesFunc, BasesRecord
+from tests.conftest import Models, BasesRecord
 
 
 def test_set_model_sets_filter(qtbot: QtBot, context: Context):
@@ -27,7 +27,7 @@ def test_set_model_sets_filter(qtbot: QtBot, context: Context):
 
 
 def test_context_menu_is_fired(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, context: Context, add_base: AddBaseFunc
+    qtbot: QtBot, monkeypatch: MonkeyPatch, context: Context, models: Models
 ):
     """When the context menu event is fired, a signal is raised"""
     # Given
@@ -35,7 +35,7 @@ def test_context_menu_is_fired(
     monkeypatch.setattr(QMenu, "popup", popup_mock)
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_base([BasesRecord()])
+    models.add_base(BasesRecord())
     table.setModel(context.models.bases_model)
     event = QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(5, 5))
 
@@ -47,7 +47,7 @@ def test_context_menu_is_fired(
 
 
 def test_context_menu_is_not_fired(
-    qtbot: QtBot, monkeypatch: MonkeyPatch, context: Context, add_base: AddBaseFunc
+    qtbot: QtBot, monkeypatch: MonkeyPatch, context: Context, models: Models
 ):
     """When the context menu event is fired, the signal is not raised if no item is selected"""
     # Given
@@ -55,7 +55,7 @@ def test_context_menu_is_not_fired(
     monkeypatch.setattr(QMenu, "popup", popup_mock)
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_base([BasesRecord()])
+    models.add_base(BasesRecord())
     table.setModel(context.models.bases_model)
     event = QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(9999, 999))
 
@@ -67,13 +67,13 @@ def test_context_menu_is_not_fired(
 
 
 def test_selected_returns_orig_model_index(
-    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
+    qtbot: QtBot, context: Context, models: Models
 ):
     """Selected indexes returns the original model's index"""
     # Given
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_empty_bases(2)
+    models.add_empty_bases(2)
     table.setModel(context.models.bases_model)
     table.selectRow(0)
 
@@ -86,14 +86,12 @@ def test_selected_returns_orig_model_index(
     assert indexes[0].model() == context.models.bases_model
 
 
-def test_backspace_deletes_item(
-    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
-):
+def test_backspace_deletes_item(qtbot: QtBot, context: Context, models: Models):
     """backspace on selected item deletes the row"""
     # Given
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_empty_bases(10)
+    models.add_empty_bases(10)
     table.setModel(context.models.bases_model)
     table.selectRow(1)
 
@@ -118,14 +116,12 @@ def test_backspace_deletes_item(
     assert indexes[0].model() == context.models.bases_model
 
 
-def test_delete_deletes_item(
-    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
-):
+def test_delete_deletes_item(qtbot: QtBot, context: Context, models: Models):
     """delete on selected item deletes the row"""
     # Given
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_empty_bases(10)
+    models.add_empty_bases(10)
     table.setModel(context.models.bases_model)
     table.selectRow(1)
 
@@ -150,14 +146,12 @@ def test_delete_deletes_item(
     assert indexes[0].model() == context.models.bases_model
 
 
-def test_return_edits_item(
-    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
-):
+def test_return_edits_item(qtbot: QtBot, context: Context, models: Models):
     """return on selected item edits the row"""
     # Given
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_empty_bases(10)
+    models.add_empty_bases(10)
     table.setModel(context.models.bases_model)
     table.selectRow(1)
 
@@ -182,14 +176,12 @@ def test_return_edits_item(
     assert index.model() == context.models.bases_model
 
 
-def test_other_keys_do_nothing(
-    qtbot: QtBot, context: Context, add_empty_bases: AddEmptyBasesFunc
-):
+def test_other_keys_do_nothing(qtbot: QtBot, context: Context, models: Models):
     """return on selected item edits the row"""
     # Given
     table = SortFilterTable(context)
     qtbot.addWidget(table)
-    add_empty_bases(10)
+    models.add_empty_bases(10)
     table.setModel(context.models.bases_model)
     table.selectRow(1)
 

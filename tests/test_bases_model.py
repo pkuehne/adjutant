@@ -1,15 +1,13 @@
 """ Testing the Bases Model and its quirks"""
 
-from tests.conftest import AddEmptyBasesFunc
+from tests.conftest import Models
 from adjutant.context.context import Context
 
 
-def test_setting_id_column_does_nothing(
-    context: Context, add_empty_bases: AddEmptyBasesFunc
-):
+def test_setting_id_column_does_nothing(context: Context, models: Models):
     """Trying to update the ID column should succeed but do nothing"""
     # Given
-    add_empty_bases(5)
+    models.add_empty_bases(5)
     index = context.models.bases_model.index(2, 0)
 
     # When

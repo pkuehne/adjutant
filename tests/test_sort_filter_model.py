@@ -3,15 +3,15 @@
 
 from adjutant.context.context import Context
 from adjutant.models.sort_filter_model import SortFilterModel
-from tests.conftest import BasesRecord, AddBaseFunc, AddEmptyBasesFunc
+from tests.conftest import BasesRecord, Models
 
 
-def test_id_filtering(context: Context, add_empty_bases: AddEmptyBasesFunc):
+def test_id_filtering(context: Context, models: Models):
     """Test that items are filtered out when a filter is set"""
     # Given
     filter_model = SortFilterModel()
     filter_model.setSourceModel(context.models.bases_model)
-    add_empty_bases(6)
+    models.add_empty_bases(6)
     filter_list = [2, 4, 6, 8]
 
     # When
@@ -37,15 +37,15 @@ def test_setting_getting_filters():
     assert filter_model.get_column_filter(5) == filter_list
 
 
-def test_filters_are_applied(context: Context, add_base: AddBaseFunc):
+def test_filters_are_applied(context: Context, models: Models):
     """Test that filters are applied to items"""
     # Given
     filter_model = SortFilterModel()
     filter_model.setSourceModel(context.models.bases_model)
     filter_list = ["foo", "bar"]
-    add_base(
-        [BasesRecord(name="foo"), BasesRecord(name="bar"), BasesRecord(name="baz")]
-    )
+    models.add_base(BasesRecord(name="foo"))
+    models.add_base(BasesRecord(name="bar"))
+    models.add_base(BasesRecord(name="baz"))
 
     # When
     filter_model.set_column_filter(1, filter_list)
@@ -57,20 +57,16 @@ def test_filters_are_applied(context: Context, add_base: AddBaseFunc):
         assert filter_model.index(row, 1).data() in filter_list
 
 
-def test_multiple_filters_are_applied(context: Context, add_base: AddBaseFunc):
+def test_multiple_filters_are_applied(context: Context, models: Models):
     """Test that multiple filters are applied to items"""
     # Given
     filter_model = SortFilterModel()
     filter_model.setSourceModel(context.models.bases_model)
     filter_list_name = ["foo"]
     filter_list_scale = ["28mm"]
-    add_base(
-        [
-            BasesRecord(name="foo", scale="28mm"),
-            BasesRecord(name="bar", scale="32mm"),
-            BasesRecord(name="baz", scale="28mm"),
-        ]
-    )
+    models.add_base(BasesRecord(name="foo", scale="28mm"))
+    models.add_base(BasesRecord(name="bar", scale="32mm"))
+    models.add_base(BasesRecord(name="baz", scale="28mm"))
 
     # When
     filter_model.set_column_filter(1, filter_list_name)

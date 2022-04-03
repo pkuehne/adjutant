@@ -6,8 +6,6 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 
 from tests.conftest import (
-    AddBaseFunc,
-    AddEmptyBasesFunc,
     AddRecipeFunc,
     AddSearchFunc,
     AddStatusFunc,
@@ -54,16 +52,14 @@ def test_convert_index_tags_sort_model(context: Context, add_tag: AddTagFunc):
 ###################################
 
 
-def test_delete_confirmation_required(
-    context: Context, add_empty_bases: AddEmptyBasesFunc, monkeypatch
-):
+def test_delete_confirmation_required(context: Context, models: Models, monkeypatch):
     """Check that delete requires confirmation"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Cancel
     )
     num_rows = 5
-    add_empty_bases(num_rows)
+    models.add_empty_bases(num_rows)
 
     # When
     context.controller.delete_records(
@@ -78,16 +74,14 @@ def test_delete_confirmation_required(
     assert context.models.bases_model.rowCount() == num_rows
 
 
-def test_delete_removes_selected_indexes(
-    context: Context, add_empty_bases: AddEmptyBasesFunc, monkeypatch
-):
+def test_delete_removes_selected_indexes(context: Context, models: Models, monkeypatch):
     """Check that delete removes the requested indexes"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
     num_rows = 5
-    add_empty_bases(num_rows)
+    models.add_empty_bases(num_rows)
     index1 = context.models.bases_model.index(2, 0)
     id1 = index1.data()
     index2 = context.models.bases_model.index(4, 0)
@@ -104,7 +98,7 @@ def test_delete_removes_selected_indexes(
 
 
 def test_delete_does_nothing_for_no_indexes(
-    context: Context, add_empty_bases: AddEmptyBasesFunc, monkeypatch
+    context: Context, models: Models, monkeypatch
 ):
     """Check that delete removes the requested indexes"""
     # Given
@@ -112,7 +106,7 @@ def test_delete_does_nothing_for_no_indexes(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
     num_rows = 5
-    add_empty_bases(num_rows)
+    models.add_empty_bases(num_rows)
 
     # When
     context.controller.delete_records(context.models.bases_model, [])
@@ -287,11 +281,11 @@ def test_font_size_sets_value_in_db(
 ###################################
 
 
-def test_duplicate_bases_does_that(context: Context, add_base: AddBaseFunc):
+def test_duplicate_bases_does_that(context: Context, models: Models):
     """When duplicating, exact copties are created"""
     # Given
     model = context.models.bases_model
-    add_base([BasesRecord(None, name="Foo Name", figures=5)])
+    models.add_base(BasesRecord(None, name="Foo Name", figures=5))
     index = model.index(0, 0)
     name_field = model.fieldIndex("name")
     figures_field = model.fieldIndex("figures")
@@ -317,11 +311,11 @@ def test_duplicate_bases_does_that(context: Context, add_base: AddBaseFunc):
     assert model.isDirty() is False
 
 
-def test_duplicate_bases_zero_does_nothing(context: Context, add_base: AddBaseFunc):
+def test_duplicate_bases_zero_does_nothing(context: Context, models: Models):
     """When duplicating 0 times, nothing happens"""
     # Given
     model = context.models.bases_model
-    add_base([BasesRecord(None, name="Foo Name", figures=5)])
+    models.add_base(BasesRecord(None, name="Foo Name", figures=5))
     index = model.index(0, 0)
 
     # When
@@ -333,12 +327,12 @@ def test_duplicate_bases_zero_does_nothing(context: Context, add_base: AddBaseFu
 
 
 def test_duplicate_bases_returns_false_when_submit_all_fails(
-    context: Context, add_base: AddBaseFunc, monkeypatch
+    context: Context, models: Models, monkeypatch
 ):
     """When duplicating a submit failure returns False"""
     # Given
     model = context.models.bases_model
-    add_base([BasesRecord(None, name="Foo Name", figures=5)])
+    models.add_base(BasesRecord(None, name="Foo Name", figures=5))
     index = model.index(0, 0)
     monkeypatch.setattr(model, "submitAll", lambda: False)
 
@@ -349,16 +343,12 @@ def test_duplicate_bases_returns_false_when_submit_all_fails(
     assert success is False
 
 
-def test_apply_field_updates_bases(context: Context, add_base: AddBaseFunc):
+def test_apply_field_updates_bases(context: Context, models: Models):
     """Test that the field's value overwrites the selected indices"""
     # Given
-    add_base(
-        [
-            BasesRecord(name="Foo", figures=1),
-            BasesRecord(name="Bar", figures=3),
-            BasesRecord(name="Baz", figures=3),
-        ]
-    )
+    models.add_base(BasesRecord(name="Foo", figures=1))
+    models.add_base(BasesRecord(name="Bar", figures=3))
+    models.add_base(BasesRecord(name="Baz", figures=3))
     name_field = context.models.bases_model.fieldIndex("name")
     figures_field = context.models.bases_model.fieldIndex("figures")
     source = context.models.bases_model.index(0, name_field)
@@ -379,16 +369,12 @@ def test_apply_field_updates_bases(context: Context, add_base: AddBaseFunc):
     ).data() != source.siblingAtColumn(figures_field)
 
 
-def test_apply_field_wont_update_id(context: Context, add_base: AddBaseFunc):
+def test_apply_field_wont_update_id(context: Context, models: Models):
     """Test that the field's value overwrites the selected indices"""
     # Given
-    add_base(
-        [
-            BasesRecord(name="Foo", figures=1),
-            BasesRecord(name="Bar", figures=3),
-            BasesRecord(name="Baz", figures=3),
-        ]
-    )
+    models.add_base(BasesRecord(name="Foo", figures=1))
+    models.add_base(BasesRecord(name="Bar", figures=3))
+    models.add_base(BasesRecord(name="Baz", figures=3))
     id_field = 0
     source = context.models.bases_model.index(0, id_field)
     destinations = [
@@ -575,7 +561,7 @@ def test_delete_status(context: Context, add_status: AddStatusFunc, monkeypatch)
 
 
 def test_delete_status_reassigns_bases(
-    context: Context, monkeypatch, add_status: AddStatusFunc, add_base: AddBaseFunc
+    context: Context, monkeypatch, add_status: AddStatusFunc, models: Models
 ):
     """When deleting a status, any bases using that status will be set to the default 0 value"""
     # Given
@@ -586,7 +572,7 @@ def test_delete_status_reassigns_bases(
     add_status("Foo")
     status_index = context.models.statuses_model.index(1, 1)
     assert status_index.data() == "Foo"
-    add_base([BasesRecord(name="Test", status=1)])
+    models.add_base(BasesRecord(name="Test", status=1))
     base_index = context.models.bases_model.index(
         0, context.models.bases_model.fieldIndex("status_id")
     )
