@@ -4,8 +4,6 @@ from unittest.mock import MagicMock
 import pytest
 from pytest import MonkeyPatch
 from tests.conftest import (
-    AddTagFunc,
-    AddTagUseFunc,
     BasesRecord,
     Models,
 )
@@ -85,10 +83,10 @@ def test_open_raises_if_database_doesnt_exist(monkeypatch: MonkeyPatch):
     # Then
 
 
-def test_tag_count_is_zero_no_usage(context: Context, add_tag: AddTagFunc):
+def test_tag_count_is_zero_no_usage(context: Context, models: Models):
     """When there is a tag, but it is not used, the tag count should be zero"""
     # Given
-    add_tag("Foo")
+    models.add_tag("Foo")
     tag_index = context.models.tags_model.index(0, 0)
 
     # When
@@ -113,17 +111,15 @@ def test_tag_count_returns_zero_on_error(context: Context, monkeypatch: MonkeyPa
 def test_tag_count_when_used(
     context: Context,
     models: Models,
-    add_tag: AddTagFunc,
-    add_tag_use: AddTagUseFunc,
 ):
     """When there is a tag, and it is used by a base, the tag count should be one"""
     # Given
-    add_tag("Foo")
+    models.add_tag("Foo")
     tag_index = context.models.tags_model.index(0, 0)
     models.add_base(BasesRecord(name="Foobar"))
     base_index = context.models.bases_model.index(0, 0)
 
-    add_tag_use(base_index.data(), tag_index.data())
+    models.add_tag_use(base_index.data(), tag_index.data())
 
     # When
     count = get_tag_count(context.database, tag_index.data())
@@ -134,14 +130,13 @@ def test_tag_count_when_used(
 
 def test_add_tag_to_base(
     context: Context,
-    add_tag: AddTagFunc,
     models: Models,
 ):
     """add_tag_to_base adds entry to the bases_tags table"""
     # Given
     models.add_empty_bases(1)
     base_id = context.models.bases_model.index(0, 0).data()
-    add_tag("Foo")
+    models.add_tag("Foo")
     tag_id = context.models.tags_model.index(0, 0).data()
 
     # When
@@ -154,7 +149,6 @@ def test_add_tag_to_base(
 
 def test_add_tag_to_base_invalid_id(
     context: Context,
-    add_tag: AddTagFunc,
     models: Models,
     monkeypatch: MonkeyPatch,
 ):
@@ -162,7 +156,7 @@ def test_add_tag_to_base_invalid_id(
     # Given
     models.add_empty_bases(1)
     base_id = context.models.bases_model.index(0, 0).data()
-    add_tag("Foo")
+    models.add_tag("Foo")
     tag_id = context.models.tags_model.index(0, 0).data()
     monkeypatch.setattr(context.database, "execute_sql_command", lambda *args: False)
 

@@ -3,8 +3,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
 from tests.conftest import (
-    AddTagFunc,
-    AddTagUseFunc,
     BasesRecord,
     Models,
 )
@@ -204,10 +202,7 @@ def test_m2m_relationship_returns_none_for_unsupported_role(
 
 
 def test_m2m_relationship_returns_stringified_tags_for_display_data(
-    relational_model: RelationalModel,
-    models: Models,
-    add_tag: AddTagFunc,
-    add_tag_use: AddTagUseFunc,
+    relational_model: RelationalModel, models: Models
 ):
     """A many-to-many relationship column returns all tags as a string for the display role"""
 
@@ -215,10 +210,10 @@ def test_m2m_relationship_returns_stringified_tags_for_display_data(
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
     models.add_empty_bases(1)
-    add_tag("Foo")
-    add_tag("Bar")
-    add_tag_use(1, 1)
-    add_tag_use(1, 2)
+    models.add_tag("Foo")
+    models.add_tag("Bar")
+    models.add_tag_use(1, 1)
+    models.add_tag_use(1, 2)
 
     # When
     tags = relational_model.index(0, relational_model.columnCount() - 1).data(
@@ -230,10 +225,7 @@ def test_m2m_relationship_returns_stringified_tags_for_display_data(
 
 
 def test_m2m_relationship_returns_lists_tags_for_edit_data(
-    relational_model: RelationalModel,
-    models: Models,
-    add_tag: AddTagFunc,
-    add_tag_use: AddTagUseFunc,
+    relational_model: RelationalModel, models: Models
 ):
     """A many-to-many relationship column returns all tags as a list for the edit role"""
 
@@ -241,10 +233,10 @@ def test_m2m_relationship_returns_lists_tags_for_edit_data(
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
     models.add_empty_bases(1)
-    add_tag("Foo")
-    add_tag("Bar")
-    add_tag_use(1, 1)
-    add_tag_use(1, 2)
+    models.add_tag("Foo")
+    models.add_tag("Bar")
+    models.add_tag_use(1, 1)
+    models.add_tag_use(1, 2)
 
     # When
     tags = relational_model.index(0, relational_model.columnCount() - 1).data(
@@ -276,7 +268,6 @@ def test_m2m_set_other_than_edit_does_nothing(
 def test_m2m_set_tags_adds_them(
     relational_model: RelationalModel,
     models: Models,
-    add_tag: AddTagFunc,
     context: Context,
 ):
     """When setting on an m2m column, like tags, it adds the tags to the intermediate table"""
@@ -284,8 +275,8 @@ def test_m2m_set_tags_adds_them(
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
     models.add_empty_bases(1)
-    add_tag("Foo")
-    add_tag("Bar")
+    models.add_tag("Foo")
+    models.add_tag("Bar")
 
     context.models.base_tags_model.select()
     assert context.models.base_tags_model.rowCount() == 0
@@ -305,8 +296,6 @@ def test_m2m_set_tags_adds_them(
 def test_m2m_set_tags_removes_old(
     relational_model: RelationalModel,
     models: Models,
-    add_tag: AddTagFunc,
-    add_tag_use: AddTagUseFunc,
     context: Context,
 ):
     """When settings on an m2m column, it removes the old association first"""
@@ -314,9 +303,9 @@ def test_m2m_set_tags_removes_old(
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
     models.add_empty_bases(1)
-    add_tag("Foo")
-    add_tag("Bar")
-    add_tag_use(1, 1)
+    models.add_tag("Foo")
+    models.add_tag("Bar")
+    models.add_tag_use(1, 1)
 
     context.models.base_tags_model.select()
     assert context.models.base_tags_model.rowCount() == 1

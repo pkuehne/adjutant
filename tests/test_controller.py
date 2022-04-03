@@ -5,24 +5,16 @@ from pytest import MonkeyPatch
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 
-from tests.conftest import (
-    AddRecipeFunc,
-    AddSearchFunc,
-    AddStatusFunc,
-    AddStorageFunc,
-    AddTagFunc,
-    AddPaintFunc,
-    BasesRecord,
-    Models,
-)
+from tests.conftest import Models, BasesRecord
+
 from adjutant.context.dataclasses import SchemeComponent
 from adjutant.context.context import Context
 
 
-def test_convert_index_tags_model(context: Context, add_tag: AddTagFunc):
+def test_convert_index_tags_model(context: Context, models: Models):
     """If a filter_model index is passed, the base model index should be returned"""
     # Given
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 0)
 
     # When
@@ -33,10 +25,10 @@ def test_convert_index_tags_model(context: Context, add_tag: AddTagFunc):
     assert retval.model() == context.models.tags_model
 
 
-def test_convert_index_tags_sort_model(context: Context, add_tag: AddTagFunc):
+def test_convert_index_tags_sort_model(context: Context, models: Models):
     """If a filter_model index is passed, the base model index should be returned"""
     # Given
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_sort_model.index(0, 0)
 
     # When
@@ -177,12 +169,10 @@ def test_create_record_uses_passed_default(context: Context, monkeypatch):
 ###################################
 
 
-def test_rename_record_requires_name(
-    context: Context, add_tag: AddTagFunc, monkeypatch
-):
+def test_rename_record_requires_name(context: Context, models: Models, monkeypatch):
     """When renaming a record, a non-empty string must be used"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("", True))
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 1)
 
     # When
@@ -192,12 +182,10 @@ def test_rename_record_requires_name(
     assert index.data() == "Foo"
 
 
-def test_rename_record_requires_input(
-    context: Context, add_tag: AddTagFunc, monkeypatch
-):
+def test_rename_record_requires_input(context: Context, models: Models, monkeypatch):
     """When renaming a record, the user can't click cancel"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kwargs: ("Foo", False))
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 1)
 
     # When
@@ -207,10 +195,10 @@ def test_rename_record_requires_input(
     assert index.data() == "Foo"
 
 
-def test_rename_record(context: Context, add_tag: AddTagFunc, monkeypatch):
+def test_rename_record(context: Context, models: Models, monkeypatch):
     """When renaming a record, the name value should change"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 1)
 
     # When
@@ -223,7 +211,7 @@ def test_rename_record(context: Context, add_tag: AddTagFunc, monkeypatch):
 
 
 def test_rename_record_uses_passed_default(
-    context: Context, add_tag: AddTagFunc, monkeypatch
+    context: Context, models: Models, monkeypatch
 ):
     """When renaming a record, a default name can be set"""
     monkeypatch.setattr(
@@ -231,7 +219,7 @@ def test_rename_record_uses_passed_default(
         "getText",
         lambda *args, **kwargs: ("Foobar", kwargs["text"] == "Foo"),
     )
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 1)
 
     # When
@@ -411,10 +399,10 @@ def test_create_tag(context: Context, monkeypatch):
     assert context.models.tags_model.isDirty() is False
 
 
-def test_rename_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
+def test_rename_tag(context: Context, models: Models, monkeypatch):
     """When renaming a tag, the name value should change"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 1)
 
     # When
@@ -426,14 +414,14 @@ def test_rename_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
     assert context.models.tags_model.isDirty() is False
 
 
-def test_delete_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
+def test_delete_tag(context: Context, models: Models, monkeypatch):
     """Delete tag does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_tag("Foo")
+    models.add_tag("Foo")
     index = context.models.tags_model.index(0, 1)
 
     # When
@@ -450,10 +438,10 @@ def test_delete_tag(context: Context, add_tag: AddTagFunc, monkeypatch):
 ######################
 
 
-def test_rename_search(context: Context, add_search: AddSearchFunc, monkeypatch):
+def test_rename_search(context: Context, models: Models, monkeypatch):
     """When renaming a search, the name value should change"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
-    add_search("Foo")
+    models.add_search("Foo")
     index = context.models.searches_model.index(0, 1)
 
     # When
@@ -465,14 +453,14 @@ def test_rename_search(context: Context, add_search: AddSearchFunc, monkeypatch)
     assert context.models.searches_model.isDirty() is False
 
 
-def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch):
+def test_delete_search(context: Context, models: Models, monkeypatch):
     """Delete search does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_search("Foo")
+    models.add_search("Foo")
     index = context.models.searches_model.index(0, 1)
 
     # When
@@ -489,14 +477,14 @@ def test_delete_search(context: Context, add_search: AddSearchFunc, monkeypatch)
 ##############################
 
 
-def test_delete_storage(context: Context, add_storage: AddStorageFunc, monkeypatch):
+def test_delete_storage(context: Context, models: Models, monkeypatch):
     """Delete recipe does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_storage("Foo")
+    models.add_storage("Foo")
     index = context.models.storage_model.index(1, 1)
 
     # When
@@ -526,10 +514,10 @@ def test_create_status(context: Context, monkeypatch):
     assert context.models.statuses_model.isDirty() is False
 
 
-def test_rename_status(context: Context, add_status: AddStatusFunc, monkeypatch):
+def test_rename_status(context: Context, models: Models, monkeypatch):
     """When renaming a status, the name value should change"""
     monkeypatch.setattr(QInputDialog, "getText", lambda *args, **kawrgs: ("Bar", True))
-    add_status("Foo")
+    models.add_status("Foo")
     index = context.models.statuses_model.index(1, 1)
 
     # When
@@ -541,14 +529,14 @@ def test_rename_status(context: Context, add_status: AddStatusFunc, monkeypatch)
     assert context.models.statuses_model.isDirty() is False
 
 
-def test_delete_status(context: Context, add_status: AddStatusFunc, monkeypatch):
+def test_delete_status(context: Context, models: Models, monkeypatch):
     """Delete status does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_status("Foo")
+    models.add_status("Foo")
     index = context.models.statuses_model.index(1, 1)
 
     # When
@@ -560,16 +548,14 @@ def test_delete_status(context: Context, add_status: AddStatusFunc, monkeypatch)
     assert index.isValid()
 
 
-def test_delete_status_reassigns_bases(
-    context: Context, monkeypatch, add_status: AddStatusFunc, models: Models
-):
+def test_delete_status_reassigns_bases(context: Context, monkeypatch, models: Models):
     """When deleting a status, any bases using that status will be set to the default 0 value"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_status("Foo")
+    models.add_status("Foo")
     status_index = context.models.statuses_model.index(1, 1)
     assert status_index.data() == "Foo"
     models.add_base(BasesRecord(name="Test", status=1))
@@ -588,14 +574,14 @@ def test_delete_status_reassigns_bases(
 ##############################
 # Paints
 ##############################
-def test_delete_paint(context: Context, add_paint: AddPaintFunc, monkeypatch):
+def test_delete_paint(context: Context, models: Models, monkeypatch):
     """Delete paint does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_paint("Foo")
+    models.add_paint("Foo")
     index = context.models.paints_model.index(0, 1)
 
     # When
@@ -610,14 +596,14 @@ def test_delete_paint(context: Context, add_paint: AddPaintFunc, monkeypatch):
 ##############################
 # Recipes
 ##############################
-def test_delete_recipe(context: Context, add_recipe: AddRecipeFunc, monkeypatch):
+def test_delete_recipe(context: Context, models: Models, monkeypatch):
     """Delete recipe does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_recipe("Foo")
+    models.add_recipe("Foo")
     index = context.models.recipes_model.index(0, 1)
 
     # When
@@ -629,16 +615,14 @@ def test_delete_recipe(context: Context, add_recipe: AddRecipeFunc, monkeypatch)
     assert index.isValid()
 
 
-def test_delete_recipe_removes_steps(
-    context: Context, add_recipe: AddRecipeFunc, models: Models, monkeypatch
-):
+def test_delete_recipe_removes_steps(context: Context, models: Models, monkeypatch):
     """Delete recipe does just that"""
     # Given
     monkeypatch.setattr(
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    add_recipe("Foo")
+    models.add_recipe("Foo")
     models.add_step(1, 0, 0)
     models.add_step(1, 1, 1)
     index = context.models.recipes_model.index(0, 1)

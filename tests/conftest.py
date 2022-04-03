@@ -1,7 +1,6 @@
 """ Fixtures """
 
 from pathlib import Path
-from typing import Callable
 
 
 from dataclasses import dataclass
@@ -29,133 +28,6 @@ class BasesRecord:
     storage: int = 0
     scheme_id: int = 0
     completed: str = None
-
-
-AddTagFunc = Callable[[str], None]
-
-
-@pytest.fixture
-def add_tag(context: Context) -> AddTagFunc:
-    """Fixture to add a record to the tags table"""
-
-    def add_tag_func(name: str):
-        record = context.models.tags_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        assert context.models.tags_model.insertRecord(-1, record)
-        context.models.tags_model.submitAll()
-        assert context.models.tags_model.lastError().text() == ""
-
-    return add_tag_func
-
-
-AddTagUseFunc = Callable[[int, int], None]
-
-
-@pytest.fixture
-def add_tag_use(context: Context) -> AddTagUseFunc:
-    """Fixture to add a record to the base_tags table"""
-
-    def add_tag_use_func(base: int, tag: int) -> None:
-        record = context.models.base_tags_model.record()
-        record.setNull("id")
-        record.setValue("bases_id", base)
-        record.setValue("tags_id", tag)
-        assert context.models.base_tags_model.insertRecord(-1, record)
-        context.models.base_tags_model.submitAll()
-        assert context.models.base_tags_model.lastError().text() == ""
-
-    return add_tag_use_func
-
-
-AddSearchFunc = Callable[[str], None]
-
-
-@pytest.fixture
-def add_search(context: Context) -> AddSearchFunc:
-    """Fixture to add a record to the searches table"""
-
-    def add_search_func(name: str) -> None:
-        record = context.models.searches_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        assert context.models.searches_model.insertRecord(-1, record)
-        context.models.searches_model.submitAll()
-        assert context.models.searches_model.lastError().text() == ""
-
-    return add_search_func
-
-
-AddStatusFunc = Callable[[str], None]
-
-
-@pytest.fixture
-def add_status(context: Context) -> AddStatusFunc:
-    """Fixture to add a record to the statuses table"""
-
-    def add_status_func(name: str) -> None:
-        record = context.models.statuses_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        assert context.models.statuses_model.insertRecord(-1, record)
-        context.models.statuses_model.submitAll()
-        assert context.models.statuses_model.lastError().text() == ""
-
-    return add_status_func
-
-
-AddStorageFunc = Callable[[str], None]
-
-
-@pytest.fixture
-def add_storage(context: Context) -> AddStorageFunc:
-    """Fixture to add a record to the storage table"""
-
-    def internal_func(name: str) -> None:
-        record = context.models.storage_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        assert context.models.storage_model.insertRecord(-1, record)
-        context.models.storage_model.submitAll()
-        assert context.models.storage_model.lastError().text() == ""
-
-    return internal_func
-
-
-AddPaintFunc = Callable[[str], None]
-
-
-@pytest.fixture
-def add_paint(context: Context) -> AddPaintFunc:
-    """Fixture to add a record to the paints table"""
-
-    def internal_func(name: str) -> None:
-        record = context.models.paints_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        assert context.models.paints_model.insertRecord(-1, record)
-        context.models.paints_model.submitAll()
-        assert context.models.paints_model.lastError().text() == ""
-
-    return internal_func
-
-
-AddRecipeFunc = Callable[[str], None]
-
-
-@pytest.fixture
-def add_recipe(context: Context) -> AddRecipeFunc:
-    """Fixture to add a record to the colour recipes table"""
-
-    def internal_func(name: str) -> None:
-        record = context.models.recipes_model.record()
-        record.setNull("id")
-        record.setValue("name", name)
-        assert context.models.recipes_model.insertRecord(-1, record)
-        context.models.recipes_model.submitAll()
-        assert context.models.recipes_model.lastError().text() == ""
-
-    return internal_func
 
 
 class Models:
@@ -191,6 +63,27 @@ class Models:
         """Fixture to add a number of empty bases"""
         for _ in range(count):
             self.add_base(BasesRecord())
+
+    def add_tag(self, name: str):
+        """Fixture to add a tag to the datbase"""
+        model = self.context.models.tags_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+    def add_tag_use(self, base: int, tag: int) -> None:
+        """Fixture to add a connection between a base and a tag"""
+        model = self.context.models.base_tags_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("bases_id", base)
+        record.setValue("tags_id", tag)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
 
     def add_scheme(self, name: str):
         """Fixture to add a scheme to the database"""
@@ -244,7 +137,36 @@ class Models:
         record.setValue("recipes_id", recipe_id)
         record.setValue("priority", step)
         record.setValue("operations_id", 1)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
 
+    def add_status(self, name: str):
+        """Fixture to add a record to the statuses table"""
+        model = self.context.models.statuses_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+    def add_storage(self, name: str):
+        """Fixture to add a record to the storages table"""
+        model = self.context.models.storage_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
+        assert model.insertRecord(-1, record)
+        model.submitAll()
+        assert model.lastError().text() == ""
+
+    def add_paint(self, name: str):
+        """Fixture to add a record to the paints table"""
+        model = self.context.models.paints_model
+        record = model.record()
+        record.setNull("id")
+        record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
