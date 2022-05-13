@@ -4,6 +4,7 @@ import pytest
 from pytestqt.qtbot import QtBot
 from PyQt6.QtWidgets import QMessageBox
 from adjutant.windows.main_window import MainWindow
+from adjutant.context.controller import Controller
 
 
 def test_title_includes_adjutant(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch):
@@ -12,6 +13,8 @@ def test_title_includes_adjutant(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         QMessageBox, "question", lambda *args: QMessageBox.StandardButton.No
     )
+    monkeypatch.setattr(Controller, "load_latest_version", lambda _, __: None)
+
     win = MainWindow()
     qtbot.addWidget(win)
 
@@ -22,9 +25,8 @@ def test_title_includes_adjutant(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch):
 def test_sample_data_can_be_loaded(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch):
     """Sample data should be loaded if requested"""
     # Given
-    monkeypatch.setattr(
-        QMessageBox, "question", lambda *args: QMessageBox.StandardButton.No
-    )
+    monkeypatch.setattr(Controller, "load_latest_version", lambda _, __: None)
+
     win = MainWindow()
     qtbot.add_widget(win)
 
