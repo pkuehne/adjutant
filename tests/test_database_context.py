@@ -11,6 +11,7 @@ from adjutant.context import Context
 from adjutant.context.database_context import (
     DatabaseContext,
     add_tag_to_base,
+    generate_uuid,
     get_tag_count,
     remove_scheme_components,
 )
@@ -20,6 +21,18 @@ from adjutant.context.exceptions import (
     NoDatabaseFileFound,
 )
 import adjutant.context.database_migrations
+
+
+def test_uuid_generates_random():
+    """When generate_uuid is run twice, it returns different results"""
+    # Given
+
+    # When
+    id1 = generate_uuid()
+    id2 = generate_uuid()
+
+    # Then
+    assert id1 != id2
 
 
 def test_version_returns_zero_for_empty_file():

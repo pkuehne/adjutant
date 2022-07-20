@@ -21,12 +21,12 @@ class RelationalLinkItemModel(QSortFilterProxyModel):
 
     def __init__(self) -> None:
         super().__init__()
-        self.filter_id = 0
+        self.filter_id = ""
         self.link_field = ""
         self.null_check_field = ""
         self.string_func = lambda n: ""
 
-    def set_filter_id(self, filter_id) -> None:
+    def set_filter_id(self, filter_id: str) -> None:
         """Update filter ID"""
         self.filter_id = filter_id
 
@@ -60,7 +60,7 @@ class RelationalLinkItemModel(QSortFilterProxyModel):
         model: RelationalModel = self.sourceModel()
         link_id = model.record(source_row).value(self.link_field)
         null_check_id = model.record(source_row).value(self.null_check_field)
-        if link_id != self.filter_id or null_check_id == 0:
+        if link_id != self.filter_id or null_check_id == "":
             return False
         return super().filterAcceptsRow(source_row, source_parent)
 
@@ -78,10 +78,10 @@ class RelationalLinkItemModel(QSortFilterProxyModel):
 class RelationalLink(QWidget):
     """Base Relational Link widget"""
 
-    def __init__(self, context: Context, link_id: int, parent=None) -> None:
+    def __init__(self, context: Context, link_id: str, parent=None) -> None:
         super().__init__(parent=parent)
         self.context = context
-        self.link_id = link_id if link_id is not None else 0
+        self.link_id = link_id if link_id is not None else ""
         self.link_field = ""
         self.add_edit_dialog = ""
         self.allow_reordering = False
@@ -228,3 +228,4 @@ class RelationalLink(QWidget):
             logging.error(
                 "Revert Model Error: %s", self.source_model.lastError().text()
             )
+        return success

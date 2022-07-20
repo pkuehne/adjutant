@@ -11,8 +11,12 @@ def test_id_filtering(context: Context, models: Models):
     # Given
     filter_model = SortFilterModel()
     filter_model.setSourceModel(context.models.bases_model)
-    models.add_empty_bases(6)
-    filter_list = [2, 4, 6, 8]
+    _ = models.add_base(BasesRecord())
+    base2 = models.add_base(BasesRecord())
+    _ = models.add_base(BasesRecord())
+    base4 = models.add_base(BasesRecord())
+
+    filter_list = [base2, base4]
 
     # When
     filter_model.set_column_filter(0, filter_list)
@@ -114,7 +118,7 @@ def test_zero_id_hidden_by_default(context: Context):
     """When a zero id is encountered, it's filtered out by default"""
     # Given
     filter_model = SortFilterModel()
-    filter_model.setSourceModel(context.models.storage_model)
+    filter_model.setSourceModel(context.models.storages_model)
 
     # Then
     assert filter_model.rowCount() == 0
@@ -125,7 +129,7 @@ def test_zero_id_can_be_shown(context: Context):
     # Given
     filter_model = SortFilterModel()
     filter_model.hide_zero_id = False
-    filter_model.setSourceModel(context.models.storage_model)
+    filter_model.setSourceModel(context.models.storages_model)
 
     # Then
     assert filter_model.rowCount() == 1

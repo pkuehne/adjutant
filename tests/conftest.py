@@ -8,6 +8,7 @@ import pytest
 
 from adjutant.context.context import Context
 from adjutant.models.relational_model import RelationalModel
+from adjutant.context.database_context import generate_uuid
 import adjutant.context
 
 # pylint: disable=redefined-outer-name
@@ -17,16 +18,16 @@ import adjutant.context
 class BasesRecord:
     """Stand-in for the real database record"""
 
-    base_id: int = None
+    base_id: str = None
     name: str = ""
     scale: str = ""
     base: str = ""
     width: int = 0
     depth: int = 0
     figures: int = 0
-    status: int = 0
+    status: str = 0
     storage: int = 0
-    scheme_id: int = 0
+    scheme_id: str = ""
     completed: str = None
 
 
@@ -41,7 +42,8 @@ class Models:
         model = self.context.models.bases_model
         record = model.record()
         if item.base_id is None:
-            record.setNull("id")
+            uuid = generate_uuid()
+            record.setValue("id", uuid)
         else:
             record.setValue("id", item.base_id)
         record.setValue("name", item.name)
@@ -51,13 +53,14 @@ class Models:
         record.setValue("depth", item.depth)
         record.setValue("figures", item.figures)
         record.setValue("status_id", item.status)
-        record.setValue("storage_id", item.storage)
+        record.setValue("storages_id", item.storage)
         record.setValue("schemes_id", item.scheme_id)
         record.setValue("date_completed", item.completed)
 
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_empty_bases(self, count: int) -> None:
         """Fixture to add a number of empty bases"""
@@ -68,38 +71,45 @@ class Models:
         """Fixture to add a tag to the datbase"""
         model = self.context.models.tags_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
-    def add_tag_use(self, base: int, tag: int) -> None:
+    def add_tag_use(self, base: str, tag: str) -> None:
         """Fixture to add a connection between a base and a tag"""
         model = self.context.models.base_tags_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("bases_id", base)
         record.setValue("tags_id", tag)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_scheme(self, name: str):
         """Fixture to add a scheme to the database"""
         model = self.context.models.colour_schemes_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_component(self, scheme_id: int, name: str, recipe_id: int):
         """Fixture to add a record to the recipe steps table"""
         model = self.context.models.scheme_components_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("schemes_id", scheme_id)
         record.setValue("name", name)
         record.setValue("recipes_id", recipe_id)
@@ -107,32 +117,38 @@ class Models:
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_recipe(self, name):
         """Fixture to add a record to the colour recipes table"""
         model = self.context.models.recipes_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_search(self, name: str):
         """Fixture to add a record to the searches table"""
         model = self.context.models.searches_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
-    def add_step(self, paint_id: int, recipe_id: int, step: int):
+    def add_step(self, paint_id: str, recipe_id: str, step: int):
         """Fixture to add a record to the recipe steps table"""
         model = self.context.models.recipe_steps_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("paints_id", paint_id)
         record.setValue("recipes_id", recipe_id)
         record.setValue("priority", step)
@@ -140,36 +156,43 @@ class Models:
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_status(self, name: str):
         """Fixture to add a record to the statuses table"""
         model = self.context.models.statuses_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_storage(self, name: str):
         """Fixture to add a record to the storages table"""
-        model = self.context.models.storage_model
+        model = self.context.models.storages_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
     def add_paint(self, name: str):
         """Fixture to add a record to the paints table"""
         model = self.context.models.paints_model
         record = model.record()
-        record.setNull("id")
+        uuid = generate_uuid()
+        record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)
         model.submitAll()
         assert model.lastError().text() == ""
+        return uuid
 
 
 @pytest.fixture

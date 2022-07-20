@@ -14,6 +14,7 @@ from adjutant.context.signal_context import SignalContext
 from adjutant.context.model_context import ModelContext
 from adjutant.context.database_context import (
     DatabaseContext,
+    generate_uuid,
     remove_all_tags_for_base,
     remove_scheme_components,
 )
@@ -53,11 +54,13 @@ class Controller(QObject):
         if name == "" or not success:
             return
 
+        uuid = generate_uuid()
         record = model.record()
-        record.setNull("id")
+        record.setValue("id", uuid)
         record.setValue("name", name)
         model.insertRecord(-1, record)
         model.submitAll()
+        return uuid
 
     def rename_record(self, model: QSqlTableModel, index: QModelIndex, desc="record"):
         """Rename the given record"""
@@ -112,7 +115,7 @@ class Controller(QObject):
         index = self.convert_index(index)
         for _ in range(num):
             record = self.models.bases_model.record(index.row())
-            record.setNull("id")
+            record.setValue("id", generate_uuid())
             self.models.bases_model.insertRecord(-1, record)
         success = self.models.bases_model.submitAll()
         if not success:
@@ -148,7 +151,7 @@ class Controller(QObject):
         model = self.models.base_tags_model
         for tag in tags:
             record = model.record()
-            record.setNull("id")
+            record.setValue("id", generate_uuid())
             record.setValue("bases_id", index.siblingAtColumn(0).data())
             record.setValue("tags_id", tag)
             model.insertRecord(-1, record)
@@ -194,7 +197,7 @@ class Controller(QObject):
 
     def delete_storages(self, indexes: List[QModelIndex]):
         """Delete all passed-in storages"""
-        self.delete_records(self.models.storage_model, indexes, "storage locations")
+        self.delete_records(self.models.storages_model, indexes, "storage locations")
 
     def create_status(self):
         """Creates a new status"""
@@ -254,7 +257,7 @@ class Controller(QObject):
         model.select()
         for component in components:
             record = model.record()
-            record.setNull("id")
+            record.setValue("id", generate_uuid())
             record.setValue("schemes_id", scheme_id)
             record.setValue("name", component.name)
             record.setValue("recipes_id", component.recipe_id)
@@ -298,7 +301,7 @@ class Controller(QObject):
                 logging.warning("Invalid paint entry with no name")
                 continue
             record = self.models.paints_model.record()
-            record.setNull("id")
+            record.setValue("id", generate_uuid())
             record.setValue("name", paint.get("name", ""))
             record.setValue("manufacturer", paint.get("manufacturer", ""))
             record.setValue("range", paint.get("range", ""))

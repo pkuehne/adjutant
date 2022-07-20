@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QModelIndex, QByteArray, Qt
 
 from adjutant.context.context import Context
+from adjutant.context.database_context import generate_uuid
 from adjutant.models.relational_model import RelationalModel
 from adjutant.widgets.recipe_steps_link import RecipeStepsLink
 
@@ -118,7 +119,10 @@ class AddEditDialog(QDialog):
     def setup(self):
         """Setup the dialog"""
         if self.features.is_add_mode:
-            self.model.insertRow(self.model.rowCount())
+            record = self.model.record()
+            uuid = generate_uuid()
+            record.setValue("id", uuid)
+            self.model.insertRecord(-1, record)
             self.index = self.model.index(self.model.rowCount() - 1, 0)
 
         self.layout_widgets()

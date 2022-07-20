@@ -47,14 +47,14 @@ class RelationalModel(QSqlTableModel):
             record = self.record(row)
             self.id_row_map[record.value(0)] = row
 
-    def record_by_id(self, id_: int) -> QSqlRecord:
+    def record_by_id(self, id_: str) -> QSqlRecord:
         """Get record by given ID"""
         if id_ not in self.id_row_map:
             logging.error("invalid id %s in record lookup", id_)
             return self.record()
         return self.record(self.id_row_map[id_])
 
-    def index_by_id(self, id_: int, field: str) -> QModelIndex:
+    def index_by_id(self, id_: str, field: str) -> QModelIndex:
         """Get index by given ID for field"""
         return self.field_index(self.id_row_map[id_], field)
 
@@ -102,7 +102,7 @@ class RelationalModel(QSqlTableModel):
         query = f"""
             SELECT {relationship.target_field} 
             FROM {relationship.target_table}
-            WHERE {relationship.target_key} == {foreign_key}
+            WHERE {relationship.target_key} == "{foreign_key}"
         """
         sql = QSqlQuery()
         sql.prepare(query)
@@ -185,8 +185,6 @@ class RelationalModel(QSqlTableModel):
         self, index: QModelIndex, value, role: int = Qt.ItemDataRole.EditRole
     ) -> bool:
         """Update the data in the model"""
-        if index.column() == 0:  # Ensure that id is always null
-            return True  # Don't update anything, key columns can't be changed
 
         if index.column() >= super().columnCount():
             return self._set_data_m2m(index, value, role)

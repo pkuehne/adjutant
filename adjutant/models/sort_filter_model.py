@@ -78,8 +78,8 @@ class SortFilterModel(QSortFilterProxyModel):
         if parent is None:
             parent = QModelIndex()
 
-        id_num = self.sourceModel().index(source_row, 0).data()
-        if id_num == 0 and self.hide_zero_id:
+        uuid = self.sourceModel().index(source_row, 0).data()
+        if uuid == "" and self.hide_zero_id:
             return False
         for column in range(self.sourceModel().columnCount()):
             filter_list = self.column_filters.get(column, None)

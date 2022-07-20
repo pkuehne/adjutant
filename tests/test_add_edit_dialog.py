@@ -59,8 +59,11 @@ def test_in_edit_mode_id_is_set(qtbot: QtBot, relational_model: RelationalModel)
     """When the dialog is in add mode, the delete button should not be enabled"""
 
     # Given
-    relational_model.insertRecord(-1, relational_model.record())
+    record = relational_model.record()
+    record.setValue("id", "FooBar")
+    relational_model.insertRecord(-1, record)
     relational_model.submitAll()
+
     dialog = AddEditDialog(relational_model.index(0, 0))
     qtbot.addWidget(dialog)
     dialog.model = relational_model
@@ -73,6 +76,7 @@ def test_in_edit_mode_id_is_set(qtbot: QtBot, relational_model: RelationalModel)
     id_widget = dialog.widgets.get("ID", None)
     assert id_widget is not None
     assert id_widget.widget.text() != ""
+    assert id_widget.widget.text() == "FooBar"
 
 
 def test_values_submitted_on_edit(qtbot: QtBot, relational_model: RelationalModel):

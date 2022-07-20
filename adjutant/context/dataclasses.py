@@ -24,7 +24,7 @@ class ManyToManyRelationship:
 class Tag:
     """Tag"""
 
-    tag_id: int
+    tag_id: str
     tag_name: str
 
 

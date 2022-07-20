@@ -2,6 +2,7 @@
 
 import logging
 import urllib.request
+from urllib.error import URLError
 from PyQt6.QtCore import QThread, pyqtSignal
 
 
@@ -17,6 +18,9 @@ class UrlLoader(QThread):
     def run(self) -> None:
         """Execute the url loading"""
         logging.debug("Retrieving %s", self.url)
-        with urllib.request.urlopen(self.url) as html:
-            logging.debug("Url loaded, sending content")
-            self.content_loaded.emit(html.read().decode("utf-8"))
+        try:
+            with urllib.request.urlopen(self.url) as html:
+                logging.debug("Url loaded, sending content")
+                self.content_loaded.emit(html.read().decode("utf-8"))
+        except URLError as exc:
+            logging.error("Failed to load %s: %s", self.url, exc.reason)

@@ -16,7 +16,7 @@ class StorageEditDialog(AddEditDialog):
     ) -> None:
         super().__init__(index, parent, **kwargs)
         self.context = context
-        self.model = context.models.storage_model
+        self.model = context.models.storages_model
 
         self.set_title("Storage")
         self.set_widgets(

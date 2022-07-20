@@ -17,7 +17,7 @@ def stringify_step(index: QModelIndex) -> str:
 class RecipeStepsLink(RelationalLink):
     """Recipe Steps Widget"""
 
-    def __init__(self, context: Context, link_id: int, parent=None) -> None:
+    def __init__(self, context: Context, link_id: str, parent=None) -> None:
         super().__init__(context, link_id, parent)
         self.source_model = self.context.models.recipe_steps_model
         self.link_field = "recipes_id"

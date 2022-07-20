@@ -23,7 +23,7 @@ def test_set_model_sets_filter(
 
     header = SortFilterHeader()
     qtbot.addWidget(header)
-    header.setModel(context.models.storage_model)
+    header.setModel(context.models.storages_model)
     monkeypatch.setattr(FilterPopup, "show", lambda _, m, c: save_args(m, c))
 
     # When

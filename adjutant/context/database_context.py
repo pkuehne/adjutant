@@ -1,6 +1,7 @@
 """ Classes to manage database operations """
 
 import logging
+import uuid
 from pathlib import Path
 from typing import Any, List
 from dataclasses import dataclass
@@ -15,6 +16,11 @@ from adjutant.context.exceptions import (
 )
 
 DATABASE_FILE = Path(".") / "adjutant.db"
+
+
+def generate_uuid() -> str:
+    """Generates a 36 char hex string that should be unique"""
+    return str(uuid.uuid4())
 
 
 @dataclass
@@ -78,9 +84,9 @@ class DatabaseContext:
             # Migrate from version 0 to 1
             self.execute_sql_string(VERSION_1)
             self.execute_sql_command("INSERT into settings(version) VALUES(0);")
-            for table in ["storage", "statuses", "step_operations", "colour_schemes"]:
+            for table in ["storages", "statuses", "step_operations", "colour_schemes"]:
                 self.execute_sql_command(
-                    f"INSERT INTO {table}(id, name) VALUES (0, '<None>');"
+                    f"INSERT INTO {table}(id, name) VALUES ('', '<None>');"
                 )
 
         # Database migrated to latest version

@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 from adjutant.context import Context
+from adjutant.context.database_context import generate_uuid
 from adjutant.widgets.foreign_key_combobox import ForeignKeyCombobox
 from adjutant.widgets.nullable_date import NullableDate
 from adjutant.widgets.tag_list_widget import TagListWidget
@@ -82,7 +83,10 @@ class BaseEditDialog(QDialog):
 
         self.setWindowTitle("Edit Base")
         if self.add_mode:
-            self.model.insertRow(self.model.rowCount())
+            record = self.model.record()
+            uuid = generate_uuid()
+            record.setValue("id", uuid)
+            self.model.insertRecord(-1, record)
             self.index = self.model.index(self.model.rowCount() - 1, 0)
             self.setWindowTitle("Add Base")
 
@@ -155,7 +159,7 @@ class BaseEditDialog(QDialog):
             QStringListModel(["Plastic", "Resin", "Metal"])
         )
         self.widgets.storage_combobox.set_model(
-            self.context.models.storage_model,
+            self.context.models.storages_model,
             lambda: self.context.signals.show_add_dialog.emit("storage", {}),
         )
         self.widgets.status_combobox.set_model(self.context.models.statuses_model)
@@ -188,7 +192,7 @@ class BaseEditDialog(QDialog):
             self.widgets.date_completed, self.field("date_completed")
         )
         self.mapper.addMapping(self.widgets.damaged, self.field("damaged"))
-        self.mapper.addMapping(self.widgets.storage_combobox, self.field("storage_id"))
+        self.mapper.addMapping(self.widgets.storage_combobox, self.field("storages_id"))
         self.mapper.addMapping(
             self.widgets.notes_edit, self.field("notes"), b"plainText"
         )

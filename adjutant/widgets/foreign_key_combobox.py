@@ -41,8 +41,8 @@ class ForeignKeyCombobox(QWidget):
         """Override the model column"""
         self.combobox.setModelColumn(column)
 
-    @pyqtProperty(int, user=True)
-    def current(self) -> int:
+    @pyqtProperty(str, user=True)
+    def current(self) -> str:
         """Retrieve the ID of the currently selected row"""
         row = self.combobox.currentIndex()
         value = self.combobox.model().index(row, 0).data()

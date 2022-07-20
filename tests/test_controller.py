@@ -357,32 +357,6 @@ def test_apply_field_updates_bases(context: Context, models: Models):
     ).data() != source.siblingAtColumn(figures_field)
 
 
-def test_apply_field_wont_update_id(context: Context, models: Models):
-    """Test that the field's value overwrites the selected indices"""
-    # Given
-    models.add_base(BasesRecord(name="Foo", figures=1))
-    models.add_base(BasesRecord(name="Bar", figures=3))
-    models.add_base(BasesRecord(name="Baz", figures=3))
-    id_field = 0
-    source = context.models.bases_model.index(0, id_field)
-    destinations = [
-        context.models.bases_model.index(1, id_field),
-        context.models.bases_model.index(1, id_field),
-    ]
-
-    # When
-    context.controller.apply_field_to_bases(source, destinations)
-
-    # Then
-    assert context.models.bases_model.isDirty() is False
-    assert destinations[0].siblingAtColumn(id_field).data() != source.siblingAtColumn(
-        id_field
-    )
-    assert destinations[1].siblingAtColumn(id_field).data() != source.siblingAtColumn(
-        id_field
-    )
-
-
 ######################
 # Tags
 ######################
@@ -485,14 +459,14 @@ def test_delete_storage(context: Context, models: Models, monkeypatch):
     )
 
     models.add_storage("Foo")
-    index = context.models.storage_model.index(1, 1)
+    index = context.models.storages_model.index(1, 1)
 
     # When
     context.controller.delete_storages([index])
 
     # Then
-    assert context.models.storage_model.rowCount() == 1
-    assert context.models.storage_model.isDirty() is False
+    assert context.models.storages_model.rowCount() == 1
+    assert context.models.storages_model.isDirty() is False
     assert index.isValid()
 
 
@@ -555,10 +529,10 @@ def test_delete_status_reassigns_bases(context: Context, monkeypatch, models: Mo
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    models.add_status("Foo")
+    status_id = models.add_status("Foo")
     status_index = context.models.statuses_model.index(1, 1)
     assert status_index.data() == "Foo"
-    models.add_base(BasesRecord(name="Test", status=1))
+    models.add_base(BasesRecord(name="Test", status=status_id))
     base_index = context.models.bases_model.index(
         0, context.models.bases_model.fieldIndex("status_id")
     )
@@ -588,6 +562,7 @@ def test_delete_paint(context: Context, models: Models, monkeypatch):
     context.controller.delete_paints([index])
 
     # Then
+    assert context.models.paints_model.lastError().text() == ""
     assert context.models.paints_model.rowCount() == 0
     assert context.models.paints_model.isDirty() is False
     assert index.isValid()
@@ -622,9 +597,9 @@ def test_delete_recipe_removes_steps(context: Context, models: Models, monkeypat
         QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
     )
 
-    models.add_recipe("Foo")
-    models.add_step(1, 0, 0)
-    models.add_step(1, 1, 1)
+    recipe_id = models.add_recipe("Foo")
+    models.add_step(1, recipe_id, 0)
+    models.add_step(1, "Foo", 1)
     index = context.models.recipes_model.index(0, 1)
 
     # When
@@ -637,10 +612,10 @@ def test_delete_recipe_removes_steps(context: Context, models: Models, monkeypat
 def test_delete_recipe_steps_removes(context: Context, models: Models):
     """Delete removes all steps for given recipe"""
     # Given
-    recipe_id = 1
+    recipe_id = "Foo"
     models.add_step(9, recipe_id, 9)
     models.add_step(8, recipe_id, 8)
-    models.add_step(7, recipe_id + 1, 7)
+    models.add_step(7, "Bar", 7)
 
     # When
     context.controller.delete_recipe_steps(recipe_id)
@@ -710,8 +685,8 @@ def test_replace_scheme_components_add_new_ones(context: Context):
 
     # Then
     assert model.rowCount() == 2
-    assert model.index(0, 3).data(Qt.ItemDataRole.EditRole) == 1
-    assert model.index(1, 3).data(Qt.ItemDataRole.EditRole) == 2
+    assert model.index(0, 3).data(Qt.ItemDataRole.EditRole) == "1"
+    assert model.index(1, 3).data(Qt.ItemDataRole.EditRole) == "2"
 
 
 def test_replace_scheme_components_removes_old(context: Context, models: Models):

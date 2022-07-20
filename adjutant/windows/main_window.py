@@ -13,8 +13,8 @@ from adjutant.context.exceptions import (
     NoSettingsFileFound,
     SettingsFileCorrupt,
 )
+from adjutant.context.sample_data import SampleData
 from adjutant.context.version import V_MAJOR, V_MINOR, V_PATCH
-from adjutant.context.database_migrations import SAMPLE_DATA
 from adjutant.widgets.dialog_manager import DialogManager
 from adjutant.widgets.main_window_menubar import MainWindowMenuBar
 from adjutant.widgets.main_window_toolbar import MainWindowToolbar
@@ -106,8 +106,9 @@ class MainWindow(QMainWindow):
         )
         if result == QMessageBox.StandardButton.No:
             return
-        self.context.database.execute_sql_string(SAMPLE_DATA)
-        self.context.models.refresh_models()
+
+        sample_data = SampleData(self.context.models)
+        sample_data.load_all()
 
     def load_context(self):
         """Load the context from files/etc"""

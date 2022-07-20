@@ -35,20 +35,20 @@ class ModelContext:
 
     def __init__(self):
         self.models: Dict[str, RelationalModel] = {}
-        self.settings_model = None
-        self.bases_model = None
-        self.tags_model = None
-        self.tags_sort_model = None
-        self.base_tags_model = None
-        self.searches_model = None
-        self.storage_model = None
-        self.statuses_model = None
-        self.paints_model = None
-        self.recipes_model = None
-        self.recipe_steps_model = None
-        self.step_operations_model = None
-        self.colour_schemes_model = None
-        self.scheme_components_model = None
+        self.settings_model: BasesModel = None
+        self.bases_model: RelationalModel = None
+        self.tags_model: RelationalModel = None
+        self.tags_sort_model: RelationalModel = None
+        self.base_tags_model: RelationalModel = None
+        self.searches_model: RelationalModel = None
+        self.storages_model: RelationalModel = None
+        self.statuses_model: RelationalModel = None
+        self.paints_model: RelationalModel = None
+        self.recipes_model: RelationalModel = None
+        self.recipe_steps_model: RelationalModel = None
+        self.step_operations_model: RelationalModel = None
+        self.colour_schemes_model: RelationalModel = None
+        self.scheme_components_model: RelationalModel = None
 
     def get(self, name: str) -> RelationalModel:
         """get a model by name"""
@@ -82,7 +82,7 @@ class ModelContext:
         self._setup_settings_model()
         self._setup_step_operations_model()
         self._setup_statuses_model()
-        self._setup_storage_model()
+        self._setup_storages_model()
         self._setup_tags_model()
 
         self.tags_sort_model = QSortFilterProxyModel()
@@ -107,8 +107,8 @@ class ModelContext:
         model.setTable("bases")
         model.set_many_to_many_relationship(ManyToManyRelationship("tags", "name"))
         model.set_one_to_many_relationship(
-            model.fieldIndex("storage_id"),
-            OneToManyRelationship("storage", "id", "name"),
+            model.fieldIndex("storages_id"),
+            OneToManyRelationship("storages", "id", "name"),
         )
         model.set_one_to_many_relationship(
             model.fieldIndex("status_id"),
@@ -173,10 +173,10 @@ class ModelContext:
         """Setup the Searches Model"""
         self.searches_model = self.setup_model("searches")
 
-    def _setup_storage_model(self) -> None:
-        """Setup the storage model"""
-        self.storage_model = self.setup_model(
-            "storage",
+    def _setup_storages_model(self) -> None:
+        """Setup the storages model"""
+        self.storages_model = self.setup_model(
+            "storages",
             [
                 HeaderData("ID", "Internal ID of the storage container"),
                 HeaderData("Name", "The name of the container"),
@@ -190,10 +190,12 @@ class ModelContext:
             ],
         )
 
-        self.storage_model.boolean_fields.append(
-            self.storage_model.fieldIndex("magnetized")
+        self.storages_model.boolean_fields.append(
+            self.storages_model.fieldIndex("magnetized")
         )
-        self.storage_model.boolean_fields.append(self.storage_model.fieldIndex("full"))
+        self.storages_model.boolean_fields.append(
+            self.storages_model.fieldIndex("full")
+        )
 
     def _setup_statuses_model(self) -> None:
         """Setup the statuses model"""

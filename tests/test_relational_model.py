@@ -11,22 +11,6 @@ from adjutant.models.relational_model import OneToManyRelationship, RelationalMo
 from adjutant.context.context import Context
 
 
-def test_setting_id_column_does_nothing(
-    relational_model: RelationalModel, models: Models
-):
-    """Trying to update the ID column should succeed but do nothing"""
-    # Given
-    models.add_empty_bases(5)
-    index = relational_model.index(2, 0)
-
-    # When
-    success = relational_model.setData(index, 99)
-
-    # Then
-    assert success
-    assert index.data() == 3  # This shouldn't be flaky because of the autoincrement
-
-
 def test_boolean_column_returns_text_value(
     relational_model: RelationalModel, models: Models
 ):
@@ -88,19 +72,19 @@ def test_relationship_returns_own_value_for_edit(
     """A relational column should return it's actual value when requesting via edit role"""
 
     # Given
-    relationship = OneToManyRelationship("storage", "id", "name")
+    relationship = OneToManyRelationship("storages", "id", "name")
     relational_model.set_one_to_many_relationship(
-        relational_model.fieldIndex("storage_id"), relationship
+        relational_model.fieldIndex("storages_id"), relationship
     )
-    models.add_empty_bases(1)
+    models.add_base(BasesRecord(storage="Foo"))
 
     # When
-    value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
+    value = relational_model.index(0, relational_model.fieldIndex("storages_id")).data(
         Qt.ItemDataRole.EditRole
     )
 
     # Then
-    assert value == 0
+    assert value == "Foo"
 
 
 def test_relationship_returns_foreign_value_for_display(
@@ -111,14 +95,14 @@ def test_relationship_returns_foreign_value_for_display(
     """
 
     # Given
-    relationship = OneToManyRelationship("storage", "id", "name")
+    relationship = OneToManyRelationship("storages", "id", "name")
     relational_model.set_one_to_many_relationship(
-        relational_model.fieldIndex("storage_id"), relationship
+        relational_model.fieldIndex("storages_id"), relationship
     )
     models.add_empty_bases(1)
 
     # When
-    value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
+    value = relational_model.index(0, relational_model.fieldIndex("storages_id")).data(
         Qt.ItemDataRole.DisplayRole
     )
 
@@ -135,12 +119,12 @@ def test_relationship_returns_none_for_error(
     # Given
     relationship = OneToManyRelationship("", "id", "name")
     relational_model.set_one_to_many_relationship(
-        relational_model.fieldIndex("storage_id"), relationship
+        relational_model.fieldIndex("storages_id"), relationship
     )
     models.add_empty_bases(1)
 
     # When
-    value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
+    value = relational_model.index(0, relational_model.fieldIndex("storages_id")).data(
         Qt.ItemDataRole.DisplayRole
     )
 
@@ -153,19 +137,19 @@ def test_relationship_returns_zero_if_key_not_found(
 ):
     """A relational column should return foreign key if key not found in target table"""
     # Given
-    relationship = OneToManyRelationship("storage", "id", "name")
+    relationship = OneToManyRelationship("storages", "id", "name")
     relational_model.set_one_to_many_relationship(
-        relational_model.fieldIndex("storage_id"), relationship
+        relational_model.fieldIndex("storages_id"), relationship
     )
-    models.add_base(BasesRecord(storage=25))
+    models.add_base(BasesRecord(storage="Foo"))
 
     # When
-    value = relational_model.index(0, relational_model.fieldIndex("storage_id")).data(
+    value = relational_model.index(0, relational_model.fieldIndex("storages_id")).data(
         Qt.ItemDataRole.DisplayRole
     )
 
     # Then
-    assert value == 25
+    assert value == "Foo"
 
 
 def test_adding_m2m_relationship_adds_one_to_column_count(
@@ -209,11 +193,11 @@ def test_m2m_relationship_returns_stringified_tags_for_display_data(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    models.add_empty_bases(1)
-    models.add_tag("Foo")
-    models.add_tag("Bar")
-    models.add_tag_use(1, 1)
-    models.add_tag_use(1, 2)
+    base_id = models.add_base(BasesRecord())
+    foo_id = models.add_tag("Foo")
+    bar_id = models.add_tag("Bar")
+    models.add_tag_use(base_id, foo_id)
+    models.add_tag_use(base_id, bar_id)
 
     # When
     tags = relational_model.index(0, relational_model.columnCount() - 1).data(
@@ -232,11 +216,11 @@ def test_m2m_relationship_returns_lists_tags_for_edit_data(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    models.add_empty_bases(1)
-    models.add_tag("Foo")
-    models.add_tag("Bar")
-    models.add_tag_use(1, 1)
-    models.add_tag_use(1, 2)
+    base_id = models.add_base(BasesRecord())
+    foo_id = models.add_tag("Foo")
+    bar_id = models.add_tag("Bar")
+    models.add_tag_use(base_id, foo_id)
+    models.add_tag_use(base_id, bar_id)
 
     # When
     tags = relational_model.index(0, relational_model.columnCount() - 1).data(
@@ -302,10 +286,10 @@ def test_m2m_set_tags_removes_old(
     # Given
     relationship = ManyToManyRelationship("tags", "name")
     relational_model.set_many_to_many_relationship(relationship)
-    models.add_empty_bases(1)
-    models.add_tag("Foo")
-    models.add_tag("Bar")
-    models.add_tag_use(1, 1)
+    base_id = models.add_base(BasesRecord())
+    foo_id = models.add_tag("Foo")
+    _ = models.add_tag("Bar")
+    models.add_tag_use(base_id, foo_id)
 
     context.models.base_tags_model.select()
     assert context.models.base_tags_model.rowCount() == 1
@@ -339,8 +323,8 @@ def test_field_by_default_returns_display_role(
 ):
     """In the field() function, passing edit=True will return the edit role"""
     # Given
-    models.add_scheme("Foo")
-    models.add_base(BasesRecord(scheme_id=1))
+    uuid = models.add_scheme("Foo")
+    models.add_base(BasesRecord(scheme_id=uuid))
     relational_model.set_one_to_many_relationship(
         relational_model.fieldIndex("schemes_id"),
         OneToManyRelationship("colour_schemes", "id", "name"),
@@ -358,8 +342,8 @@ def test_field_edit_returns_edit_role(
 ):
     """In the field() function, passing edit=True will return the edit role"""
     # Given
-    models.add_scheme("Foo")
-    models.add_base(BasesRecord(scheme_id=1))
+    uuid = models.add_scheme("Foo")
+    models.add_base(BasesRecord(scheme_id=uuid))
     relational_model.set_one_to_many_relationship(
         relational_model.fieldIndex("schemes_id"),
         OneToManyRelationship("colour_schemes", "id", "name"),
@@ -369,7 +353,7 @@ def test_field_edit_returns_edit_role(
     data = relational_model.field_data(0, "schemes_id", True)
 
     # Then
-    assert data == 1
+    assert data == uuid
 
 
 def test_field_index_returns_index_based_on_field_name(
@@ -450,10 +434,10 @@ def test_update_removes_previous_mappings(models: Models, context: Context):
 def test_record_by_id(models: Models, context: Context):
     """Retrieving record by ID"""
     # Given
-    models.add_base(BasesRecord(name="Foo"))
+    uuid = models.add_base(BasesRecord(name="Foo"))
 
     # When
-    record = context.models.bases_model.record_by_id(1)
+    record = context.models.bases_model.record_by_id(uuid)
 
     # Then
     assert record is not None
@@ -466,20 +450,20 @@ def test_record_by_id_invalid_id(models: Models, context: Context):
     models.add_base(BasesRecord(name="Foo"))
 
     # When
-    record = context.models.bases_model.record_by_id(1234)
+    record = context.models.bases_model.record_by_id("1234")
 
     # Then
     assert record is not None
-    assert record.value("id") == 0
+    assert record.value("id") == ""
 
 
 def test_index_by_id(models: Models, context: Context):
     """Retrieving index by ID and field name"""
     # Given
-    models.add_base(BasesRecord(name="Foo"))
+    uuid = models.add_base(BasesRecord(name="Foo"))
 
     # When
-    index = context.models.bases_model.index_by_id(1, "name")
+    index = context.models.bases_model.index_by_id(uuid, "name")
 
     # Then
     assert index.data() == "Foo"

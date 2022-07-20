@@ -38,5 +38,5 @@ def test_sample_data_can_be_loaded(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
     win.load_sample_data()
 
     # Then
-    assert win.context.models.bases_model.rowCount() > 0
+    assert win.context.models.bases_model.rowCount() > 2
     assert win.context.models.bases_model.isDirty() is False
