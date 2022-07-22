@@ -542,7 +542,7 @@ def test_delete_status_reassigns_bases(context: Context, monkeypatch, models: Mo
     context.controller.delete_status(status_index)
 
     # Then
-    assert base_index.data(Qt.ItemDataRole.EditRole) == 0
+    assert base_index.data(Qt.ItemDataRole.EditRole) == ""
 
 
 ##############################
