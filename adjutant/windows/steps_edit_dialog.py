@@ -1,4 +1,4 @@
-""" Paints Edit/Add dialog"""
+""" Steps Edit/Add dialog"""
 
 from typing import List
 from PyQt6.QtCore import QModelIndex
@@ -10,7 +10,7 @@ from adjutant.widgets.foreign_key_combobox import ForeignKeyCombobox
 
 
 class StepsEditDialog(AddEditDialog):
-    """Add/Edit Dialog for paints"""
+    """Add/Edit Dialog for Steps"""
 
     dialog_reference = None
 

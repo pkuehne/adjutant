@@ -7,6 +7,7 @@ from adjutant.context import Context
 from adjutant.windows.base_report_dialog import BaseReportDialog
 from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
 from adjutant.windows.completion_chart_window import CompletionChartWindow
+from adjutant.windows.manage_operations_dialog import ManageOperationsDialog
 from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
 from adjutant.windows.manage_searches_dialog import ManageSearchesDialog
@@ -118,10 +119,15 @@ class MainWindowMenuBar(QMenuBar):
         statuses_action.triggered.connect(
             lambda: ManageStatusesDialog.show(self.parent(), self.context)
         )
+        operations_action = QAction("Manage &Operations", self)
+        operations_action.triggered.connect(
+            lambda: ManageOperationsDialog.show(self.parent(), self.context)
+        )
 
         manage_menu.addAction(tags_action)
         manage_menu.addAction(searches_action)
         manage_menu.addAction(statuses_action)
+        manage_menu.addAction(operations_action)
         return manage_menu
 
     def _setup_import_menu(self, menu: QMenu):

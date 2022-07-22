@@ -219,7 +219,7 @@ class Controller(QObject):
                 row, self.models.bases_model.fieldIndex("status_id")
             )
             if index.data(Qt.ItemDataRole.EditRole) == old_status:
-                self.models.bases_model.setData(index, 0)
+                self.models.bases_model.setData(index, "")
 
     def delete_paints(self, indexes: List[QModelIndex]):
         """Deletes a given paint"""
@@ -263,6 +263,31 @@ class Controller(QObject):
             record.setValue("recipes_id", component.recipe_id)
             model.insertRecord(-1, record)
         model.submitAll()
+
+    def create_operation(self):
+        """Creates a new operation"""
+        self.create_record(self.models.step_operations_model, "operation")
+
+    def rename_operation(self, index: QModelIndex):
+        """Rename an operation"""
+        self.rename_record(
+            self.models.step_operations_model,
+            index.siblingAtColumn(1),
+            desc="operation",
+        )
+
+    def delete_operation(self, index: QModelIndex):
+        """Delete an operation"""
+        old_operation = index.siblingAtColumn(0).data()
+        self.delete_records(self.models.step_operations_model, [index], "operation")
+
+        for row in range(self.models.recipe_steps_model.rowCount()):
+            index = self.models.recipe_steps_model.index(
+                row, self.models.recipe_steps_model.fieldIndex("operations_id")
+            )
+            if index.data(Qt.ItemDataRole.EditRole) == old_operation:
+                self.models.recipe_steps_model.removeRow(row)
+        self.models.recipe_steps_model.submitAll()
 
     def import_paints(self):
         """Ask for file and import it into the paints table"""
