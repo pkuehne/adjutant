@@ -13,6 +13,7 @@ class SortFilterHeader(QHeaderView):
         self.setSectionsClickable(True)
         self.sectionClicked.connect(self.section_clicked)
         self.setStretchLastSection(True)
+        self.setSortIndicatorShown(True)
 
     def section_clicked(self, column: int) -> None:
         """Respond to clicks on the header"""

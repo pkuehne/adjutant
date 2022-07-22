@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, List
 from PyQt6.QtCore import QSortFilterProxyModel, Qt
-from PyQt6.QtGui import QCursor, QStandardItem, QStandardItemModel
+from PyQt6.QtGui import QCursor, QStandardItem, QStandardItemModel, QIcon
 from PyQt6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -55,6 +55,12 @@ class FilterPopup(QDialog):
 
         self.select_all_button = QPushButton(self.tr("Select all"))
         self.unselect_all_button = QPushButton(self.tr("Unselect all"))
+        self.sort_ascending_button = QPushButton(
+            QIcon("icons:sort_asc.png"), self.tr("Sort Ascending")
+        )
+        self.sort_descending_button = QPushButton(
+            QIcon("icons:sort_dsc.png"), self.tr("Sort Descending")
+        )
         self.ok_button = QPushButton(self.tr("Apply"))
         self.cancel_button = QPushButton(self.tr("Cancel"))
         self.list_widget = QListView()
@@ -68,7 +74,7 @@ class FilterPopup(QDialog):
 
     def _setup_layout(self):
         """Setup the layout"""
-        self.setFixedSize(180, 300)
+        self.setFixedSize(250, 350)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -76,6 +82,9 @@ class FilterPopup(QDialog):
         button_layout.addWidget(self.ok_button)
 
         central = QVBoxLayout()
+        central.addWidget(self.sort_ascending_button)
+        central.addWidget(self.sort_descending_button)
+        central.addWidget(QWidget())
         central.addWidget(self.select_all_button)
         central.addWidget(self.unselect_all_button)
         central.addWidget(self.list_widget)
@@ -86,16 +95,46 @@ class FilterPopup(QDialog):
         """Configure the widgets"""
         self.list_widget.setModel(self.list_model)
 
+        self.sort_ascending_button.setCheckable(True)
+        self.sort_descending_button.setCheckable(True)
+        if self.model.sortColumn() == self.column:
+            self.sort_ascending_button.setChecked(
+                self.model.sortOrder() == Qt.SortOrder.AscendingOrder
+            )
+            self.sort_descending_button.setChecked(
+                self.model.sortOrder() == Qt.SortOrder.DescendingOrder
+            )
+
+    def _ascending_clicked(self, checked: bool):
+        """When ascneding button is clicked"""
+        if checked:
+            self.sort_descending_button.setChecked(False)
+            self.model.sort(self.column, Qt.SortOrder.AscendingOrder)
+        else:
+            self.model.sort(-1, Qt.SortOrder.AscendingOrder)
+
+    def _descending_clicked(self, checked: bool):
+        """When the descending button is clicked"""
+        if checked:
+            self.sort_ascending_button.setChecked(False)
+            self.model.sort(self.column, Qt.SortOrder.DescendingOrder)
+        else:
+            self.model.sort(-1, Qt.SortOrder.DescendingOrder)
+
     def _setup_signals(self):
         """Connect signals"""
         self.list_widget.selectionModel().selectionChanged.connect(
             lambda __, _: self.update_model_check_state()
         )
+        # self.sort_ascending_button.pressed.connect(self.sort_ascending)
+        # self.sort_descending_button.pressed.connect(self.sort_descending)
         self.select_all_button.pressed.connect(self.select_all)
         self.unselect_all_button.pressed.connect(self.unselect_all)
         self.cancel_button.pressed.connect(self.reject)
         self.ok_button.pressed.connect(self.accept)
         self.accepted.connect(self.update_filters)
+        self.sort_ascending_button.toggled.connect(self._ascending_clicked)
+        self.sort_descending_button.toggled.connect(self._descending_clicked)
 
     def setup_filter(self) -> None:
         """Retrieves unique items from model at that column"""

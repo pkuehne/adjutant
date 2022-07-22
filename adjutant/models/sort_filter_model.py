@@ -41,6 +41,7 @@ class SortFilterModel(QSortFilterProxyModel):
         """Removes any set column filters"""
         for column in range(self.columnCount()):
             self.set_column_filter(column, None)
+        self.sort(-1, Qt.SortOrder.AscendingOrder)
 
     def encode_filters(self) -> str:
         """Encode the filters in a binary format"""
@@ -60,11 +61,11 @@ class SortFilterModel(QSortFilterProxyModel):
     def headerData(self, section: int, orientation: Qt.Orientation, role: int):
         """Override to set filter icon"""
         if role == Qt.ItemDataRole.DecorationRole:
-            image = (
-                "icons:filter-available.png"
-                if self.column_filters.get(section, None) is None
-                else "icons:filter-applied.png"
-            )
+            image = "icons:filter-applied.png"
+            if (self.column_filters.get(section, None) is None) and (
+                self.sortColumn() != section
+            ):
+                image = "icons:filter-available.png"
             return QIcon(image)
         return super().headerData(section, orientation, role=role)
 
