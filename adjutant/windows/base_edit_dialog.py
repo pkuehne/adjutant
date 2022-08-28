@@ -1,6 +1,7 @@
 """ Edit Window for a Base """
 
 from dataclasses import dataclass
+from datetime import date
 import logging
 from PyQt6.QtCore import QModelIndex, QStringListModel
 from PyQt6.QtCore import Qt
@@ -86,6 +87,7 @@ class BaseEditDialog(QDialog):
             record = self.model.record()
             uuid = generate_uuid()
             record.setValue("id", uuid)
+            record.setValue("date_added", date.today().isoformat())
             self.model.insertRecord(-1, record)
             self.index = self.model.index(self.model.rowCount() - 1, 0)
             self.setWindowTitle("Add Base")
