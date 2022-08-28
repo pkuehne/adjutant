@@ -3,7 +3,6 @@ __pycache__
 adjutant/resources.py
 *.db
 *.yaml
-*.spec
 adjutant.log
 cov.xml
 .coverage

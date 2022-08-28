@@ -3,7 +3,6 @@
 import functools
 from typing import List, cast
 from PyQt6.QtCore import (
-    QAbstractItemModel,
     QEvent,
     QModelIndex,
     QObject,
@@ -35,6 +34,7 @@ class SortFilterTable(QTableView):
     item_edited = pyqtSignal(QModelIndex)
     item_deleted = pyqtSignal(list)
     item_added = pyqtSignal()
+    row_count_changed = pyqtSignal(int)
 
     def __init__(self, context: Context, parent=None) -> None:
         super().__init__(parent=parent)
@@ -68,7 +68,7 @@ class SortFilterTable(QTableView):
         return self._map_indexes(self.selectionModel().selectedRows())
 
     # pylint: disable=invalid-name
-    def setModel(self, model: QAbstractItemModel) -> None:
+    def setModel(self, model: RelationalModel) -> None:
         """Set the source model for the table"""
         self.filter_model.setSourceModel(model)
         self.filter_model.setFilterKeyColumn(-1)  # All columns
@@ -76,6 +76,10 @@ class SortFilterTable(QTableView):
 
         super().setModel(self.filter_model)
         self.resizeColumnsToContents()
+
+        emit_count = lambda: self.row_count_changed.emit(self.filter_model.rowCount())
+        self.filter_model.filter_changed.connect(emit_count)
+        model.row_count_updated.connect(emit_count)
 
     def additional_context_menu_items(self, index: QModelIndex, menu: QMenu):
         """Overridable for subclasses"""

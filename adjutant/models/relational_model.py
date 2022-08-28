@@ -22,6 +22,7 @@ class RelationalModel(QSqlTableModel):
     """Subclass QSqlTableModel"""
 
     data_updated = pyqtSignal()
+    row_count_updated = pyqtSignal(int)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
@@ -31,6 +32,7 @@ class RelationalModel(QSqlTableModel):
         self.colour_fields = []
         self.id_row_map = {}
         self.db_context = DatabaseContext()
+        self.beforeInsert.connect(lambda: self.row_count_updated.emit(self.rowCount()))
 
     def set_many_to_many_relationship(self, rel: ManyToManyRelationship):
         """Adds a new many-to-many relationship"""
@@ -196,3 +198,7 @@ class RelationalModel(QSqlTableModel):
     def columnCount(self, _: QModelIndex = None) -> int:
         """Override for the column count"""
         return super().columnCount() + len(self.m2m_relationships)
+
+    def updateRowCount(self):
+        """Emit signal with the current rowCount()"""
+        self.row_count_updated.emit(self.rowCount())

@@ -69,11 +69,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(status_bar)
 
         def status_bar_subscription(screen: BasesScreen):
-            screen.table.filter_model.filter_changed.connect(
-                lambda: status_bar.update_row_count(
-                    screen.table.filter_model.rowCount()
-                )
-            )
+            screen.table.row_count_changed.connect(status_bar.update_row_count)
             screen.table.selectionModel().selectionChanged.connect(
                 lambda _, __: status_bar.update_select_count(
                     len(screen.table.selected_indexes())

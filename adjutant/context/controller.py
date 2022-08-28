@@ -19,6 +19,7 @@ from adjutant.context.database_context import (
     remove_scheme_components,
 )
 from adjutant.context.dataclasses import SchemeComponent, Tag
+from adjutant.models.relational_model import RelationalModel
 
 
 class Controller(QObject):
@@ -44,7 +45,7 @@ class Controller(QObject):
         return index
 
     def create_record(
-        self, model: QSqlTableModel, desc: str = "records", default: str = ""
+        self, model: RelationalModel, desc: str = "records", default: str = ""
     ):
         """Creates a record in the given model and sets name field"""
         name, success = QInputDialog.getText(
@@ -76,7 +77,7 @@ class Controller(QObject):
         model.submitAll()
 
     def delete_records(
-        self, model: QSqlTableModel, indexes: List[QModelIndex], desc="records"
+        self, model: RelationalModel, indexes: List[QModelIndex], desc="records"
     ):
         """Removes records from the model with confirmation"""
         result = QMessageBox.warning(
@@ -91,6 +92,8 @@ class Controller(QObject):
         for index in indexes:
             model.removeRow(index.row())
         model.submitAll()
+        model.select()
+        model.updateRowCount()
 
     def set_font_size(self, font_size: int):
         """Set the applications font size"""
