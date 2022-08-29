@@ -1,3 +1,5 @@
-files: 
-  - name: "citadel.yaml"
+files:
+  - name: "Citadel Paints"
+    filename: "citadel.yaml"
     desc: "Paints for the current Citadel paint range sold by Games Workshop"
+    updated: "2021-01-20"
