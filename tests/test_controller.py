@@ -1,6 +1,5 @@
 """ Tests for the Controller class"""
 
-from unittest.mock import MagicMock
 from pytest import MonkeyPatch
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
@@ -703,64 +702,3 @@ def test_replace_scheme_components_removes_old(context: Context, models: Models)
 
     # Then
     assert context.models.scheme_components_model.rowCount() == 0
-
-
-################################################
-# import_paint
-################################################
-
-
-def test_load_paints_parser_error(monkeypatch, context: Context):
-    """ParserError in yaml loading warns and returns early"""
-    # Given
-    data = """
-    paints:
-      - name: "foo"-
-        range: "bar"
-        hexvalue: "#123456"
-    """
-    mock = MagicMock()
-    monkeypatch.setattr(QMessageBox, "critical", mock)
-
-    # When
-    context.controller.load_paints_from_string(data)
-
-    # Then
-    mock.assert_called_once()
-    assert context.models.paints_model.rowCount() == 0
-
-
-def test_load_paints_skip_empty_name(context: Context):
-    """Empty names are skipped"""
-    # Given
-    data = """
-    paints:
-      - name: ""
-        range: "bar"
-        hexvalue: "#123456"
-    """
-
-    # When
-    context.controller.load_paints_from_string(data)
-
-    # Then
-    assert context.models.paints_model.rowCount() == 0
-
-
-def test_load_paints_adds(context: Context):
-    """Correct paints are added"""
-    # Given
-    data = """
-    paints:
-      - name: "Foo"
-        range: "bar"
-        hexvalue: "#123456"
-    """
-
-    # When
-    context.controller.load_paints_from_string(data)
-
-    # Then
-    assert context.models.paints_model.rowCount() == 1
-    record = context.models.paints_model.record(0)
-    assert record.value("name") == "Foo"

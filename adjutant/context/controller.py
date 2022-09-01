@@ -2,11 +2,8 @@
 
 from typing import List
 import logging
-import yaml
-from yaml.scanner import ScannerError
-from yaml.parser import ParserError
-from PyQt6.QtCore import QModelIndex, QObject, Qt, QUrl
-from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox, QFileDialog
+from PyQt6.QtCore import QModelIndex, QObject, Qt
+from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 from PyQt6.QtSql import QSqlTableModel
 from adjutant.context.url_loader import UrlLoader
 from adjutant.context.settings_context import SettingsContext
@@ -291,53 +288,6 @@ class Controller(QObject):
             if index.data(Qt.ItemDataRole.EditRole) == old_operation:
                 self.models.recipe_steps_model.removeRow(row)
         self.models.recipe_steps_model.submitAll()
-
-    def import_paints(self):
-        """Ask for file and import it into the paints table"""
-        filename: QUrl = QFileDialog.getOpenFileUrl(caption="Paints File")[0]
-        if not filename.isValid():
-            return
-
-        if filename.isLocalFile():
-            with open(filename.toLocalFile()) as file:
-                self.load_paints_from_string(file.read())
-        else:
-            thread = UrlLoader(self, filename.toString())
-            thread.content_loaded.connect(self.load_paints_from_string)
-            thread.finished.connect(thread.deleteLater)
-            thread.start()
-
-    def load_paints_from_string(self, file_contents):
-        """load the actual data into the paints table"""
-        yaml_data = None
-        try:
-            yaml_data = yaml.safe_load(file_contents)
-        except (ScannerError, ParserError) as exc:
-            QMessageBox.critical(
-                None,
-                "Invalid File Format",
-                f"Cannot parse the file:\n{exc.problem}\n{exc.problem_mark}",
-            )
-            return
-
-        # print(yaml_data)
-
-        paints = yaml_data.get("paints", [])
-        for paint in paints:
-            paint_name = paint.get("name", "")
-            if paint_name == "":
-                logging.warning("Invalid paint entry with no name")
-                continue
-            record = self.models.paints_model.record()
-            record.setValue("id", generate_uuid())
-            record.setValue("name", paint.get("name", ""))
-            record.setValue("manufacturer", paint.get("manufacturer", ""))
-            record.setValue("range", paint.get("range", ""))
-            record.setValue("hexvalue", paint.get("hexvalue", ""))
-            record.setValue("notes", paint.get("notes", ""))
-            self.models.paints_model.insertRecord(-1, record)
-        self.models.paints_model.submitAll()
-        logging.info("Loaded %s paints", len(paints))
 
     def load_latest_version(self, callback):
         """Load version from github repo"""

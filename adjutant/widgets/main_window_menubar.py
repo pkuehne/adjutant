@@ -7,6 +7,7 @@ from adjutant.context import Context
 from adjutant.windows.base_report_dialog import BaseReportDialog
 from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
 from adjutant.windows.completion_chart_window import CompletionChartWindow
+from adjutant.windows.import_paints_dialog import ImportPaintsDialog
 from adjutant.windows.manage_operations_dialog import ManageOperationsDialog
 from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
@@ -133,7 +134,9 @@ class MainWindowMenuBar(QMenuBar):
     def _setup_import_menu(self, menu: QMenu):
         """Setup the import menu"""
         paints_action = QAction("Paints", self)
-        paints_action.triggered.connect(self.context.controller.import_paints)
+        paints_action.triggered.connect(
+            lambda: ImportPaintsDialog.show(self.parent(), self.context)
+        )
 
         menu.addAction(paints_action)
 
