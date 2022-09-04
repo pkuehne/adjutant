@@ -236,6 +236,7 @@ class AddEditDialog(QDialog):
     def edit(cls, context: Context, index, parent, **kwargs):
         """Wraps the creation of the dialog, particularly for unit testing"""
         cls.dialog_reference = cls(context, index, parent, **kwargs)
+        cls.dialog_reference.setup()
         cls.dialog_reference.exec()
         cls.dialog_reference = None
 
@@ -243,5 +244,6 @@ class AddEditDialog(QDialog):
     def add(cls, context: Context, parent, **kwargs):
         """Wraps the adding of a colour"""
         cls.dialog_reference = cls(context, QModelIndex(), parent, **kwargs)
+        cls.dialog_reference.setup()
         cls.dialog_reference.exec()
         cls.dialog_reference = None

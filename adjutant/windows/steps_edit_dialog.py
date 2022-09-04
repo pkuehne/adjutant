@@ -48,11 +48,12 @@ class StepsEditDialog(AddEditDialog):
             ]
         )
 
-        self.setup()
         recipe_edit.setText(str(kwargs.get("link_id", 0)))
         step_edit.setText(str(kwargs.get("priority", 0)))
 
     def delete_function(self, indexes: List[QModelIndex]):
         """delete was called on this item"""
+        if indexes == []:
+            return
         self.model.removeRow(indexes[0].row())
         self.model.submitAll()

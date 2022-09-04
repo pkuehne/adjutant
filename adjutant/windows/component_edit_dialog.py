@@ -39,7 +39,6 @@ class ComponentEditDialog(AddEditDialog):
             ]
         )
 
-        self.setup()
         scheme_edit.setText(str(kwargs.get("link_id", 0)))
 
     def delete_function(self, indexes: List[QModelIndex]):

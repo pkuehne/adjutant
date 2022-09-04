@@ -29,8 +29,6 @@ class StorageEditDialog(AddEditDialog):
             ]
         )
 
-        self.setup()
-
     def delete_function(self, indexes):
         """delete was called on this item"""
         self.context.controller.delete_storages(indexes)

@@ -26,8 +26,6 @@ class SchemeEditDialog(AddEditDialog):
             SchemeComponentsLink(self.context, index.data()),
         )
 
-        self.setup()
-
     def delete_function(self, indexes):
         """delete was called on this item"""
         self.context.controller.delete_schemes(indexes)
