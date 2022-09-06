@@ -52,7 +52,11 @@ class BasesScreen(QWidget):
             lambda index: BaseEditDialog.edit_base(self.context, index, self)
         )
         self.table.item_edited.connect(self.context.signals.show_edit_base_dialog.emit)
-        self.table.item_deleted.connect(self.context.controller.delete_bases)
+        self.table.item_deleted.connect(
+            lambda idx: self.context.controller.delete_records(
+                self.context.models.bases_model, idx, "bases"
+            )
+        )
 
     def save_search(self):
         """Save the current search"""

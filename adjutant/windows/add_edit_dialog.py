@@ -32,6 +32,7 @@ class MappedWidget:
     field: str
     property: QByteArray = None
     hidden: bool = False
+    default: str = None
 
 
 @dataclass
@@ -182,7 +183,14 @@ class AddEditDialog(QDialog):
                 self.mapper.addMapping(widget.widget, field_index, widget.property)
             else:
                 self.mapper.addMapping(widget.widget, field_index)
+
+        # Load values from model into widgets
         self.mapper.setCurrentModelIndex(self.index)
+
+        # Override any defaults
+        for widget in self.widgets.values():
+            if widget.default is not None:
+                widget.widget.setText(widget.default)
 
         # Buttons
         self.buttons.ok_button.setDefault(True)

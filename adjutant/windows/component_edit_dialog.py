@@ -33,15 +33,18 @@ class ComponentEditDialog(AddEditDialog):
         self.hide_name_field()
         self.set_widgets(
             [
-                MappedWidget("Scheme", scheme_edit, "schemes_id", hidden=True),
+                MappedWidget(
+                    "Scheme",
+                    scheme_edit,
+                    "schemes_id",
+                    hidden=False,
+                    default=str(kwargs.get("link_id", 0)),
+                ),
                 MappedWidget("Name", name_edit, "name"),
                 MappedWidget("Recipe", recipe_box, "recipes_id"),
             ]
         )
 
-        scheme_edit.setText(str(kwargs.get("link_id", 0)))
-
     def delete_function(self, indexes: List[QModelIndex]):
         """delete was called on this item"""
-        self.model.removeRow(indexes[0].row())
-        self.model.submitAll()
+        self.context.controller.delete_records(self.model, indexes, "components")

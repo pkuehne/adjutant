@@ -1,7 +1,7 @@
 """ Fixtures """
 
 from pathlib import Path
-
+from unittest import mock
 
 from dataclasses import dataclass
 import pytest
@@ -221,6 +221,7 @@ def context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     context.models.load()
     context.models.refresh_models()
 
+    context.controller.confirm_deletion = mock.Mock(return_value=True)
     return context
 
 

@@ -1,5 +1,6 @@
 """ Tests for the Controller class"""
 
+from unittest import mock
 from pytest import MonkeyPatch
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
@@ -43,12 +44,10 @@ def test_convert_index_tags_sort_model(context: Context, models: Models):
 ###################################
 
 
-def test_delete_confirmation_required(context: Context, models: Models, monkeypatch):
+def test_delete_confirmation_required(context: Context, models: Models):
     """Check that delete requires confirmation"""
     # Given
-    monkeypatch.setattr(
-        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Cancel
-    )
+    context.controller.confirm_deletion = mock.Mock(return_value=False)
     num_rows = 5
     models.add_empty_bases(num_rows)
 
@@ -65,12 +64,9 @@ def test_delete_confirmation_required(context: Context, models: Models, monkeypa
     assert context.models.bases_model.rowCount() == num_rows
 
 
-def test_delete_removes_selected_indexes(context: Context, models: Models, monkeypatch):
+def test_delete_removes_selected_indexes(context: Context, models: Models):
     """Check that delete removes the requested indexes"""
     # Given
-    monkeypatch.setattr(
-        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
-    )
     num_rows = 5
     models.add_empty_bases(num_rows)
     index1 = context.models.bases_model.index(2, 0)
@@ -88,14 +84,9 @@ def test_delete_removes_selected_indexes(context: Context, models: Models, monke
         assert context.models.bases_model.index(row, 0).data() != id2
 
 
-def test_delete_does_nothing_for_no_indexes(
-    context: Context, models: Models, monkeypatch
-):
+def test_delete_does_nothing_for_no_indexes(context: Context, models: Models):
     """Check that delete removes the requested indexes"""
     # Given
-    monkeypatch.setattr(
-        QMessageBox, "warning", lambda *args: QMessageBox.StandardButton.Ok
-    )
     num_rows = 5
     models.add_empty_bases(num_rows)
 

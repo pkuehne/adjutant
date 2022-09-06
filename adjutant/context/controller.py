@@ -43,14 +43,14 @@ class Controller(QObject):
 
     def create_record(
         self, model: RelationalModel, desc: str = "records", default: str = ""
-    ):
+    ) -> str:
         """Creates a record in the given model and sets name field"""
         name, success = QInputDialog.getText(
             None, f"New {desc}", f"Please enter a name for the {desc}", text=default
         )
 
         if name == "" or not success:
-            return
+            return ""
 
         uuid = generate_uuid()
         record = model.record()
@@ -73,10 +73,8 @@ class Controller(QObject):
         model.setData(index, name)
         model.submitAll()
 
-    def delete_records(
-        self, model: RelationalModel, indexes: List[QModelIndex], desc="records"
-    ):
-        """Removes records from the model with confirmation"""
+    def confirm_deletion(self, indexes: List[QModelIndex], desc: str) -> bool:
+        """Asks user to confirm deletion"""
         result = QMessageBox.warning(
             None,
             "Confirm deletion",
@@ -84,7 +82,13 @@ class Controller(QObject):
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Cancel,
         )
-        if result == QMessageBox.StandardButton.Cancel:
+        return result == QMessageBox.StandardButton.Ok
+
+    def delete_records(
+        self, model: RelationalModel, indexes: List[QModelIndex], desc="records"
+    ):
+        """Removes records from the model with confirmation"""
+        if not self.confirm_deletion(indexes, desc):
             return
         for index in indexes:
             model.removeRow(index.row())
@@ -105,10 +109,6 @@ class Controller(QObject):
 
         self.settings.font_size = font_size
         self.settings.save()
-
-    def delete_bases(self, indexes: List[QModelIndex]):
-        """Delete all currently selected rows"""
-        self.delete_records(self.models.bases_model, indexes, "bases")
 
     def duplicate_base(self, index: QModelIndex, num: int) -> bool:
         """Duplicate the given base num times"""

@@ -298,7 +298,7 @@ class BaseEditDialog(QDialog):
 
     def delete_button_pressed(self):
         """Delete the current index"""
-        self.context.controller.delete_bases([self.index])
+        self.context.controller.delete_records(self.model, [self.index], "bases")
         self.reject()
 
     def base_combobox_changed(self, text: str):
@@ -311,11 +311,8 @@ class BaseEditDialog(QDialog):
     def edit_base(cls, context, index, parent):
         """Wraps the creation of the dialog, particularly for unit testing"""
         cls.dialog_reference = cls(context, index, parent)
-        # cls.dialog_reference.summary.setFocus()
         cls.dialog_reference.exec()
-        # result = cls.dialog_reference.result
         cls.dialog_reference = None
-        # return result
 
     @classmethod
     def add_base(cls, context, parent):
