@@ -12,5 +12,7 @@
         "--cov-report=html",
         "--cov=adjutant",
         "tests"
-    ]
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

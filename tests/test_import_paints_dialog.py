@@ -11,6 +11,7 @@ from adjutant.context.context import Context
 from adjutant.context.url_loader import UrlLoader
 from adjutant.windows.import_paints_dialog import ImportPaintsDialog, PaintItem
 from adjutant.windows.online_import_dialog import OnlineImportDialog
+from .conftest import Models
 
 
 @pytest.fixture(name="win")
@@ -159,3 +160,122 @@ def test_import_adds_selected_to_model(win: ImportPaintsDialog, context: Context
 
     # Then
     assert context.models.paints_model.rowCount() == 2
+
+
+def test_note_skipped_when_option_off(win: ImportPaintsDialog, context: Context):
+    """When the option for it is on, a note saying "Imported" is added to the imports"""
+    # Given
+    win.paints = [
+        PaintItem({"name": "foo", "desc": "test range", "manufacturer": "Someone"}),
+    ]
+    win.load_table()
+    win.widgets.option_add_note.setChecked(True)
+
+    # When
+    win.import_paints()
+
+    # Then
+    assert context.models.paints_model.rowCount() == 1
+    assert "Imported" in context.models.paints_model.field_data(0, "notes")
+
+
+def test_note_addded_when_option_on(win: ImportPaintsDialog, context: Context):
+    """When the option for it is off, no note is added to the imports"""
+    # Given
+    win.paints = [
+        PaintItem({"name": "foo", "desc": "test range", "manufacturer": "Someone"}),
+    ]
+    win.load_table()
+    win.widgets.option_add_note.setChecked(False)
+
+    # When
+    win.import_paints()
+
+    # Then
+    assert context.models.paints_model.rowCount() == 1
+    assert context.models.paints_model.field_data(0, "notes") == ""
+
+
+def test_name_exists_returns_true_if_name_exists(
+    win: ImportPaintsDialog, models: Models
+):
+    """The name matching is case-insensitive"""
+    # Given
+    models.add_paint("Foo")
+    models.add_paint("Bar")
+
+    # When
+    exists = win.name_exists("Foo")
+
+    # Then
+    assert exists
+
+
+def test_name_exists_returns_false_if_not_exists(
+    win: ImportPaintsDialog, models: Models
+):
+    """The name matching is case-insensitive"""
+    # Given
+    models.add_paint("Foo")
+    models.add_paint("Bar")
+
+    # When
+    exists = win.name_exists("Baba")
+
+    # Then
+    assert exists is False
+
+
+def test_name_exists_matches_different_case(win: ImportPaintsDialog, models: Models):
+    """The name matching is case-insensitive"""
+    # Given
+    models.add_paint("Foo")
+    models.add_paint("Bar")
+
+    # When
+    exists = win.name_exists("foo")
+
+    # Then
+    assert exists
+
+
+def test_import_skips_existing_name_if_option_set(
+    win: ImportPaintsDialog, models: Models
+):
+    """The name matching is case-insensitive"""
+    # Given
+    models.add_paint("Foo")
+    models.add_paint("Bar")
+    win.paints = [
+        PaintItem({"name": "Foo", "desc": "test range", "manufacturer": "Someone"}),
+        PaintItem({"name": "Test", "desc": "test range", "manufacturer": "Someone"}),
+    ]
+    win.load_table()
+    win.widgets.option_skip_existing.setChecked(True)
+
+    # When
+    win.import_paints()
+
+    # Then
+    assert models.context.models.paints_model.rowCount() == 3
+
+
+def test_import_adds_existing_name_if_option_cleared(
+    win: ImportPaintsDialog, models: Models
+):
+    """The name matching is case-insensitive"""
+    # Given
+    models.add_paint("Foo")
+    models.add_paint("Bar")
+    win.paints = [
+        PaintItem({"name": "Foo", "desc": "test range", "manufacturer": "Someone"}),
+        PaintItem({"name": "Test", "desc": "test range", "manufacturer": "Someone"}),
+    ]
+    win.load_table()
+    win.widgets.option_skip_existing.setChecked(False)
+
+    # When
+    win.import_paints()
+
+    # Then
+    assert models.context.models.paints_model.rowCount() == 4
