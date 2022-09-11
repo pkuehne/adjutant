@@ -37,7 +37,7 @@ class ComponentEditDialog(AddEditDialog):
                     "Scheme",
                     scheme_edit,
                     "schemes_id",
-                    hidden=False,
+                    hidden=True,
                     default=str(kwargs.get("link_id", 0)),
                 ),
                 MappedWidget("Name", name_edit, "name"),
