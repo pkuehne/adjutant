@@ -190,7 +190,7 @@ class AddEditDialog(QDialog):
         # Override any defaults
         for widget in self.widgets.values():
             if widget.default is not None:
-                widget.widget.setText(widget.default)
+                widget.widget.setText(str(widget.default))
 
         # Buttons
         self.buttons.ok_button.setDefault(True)

@@ -69,8 +69,7 @@ class RelationalLinkItemModel(QSortFilterProxyModel):
         model: RelationalModel = self.sourceModel()
         left_num = model.record(left.row()).value("priority")
         right_num = model.record(right.row()).value("priority")
-
-        return left_num < right_num
+        return int(left_num) < int(right_num)
 
     # pylint: enable=invalid-name
 
