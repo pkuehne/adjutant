@@ -67,11 +67,11 @@ class Models:
         for _ in range(count):
             self.add_base(BasesRecord())
 
-    def add_tag(self, name: str):
+    def add_tag(self, name: str, id_: str = None):
         """Fixture to add a tag to the datbase"""
         model = self.context.models.tags_model
         record = model.record()
-        uuid = generate_uuid()
+        uuid = id_ if id_ is not None else generate_uuid()
         record.setValue("id", uuid)
         record.setValue("name", name)
         assert model.insertRecord(-1, record)

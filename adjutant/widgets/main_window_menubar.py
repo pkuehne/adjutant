@@ -1,9 +1,10 @@
 """ Menu bar for the main window"""
 
-from PyQt6.QtWidgets import QApplication, QMenu, QMenuBar, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMenu, QMenuBar, QMessageBox, QFileDialog
 from PyQt6.QtGui import QAction
 
 from adjutant.context import Context
+from adjutant.context.import_export import write_models_to_yaml, read_models_from_yaml
 from adjutant.windows.base_report_dialog import BaseReportDialog
 from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
 from adjutant.windows.completion_chart_window import CompletionChartWindow
@@ -31,10 +32,44 @@ class MainWindowMenuBar(QMenuBar):
     def _setup_file_menu(self):
         """Setup the file menu"""
 
+        def export_func():
+            filename = QFileDialog.getSaveFileName(
+                self, "Export data", filter=self.tr("YAML File (*.yaml)")
+            )[0]
+            if filename == "":
+                return
+            write_models_to_yaml(self.context.models.models, filename)
+            QMessageBox.information(
+                self,
+                self.tr("Export complete"),
+                self.tr("Export completed successfully!"),
+            )
+
+        def import_func():
+            filename = QFileDialog.getOpenFileName(
+                self, "Open File", filter=self.tr("YAML File (*.yaml)")
+            )[0]
+            if filename == "":
+                return
+            read_models_from_yaml(self.context.models.models, filename)
+            QMessageBox.information(
+                self,
+                self.tr("Import complete"),
+                self.tr("Import completed successfully!"),
+            )
+
+        export_action = QAction("&Export data", self)
+        export_action.triggered.connect(export_func)
+
+        import_action = QAction("&Import data", self)
+        import_action.triggered.connect(import_func)
+
         quit_action = QAction("&Quit", self)
         quit_action.triggered.connect(QApplication.quit)
 
         file_menu = self.addMenu("&File")
+        file_menu.addAction(export_action)
+        file_menu.addAction(import_action)
         file_menu.addSeparator()
         file_menu.addAction(quit_action)
 
