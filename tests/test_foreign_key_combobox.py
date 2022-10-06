@@ -1,7 +1,12 @@
 """ Test for the ForeignKeyCombobox"""
 
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtGui import QValidator
 from pytestqt.qtbot import QtBot
-from adjutant.widgets.foreign_key_combobox import ForeignKeyCombobox
+from adjutant.widgets.foreign_key_combobox import (
+    ForeignKeyCombobox,
+    ModelContentValidator,
+)
 from tests.conftest import RelationalModel
 
 
@@ -81,3 +86,57 @@ def test_set_model_column_passes_to_combobox(
 
     # Then
     assert box.combobox.modelColumn() == 3
+
+
+def test_validator_accepts_existing_string():
+    """The validator accepts a string that's in the model"""
+    # Given
+    model = QStandardItemModel(4, 1)
+    model.setItem(0, 0, QStandardItem("Foo"))
+    model.setItem(1, 0, QStandardItem("Bar"))
+    model.setItem(2, 0, QStandardItem("Test"))
+    model.setItem(3, 0, QStandardItem("Baz"))
+
+    validator = ModelContentValidator(model, 0)
+
+    # When
+    (result, _, __) = validator.validate("Test", 1)
+
+    # Then
+    assert result == QValidator.State.Acceptable
+
+
+def test_validator_accepts_partial_string():
+    """The validator accepts a string that's partially in the model"""
+    # Given
+    model = QStandardItemModel(4, 1)
+    model.setItem(0, 0, QStandardItem("Foo"))
+    model.setItem(1, 0, QStandardItem("Bar"))
+    model.setItem(2, 0, QStandardItem("Test"))
+    model.setItem(3, 0, QStandardItem("Baz"))
+
+    validator = ModelContentValidator(model, 0)
+
+    # When
+    (result, _, __) = validator.validate("Te", 1)
+
+    # Then
+    assert result == QValidator.State.Intermediate
+
+
+def test_validator_rejects_invalid_string():
+    """The validator rejects a string that's not in the model"""
+    # Given
+    model = QStandardItemModel(4, 1)
+    model.setItem(0, 0, QStandardItem("Foo"))
+    model.setItem(1, 0, QStandardItem("Bar"))
+    model.setItem(2, 0, QStandardItem("Test"))
+    model.setItem(3, 0, QStandardItem("Baz"))
+
+    validator = ModelContentValidator(model, 0)
+
+    # When
+    (result, _, __) = validator.validate("Foops", 1)
+
+    # Then
+    assert result == QValidator.State.Invalid
