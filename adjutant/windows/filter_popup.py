@@ -53,16 +53,19 @@ class FilterPopup(QDialog):
         super().__init__(parent=parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
 
-        self.select_all_button = QPushButton(self.tr("Select all"))
-        self.unselect_all_button = QPushButton(self.tr("Unselect all"))
-        self.sort_ascending_button = QPushButton(
-            QIcon("icons:sort_asc.png"), self.tr("Sort Ascending")
-        )
-        self.sort_descending_button = QPushButton(
-            QIcon("icons:sort_dsc.png"), self.tr("Sort Descending")
-        )
-        self.ok_button = QPushButton(self.tr("Apply"))
-        self.cancel_button = QPushButton(self.tr("Cancel"))
+        self.buttons = {
+            "select_all": QPushButton(self.tr("Select all")),
+            "unselect_all": QPushButton(self.tr("Unselect all")),
+            "sort_ascending": QPushButton(
+                QIcon("icons:sort_asc.png"), self.tr("Sort Ascending")
+            ),
+            "sort_descending": QPushButton(
+                QIcon("icons:sort_dsc.png"), self.tr("Sort Descending")
+            ),
+            "apply": QPushButton(self.tr("Apply")),
+            "cancel": QPushButton(self.tr("Cancel")),
+        }
+
         self.list_widget = QListView()
         self.list_model = QStandardItemModel()
         self.model = model
@@ -78,15 +81,15 @@ class FilterPopup(QDialog):
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
-        button_layout.addWidget(self.cancel_button)
-        button_layout.addWidget(self.ok_button)
+        button_layout.addWidget(self.buttons["cancel"])
+        button_layout.addWidget(self.buttons["apply"])
 
         central = QVBoxLayout()
-        central.addWidget(self.sort_ascending_button)
-        central.addWidget(self.sort_descending_button)
+        central.addWidget(self.buttons["sort_ascending"])
+        central.addWidget(self.buttons["sort_descending"])
         central.addWidget(QWidget())
-        central.addWidget(self.select_all_button)
-        central.addWidget(self.unselect_all_button)
+        central.addWidget(self.buttons["select_all"])
+        central.addWidget(self.buttons["unselect_all"])
         central.addWidget(self.list_widget)
         central.addLayout(button_layout)
         self.setLayout(central)
@@ -95,20 +98,20 @@ class FilterPopup(QDialog):
         """Configure the widgets"""
         self.list_widget.setModel(self.list_model)
 
-        self.sort_ascending_button.setCheckable(True)
-        self.sort_descending_button.setCheckable(True)
+        self.buttons["sort_ascending"].setCheckable(True)
+        self.buttons["sort_descending"].setCheckable(True)
         if self.model.sortColumn() == self.column:
-            self.sort_ascending_button.setChecked(
+            self.buttons["sort_ascending"].setChecked(
                 self.model.sortOrder() == Qt.SortOrder.AscendingOrder
             )
-            self.sort_descending_button.setChecked(
+            self.buttons["sort_descending"].setChecked(
                 self.model.sortOrder() == Qt.SortOrder.DescendingOrder
             )
 
     def _ascending_clicked(self, checked: bool):
         """When ascneding button is clicked"""
         if checked:
-            self.sort_descending_button.setChecked(False)
+            self.buttons["sort_descending"].setChecked(False)
             self.model.sort(self.column, Qt.SortOrder.AscendingOrder)
         else:
             self.model.sort(-1, Qt.SortOrder.AscendingOrder)
@@ -116,7 +119,7 @@ class FilterPopup(QDialog):
     def _descending_clicked(self, checked: bool):
         """When the descending button is clicked"""
         if checked:
-            self.sort_ascending_button.setChecked(False)
+            self.buttons["sort_ascending"].setChecked(False)
             self.model.sort(self.column, Qt.SortOrder.DescendingOrder)
         else:
             self.model.sort(-1, Qt.SortOrder.DescendingOrder)
@@ -126,15 +129,13 @@ class FilterPopup(QDialog):
         self.list_widget.selectionModel().selectionChanged.connect(
             lambda __, _: self.update_model_check_state()
         )
-        # self.sort_ascending_button.pressed.connect(self.sort_ascending)
-        # self.sort_descending_button.pressed.connect(self.sort_descending)
-        self.select_all_button.pressed.connect(self.select_all)
-        self.unselect_all_button.pressed.connect(self.unselect_all)
-        self.cancel_button.pressed.connect(self.reject)
-        self.ok_button.pressed.connect(self.accept)
+        self.buttons["select_all"].pressed.connect(self.select_all)
+        self.buttons["unselect_all"].pressed.connect(self.unselect_all)
+        self.buttons["cancel"].pressed.connect(self.reject)
+        self.buttons["apply"].pressed.connect(self.accept)
         self.accepted.connect(self.update_filters)
-        self.sort_ascending_button.toggled.connect(self._ascending_clicked)
-        self.sort_descending_button.toggled.connect(self._descending_clicked)
+        self.buttons["sort_ascending"].toggled.connect(self._ascending_clicked)
+        self.buttons["sort_descending"].toggled.connect(self._descending_clicked)
 
     def setup_filter(self) -> None:
         """Retrieves unique items from model at that column"""
@@ -181,7 +182,7 @@ class FilterPopup(QDialog):
             item.setCheckState(Qt.CheckState.Unchecked)
 
     def select_all(self):
-        """Uncheck all items"""
+        """Check all items"""
         for row in range(self.list_model.rowCount()):
             item = self.list_model.item(row, 0)
             item.setCheckState(Qt.CheckState.Checked)
