@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+    QLineEdit,
 )
 from adjutant.context.dataclasses import Tag
 from adjutant.models.sort_filter_model import SortFilterModel
@@ -65,9 +66,11 @@ class FilterPopup(QDialog):
             "apply": QPushButton(self.tr("Apply")),
             "cancel": QPushButton(self.tr("Cancel")),
         }
+        self.filter = QLineEdit()
 
         self.list_widget = QListView()
         self.list_model = QStandardItemModel()
+        self.sort_model = QSortFilterProxyModel()
         self.model = model
         self.column = column
 
@@ -84,19 +87,24 @@ class FilterPopup(QDialog):
         button_layout.addWidget(self.buttons["cancel"])
         button_layout.addWidget(self.buttons["apply"])
 
+        select_button_layout = QHBoxLayout()
+        select_button_layout.addWidget(self.buttons["select_all"])
+        select_button_layout.addWidget(self.buttons["unselect_all"])
+
         central = QVBoxLayout()
         central.addWidget(self.buttons["sort_ascending"])
         central.addWidget(self.buttons["sort_descending"])
         central.addWidget(QWidget())
-        central.addWidget(self.buttons["select_all"])
-        central.addWidget(self.buttons["unselect_all"])
+        central.addLayout(select_button_layout)
+        central.addWidget(self.filter)
         central.addWidget(self.list_widget)
         central.addLayout(button_layout)
         self.setLayout(central)
 
     def _setup_widgets(self):
         """Configure the widgets"""
-        self.list_widget.setModel(self.list_model)
+        self.sort_model.setSourceModel(self.list_model)
+        self.list_widget.setModel(self.sort_model)
 
         self.buttons["sort_ascending"].setCheckable(True)
         self.buttons["sort_descending"].setCheckable(True)
@@ -107,6 +115,20 @@ class FilterPopup(QDialog):
             self.buttons["sort_descending"].setChecked(
                 self.model.sortOrder() == Qt.SortOrder.DescendingOrder
             )
+
+    def _setup_signals(self):
+        """Connect signals"""
+        self.list_widget.selectionModel().selectionChanged.connect(
+            lambda __, _: self.update_model_check_state()
+        )
+        self.filter.textChanged.connect(self.sort_model.setFilterRegularExpression)
+        self.buttons["select_all"].pressed.connect(self.select_all)
+        self.buttons["unselect_all"].pressed.connect(self.unselect_all)
+        self.buttons["cancel"].pressed.connect(self.reject)
+        self.buttons["apply"].pressed.connect(self.accept)
+        self.accepted.connect(self.update_filters)
+        self.buttons["sort_ascending"].toggled.connect(self._ascending_clicked)
+        self.buttons["sort_descending"].toggled.connect(self._descending_clicked)
 
     def _ascending_clicked(self, checked: bool):
         """When ascneding button is clicked"""
@@ -123,19 +145,6 @@ class FilterPopup(QDialog):
             self.model.sort(self.column, Qt.SortOrder.DescendingOrder)
         else:
             self.model.sort(-1, Qt.SortOrder.DescendingOrder)
-
-    def _setup_signals(self):
-        """Connect signals"""
-        self.list_widget.selectionModel().selectionChanged.connect(
-            lambda __, _: self.update_model_check_state()
-        )
-        self.buttons["select_all"].pressed.connect(self.select_all)
-        self.buttons["unselect_all"].pressed.connect(self.unselect_all)
-        self.buttons["cancel"].pressed.connect(self.reject)
-        self.buttons["apply"].pressed.connect(self.accept)
-        self.accepted.connect(self.update_filters)
-        self.buttons["sort_ascending"].toggled.connect(self._ascending_clicked)
-        self.buttons["sort_descending"].toggled.connect(self._descending_clicked)
 
     def setup_filter(self) -> None:
         """Retrieves unique items from model at that column"""
@@ -172,7 +181,8 @@ class FilterPopup(QDialog):
         indexes = self.list_widget.selectionModel().selectedIndexes()
         if not indexes:
             return
-        item = self.list_model.item(indexes[0].row(), indexes[0].column())
+        index = self.sort_model.mapToSource(indexes[0])
+        item = self.list_model.item(index.row(), index.column())
         item.setCheckState(invert_check_state(item.checkState()))
 
     def unselect_all(self):
