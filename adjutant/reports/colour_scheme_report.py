@@ -2,17 +2,17 @@
 
 from typing import List
 from PyQt6.QtSql import QSqlRecord
-from adjutant.reports.base_report import BaseReport
+from adjutant.reports.base_report import BaseReport, InputValues
 from adjutant.context import Context
 
 
 class ColourSchemeReport(BaseReport):
     """Report for a colour scheme"""
 
-    def __init__(self, context: Context, scheme_id: int) -> None:
-        super().__init__(context)
+    def __init__(self, context: Context, inputs: InputValues) -> None:
+        super().__init__(context, inputs)
 
-        self.scheme_id = scheme_id
+        self.scheme_id = inputs.colour_scheme_id
         self.title = "Colour Scheme Report - "
         self.model = self.context.models.colour_schemes_model
 

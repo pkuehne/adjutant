@@ -1,5 +1,6 @@
 """ Base class for all PDF reports"""
 
+from dataclasses import dataclass
 from PyQt6 import QtGui
 from PyQt6 import QtPrintSupport
 from PyQt6.QtCore import QMarginsF
@@ -8,6 +9,11 @@ from PyQt6.QtWidgets import QDialog
 
 from adjutant.context.context import Context
 
+@dataclass
+class InputValues:
+    """Values that can be passed to reports"""
+    colour_scheme_id: str = None
+    base_id: str = None
 
 def format_paint(paint: QSqlRecord) -> str:
     """Formats a colour"""
@@ -20,9 +26,10 @@ def format_paint(paint: QSqlRecord) -> str:
 class BaseReport:
     """Base class providing utility and abstraction"""
 
-    def __init__(self, context: Context) -> None:
+    def __init__(self, context: Context, inputs: InputValues) -> None:
         self.title = "Unnamed Report"
         self.context = context
+        self.inputs = inputs
 
     def style(self) -> str:
         """The style to use in the header"""

@@ -1,18 +1,18 @@
 """ PDF report for a Colour Scheme"""
 
 from PyQt6.QtSql import QSqlRecord
-from adjutant.reports.base_report import BaseReport, format_paint
+from adjutant.reports.base_report import BaseReport, InputValues, format_paint
 from adjutant.context import Context
 
 
 class PaintingGuideReport(BaseReport):
     """Report for a painting guide"""
 
-    def __init__(self, context: Context, base_id: int) -> None:
-        super().__init__(context)
+    def __init__(self, context: Context, inputs: InputValues) -> None:
+        super().__init__(context, inputs)
 
-        self.base_id = base_id
-        self.scheme_id = self.context.models.bases_model.record_by_id(base_id).value(
+        self.base_id = inputs.base_id
+        self.scheme_id = self.context.models.bases_model.record_by_id(self.base_id).value(
             "schemes_id"
         )
         self.title = "Painting Guide Report - "

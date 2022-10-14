@@ -5,8 +5,6 @@ from PyQt6.QtGui import QAction
 
 from adjutant.context import Context
 from adjutant.context.import_export import write_models_to_yaml, read_models_from_yaml
-from adjutant.windows.base_report_dialog import BaseReportDialog
-from adjutant.windows.colour_scheme_report_dialog import ColourSchemeReportDialog
 from adjutant.windows.completion_chart_window import CompletionChartWindow
 from adjutant.windows.import_paints_dialog import ImportPaintsDialog
 from adjutant.windows.manage_operations_dialog import ManageOperationsDialog
@@ -14,6 +12,7 @@ from adjutant.windows.manage_statuses_dialog import ManageStatusesDialog
 from adjutant.windows.manage_tags_dialog import ManageTagsDialog
 from adjutant.windows.manage_searches_dialog import ManageSearchesDialog
 from adjutant.windows.preferences_dialog import PreferencesDialog
+from adjutant.windows.report_window import ReportWindow
 
 
 class MainWindowMenuBar(QMenuBar):
@@ -107,22 +106,16 @@ class MainWindowMenuBar(QMenuBar):
     def _setup_reports_menu(self):
         """Setup the Reports menu"""
 
-        colour_scheme_report_action = QAction("Colour Scheme Report", self)
-        colour_scheme_report_action.triggered.connect(
-            lambda: ColourSchemeReportDialog.show(self.context, None)
-        )
-        painting_guide_report_action = QAction("Painting Guide Report", self)
-        painting_guide_report_action.triggered.connect(
-            lambda: BaseReportDialog.show(self.context, None)
-        )
+        report_action = QAction("Generate Report", self)
+        report_action.triggered.connect(lambda: ReportWindow.show(self.context))
+
         completion_chart_action = QAction("Completion Chart", self)
         completion_chart_action.triggered.connect(
             lambda: CompletionChartWindow.show(self.context, None)
         )
 
         reports_menu = self.addMenu("&Reports")
-        reports_menu.addAction(colour_scheme_report_action)
-        reports_menu.addAction(painting_guide_report_action)
+        reports_menu.addAction(report_action)
         reports_menu.addAction(completion_chart_action)
 
     def _setup_tools_menu(self):
