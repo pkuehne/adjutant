@@ -74,6 +74,7 @@ class OnlineImportDialog(QDialog):
             self.item_table.setItem(row, 1, desc_item)
             self.item_table.setItem(row, 2, QTableWidgetItem(item.updated))
         self.item_table.setCurrentCell(0, 0)
+        self.ok_button.setEnabled(True)
 
     def setup_layout(self):
         """Set up the layout"""
@@ -94,6 +95,7 @@ class OnlineImportDialog(QDialog):
 
     def setup_widgets(self):
         """Setup the widgets"""
+        self.ok_button.setDisabled(True)
         headers = ["Name", "Description", "Last Updated"]
         self.item_table.setColumnCount(len(headers))
         self.item_table.verticalHeader().hide()

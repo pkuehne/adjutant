@@ -104,6 +104,7 @@ class FilterPopup(QDialog):
     def _setup_widgets(self):
         """Configure the widgets"""
         self.sort_model.setSourceModel(self.list_model)
+        self.sort_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.list_widget.setModel(self.sort_model)
 
         self.buttons["sort_ascending"].setCheckable(True)
@@ -115,6 +116,7 @@ class FilterPopup(QDialog):
             self.buttons["sort_descending"].setChecked(
                 self.model.sortOrder() == Qt.SortOrder.DescendingOrder
             )
+        self.filter.setClearButtonEnabled(True)
 
     def _setup_signals(self):
         """Connect signals"""
@@ -187,14 +189,16 @@ class FilterPopup(QDialog):
 
     def unselect_all(self):
         """Uncheck all items"""
-        for row in range(self.list_model.rowCount()):
-            item = self.list_model.item(row, 0)
+        for row in range(self.sort_model.rowCount()):
+            index = self.sort_model.index(row, 0)
+            item = self.list_model.item(self.sort_model.mapToSource(index).row(), 0)
             item.setCheckState(Qt.CheckState.Unchecked)
 
     def select_all(self):
         """Check all items"""
-        for row in range(self.list_model.rowCount()):
-            item = self.list_model.item(row, 0)
+        for row in range(self.sort_model.rowCount()):
+            index = self.sort_model.index(row, 0)
+            item = self.list_model.item(self.sort_model.mapToSource(index).row(), 0)
             item.setCheckState(Qt.CheckState.Checked)
 
     def update_filters(self):
