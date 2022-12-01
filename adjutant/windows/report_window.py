@@ -10,12 +10,16 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QFormLayout,
     QFileDialog,
-    # QSizePolicy
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtGui import QGuiApplication
 from adjutant.context import Context
-from adjutant.reports import ColourSchemeReport, PaintingGuideReport, BaseReport
+from adjutant.reports import (
+    ColourSchemeReport,
+    PaintingGuideReport,
+    BaseReport,
+    StorageReport,
+)
 from adjutant.models.row_zero_filter_model import RowZeroFilterModel
 from adjutant.reports.base_report import InputValues
 
@@ -66,6 +70,7 @@ class ReportWindow(QDialog):
         self.reports = [
             Report("Colour Scheme", ColourSchemeReport, [self.widgets.schemes_list]),
             Report("Painting Guide", PaintingGuideReport, [self.widgets.bases_list]),
+            Report("Storages", StorageReport, []),
         ]
         self.inputs_layout = QFormLayout()
 
@@ -74,7 +79,6 @@ class ReportWindow(QDialog):
         self._setup_layout()
         self._setup_widgets()
         self._setup_signals()
-
 
     def _setup_layout(self):
         """"""
@@ -128,7 +132,7 @@ class ReportWindow(QDialog):
         self.widgets.export_button.pressed.connect(self.export_pdf)
 
     def generate_report(self):
-        """ Generates the selected reprot and puts it into the window """
+        """Generates the selected report and puts it into the window"""
         report = self.reports[self.widgets.report_list.currentIndex()]
 
         row = self.widgets.schemes_list.currentIndex()
@@ -144,23 +148,22 @@ class ReportWindow(QDialog):
         self.widgets.export_button.setEnabled(True)
 
     def export_pdf(self):
-        """Exports a PDF of the report """
+        """Exports a PDF of the report"""
         filename = QFileDialog.getSaveFileName(
-                self, "Export data", filter=self.tr("PDF File (*.pdf)")
-            )[0]
+            self, "Export data", filter=self.tr("PDF File (*.pdf)")
+        )[0]
         if filename == "":
             return
 
         self.widgets.web_view.printToPdf(filename)
 
     def update_inputs(self, index):
-        """ Update the input selections based on current report"""
+        """Update the input selections based on current report"""
         report = self.reports[index]
         for combo in [self.widgets.schemes_list, self.widgets.bases_list]:
             self.inputs_layout.setRowVisible(combo, False)
         for combo in report.input_widgets:
             self.inputs_layout.setRowVisible(combo, True)
-
 
     @classmethod
     def show(cls, context):

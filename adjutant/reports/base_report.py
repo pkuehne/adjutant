@@ -1,19 +1,18 @@
 """ Base class for all PDF reports"""
 
 from dataclasses import dataclass
-from PyQt6 import QtGui
-from PyQt6 import QtPrintSupport
-from PyQt6.QtCore import QMarginsF
 from PyQt6.QtSql import QSqlRecord
-from PyQt6.QtWidgets import QDialog
-
 from adjutant.context.context import Context
+
 
 @dataclass
 class InputValues:
     """Values that can be passed to reports"""
+
     colour_scheme_id: str = None
     base_id: str = None
+    storage_id: str = None
+
 
 def format_paint(paint: QSqlRecord) -> str:
     """Formats a colour"""
@@ -60,6 +59,9 @@ class BaseReport:
         """Overridable generator for the body of the report"""
         return "Empty Report"
 
+    def prepare(self):
+        """Overrideable preparation step to load data"""
+
     def document(self) -> str:
         """Generates the wrapper html for the printer"""
         return f"""
@@ -75,23 +77,3 @@ class BaseReport:
             </body>
         </html>
         """
-
-    def generate(self):
-        """Generates the actual Report"""
-        printer = QtPrintSupport.QPrinter(
-            QtPrintSupport.QPrinter.PrinterMode.HighResolution
-        )
-        printer.setPageOrientation(QtGui.QPageLayout.Orientation.Portrait)
-        printer.setPageMargins(QMarginsF(2, 2, 2, 2), QtGui.QPageLayout.Unit.Millimeter)
-        printer.setPageSize(QtGui.QPageSize(QtGui.QPageSize.PageSizeId.A4))
-        dialog = QtPrintSupport.QPrintDialog(printer)
-
-        if dialog.exec() != QDialog.DialogCode.Accepted:
-            return
-
-        html = self.document()
-        # print(html)
-
-        document = QtGui.QTextDocument()
-        document.setHtml(html)
-        document.print(printer)
